@@ -1,0 +1,371 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "China",
+        "chineseName": "中国",
+        "capital": "Beijing",
+        "capitalChinese": "北京"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [116.4074, 39.9042]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "United States",
+        "chineseName": "美国",
+        "capital": "Washington, D.C.",
+        "capitalChinese": "华盛顿"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-77.0369, 38.9072]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Russia",
+        "chineseName": "俄罗斯",
+        "capital": "Moscow",
+        "capitalChinese": "莫斯科"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [37.6173, 55.7558]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Canada",
+        "chineseName": "加拿大",
+        "capital": "Ottawa",
+        "capitalChinese": "渥太华"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-75.6972, 45.4215]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "United Kingdom",
+        "chineseName": "英国",
+        "capital": "London",
+        "capitalChinese": "伦敦"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.1276, 51.5074]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "France",
+        "chineseName": "法国",
+        "capital": "Paris",
+        "capitalChinese": "巴黎"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [2.3522, 48.8566]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Germany",
+        "chineseName": "德国",
+        "capital": "Berlin",
+        "capitalChinese": "柏林"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [13.405, 52.52]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Japan",
+        "chineseName": "日本",
+        "capital": "Tokyo",
+        "capitalChinese": "东京"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [139.6917, 35.6895]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "South Korea",
+        "chineseName": "韩国",
+        "capital": "Seoul",
+        "capitalChinese": "首尔"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [126.978, 37.5665]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "India",
+        "chineseName": "印度",
+        "capital": "New Delhi",
+        "capitalChinese": "新德里"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.209, 28.6139]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Australia",
+        "chineseName": "澳大利亚",
+        "capital": "Canberra",
+        "capitalChinese": "堪培拉"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [149.13, -35.28]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Brazil",
+        "chineseName": "巴西",
+        "capital": "Brasília",
+        "capitalChinese": "巴西利亚"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-47.8825, -15.7939]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "South Africa",
+        "chineseName": "南非",
+        "capital": "Pretoria",
+        "capitalChinese": "比勒陀利亚"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [28.2293, -25.7479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Saudi Arabia",
+        "chineseName": "沙特阿拉伯",
+        "capital": "Riyadh",
+        "capitalChinese": "利雅得"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [46.6753, 24.7136]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "United Arab Emirates",
+        "chineseName": "阿联酋",
+        "capital": "Abu Dhabi",
+        "capitalChinese": "阿布扎比"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [54.3773, 24.4539]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Qatar",
+        "chineseName": "卡塔尔",
+        "capital": "Doha",
+        "capitalChinese": "多哈"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [51.531, 25.2854]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Italy",
+        "chineseName": "意大利",
+        "capital": "Rome",
+        "capitalChinese": "罗马"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [12.4964, 41.9028]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Spain",
+        "chineseName": "西班牙",
+        "capital": "Madrid",
+        "capitalChinese": "马德里"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.7038, 40.4168]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Mexico",
+        "chineseName": "墨西哥",
+        "capital": "Mexico City",
+        "capitalChinese": "墨西哥城"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-99.1332, 19.4326]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Argentina",
+        "chineseName": "阿根廷",
+        "capital": "Buenos Aires",
+        "capitalChinese": "布宜诺斯艾利斯"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-58.3816, -34.6037]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Indonesia",
+        "chineseName": "印度尼西亚",
+        "capital": "Jakarta",
+        "capitalChinese": "雅加达"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [106.8456, -6.2088]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Thailand",
+        "chineseName": "泰国",
+        "capital": "Bangkok",
+        "capitalChinese": "曼谷"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [100.5018, 13.7563]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Singapore",
+        "chineseName": "新加坡",
+        "capital": "Singapore",
+        "capitalChinese": "新加坡"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [103.8198, 1.3521]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Malaysia",
+        "chineseName": "马来西亚",
+        "capital": "Kuala Lumpur",
+        "capitalChinese": "吉隆坡"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [101.6869, 3.139]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Philippines",
+        "chineseName": "菲律宾",
+        "capital": "Manila",
+        "capitalChinese": "马尼拉"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [120.9842, 14.5995]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Vietnam",
+        "chineseName": "越南",
+        "capital": "Hanoi",
+        "capitalChinese": "河内"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [105.8342, 21.0278]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Turkey",
+        "chineseName": "土耳其",
+        "capital": "Ankara",
+        "capitalChinese": "安卡拉"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [32.8597, 39.9334]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Egypt",
+        "chineseName": "埃及",
+        "capital": "Cairo",
+        "capitalChinese": "开罗"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [31.2357, 30.0444]
+      }
+    }
+  ]
+}
+
+

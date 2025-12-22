@@ -1,0 +1,46 @@
+{
+  "name": "dashboard-cockpit",
+  "version": "1.0.0",
+  "description": "大屏驾驶舱项目",
+  "private": true,
+  "scripts": {
+    "dev": "webpack-dev-server --mode development --open",
+    "build": "webpack --mode production",
+    "build:obfuscate": "webpack --mode production --env obfuscate"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "2.3.2",
+    "core-js": "3.6.5",
+    "echarts": "4.8.0",
+    "echarts-gl": "^1.1.2",
+    "element-ui": "2.15.14",
+    "gsap": "^3.14.2",
+    "html2canvas": "^1.4.1",
+    "pietile-eventemitter": "^1.0.1",
+    "regenerator-runtime": "^0.13.7",
+    "three": "^0.127.0",
+    "vue": "2.6.10",
+    "vue-router": "3.5.4",
+    "vuex": "3.0.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.0",
+    "@babel/preset-env": "^7.12.0",
+    "babel-loader": "^8.2.0",
+    "css-loader": "^4.3.0",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^4.5.0",
+    "javascript-obfuscator": "^2.6.0",
+    "node-sass": "^4.14.1",
+    "sass-loader": "8.0.0",
+    "style-loader": "^2.0.0",
+    "url-loader": "^4.1.1",
+    "vue-loader": "^15.9.5",
+    "vue-style-loader": "^4.1.3",
+    "vue-template-compiler": "2.6.10",
+    "webpack": "^4.44.2",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0",
+    "webpack-obfuscator": "2.6.0"
+  }
+}

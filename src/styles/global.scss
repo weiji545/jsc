@@ -1,0 +1,76 @@
+/* 全局初始化样式 */
+
+// 主题颜色变量 - 深色模式（默认）
+:root {
+  // 标题和数字颜色
+  --color-title-dark: #FFFFFF;
+  --color-title-light: #181818;
+
+  // 文字提示颜色
+  --color-label-dark: #9EC7F0;
+  --color-label-light: #666666;
+
+  // 文字2提示颜色
+  --color-label2-dark: #C3E2FF;
+  --color-label2-light: #666666;
+
+
+}
+
+// 浅色模式变量覆盖
+.is-light-mode {
+  --color-title: var(--color-title-light);
+  --color-label: var(--color-label-light);
+}
+
+// 深色模式变量（默认）
+:root,
+.is-dark-mode {
+  --color-title: var(--color-title-dark);
+  --color-label: var(--color-label-dark);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  background: #0a1929;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  overflow: hidden;
+}
+
+#app {
+  width: 100%;
+  height: 100%;
+}
+
+/* 隐藏全局滚动条，避免弹层抖动 */
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* 表单控件基础样式微调 */
+input,
+button,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+/* 链接去除下划线，继承颜色 */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
