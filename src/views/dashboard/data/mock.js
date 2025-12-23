@@ -1,5 +1,55 @@
 // 本地假数据
+// 本地假数据
+// 以下数据用于模拟后端接口返回的静态数据，供页面本地预览使用
+// 真实项目中可替换为 mock 服务或真正的后端接口
 
+// 基础数据：用于顶部统计与简单面板展示
+export const baseDataList = [
+  { label: '账户总数', value: 183220, isAmount: false },
+  { label: '账户余额总数', value: 56200, isAmount: true, decimals: 2 },
+]
+
+// 地区列表假数据：用于左侧“账户区域统计”展示（已按金额示例）
+export const regionList = [
+  { name: '北京', value: 45200, count: 1280 },
+  { name: '上海', value: 39800, count: 1120 },
+  { name: '广州', value: 28900, count: 980 },
+  { name: '深圳', value: 21000, count: 760 },
+  { name: '杭州', value: 15400, count: 520 },
+  { name: '成都', value: 9800, count: 320 },
+  { name: '南京', value: 7200, count: 250 },
+  { name: '武汉', value: 4800, count: 180 },
+]
+
+// 汇率假数据：用于境外模式下的汇率柱状图示例
+export const exchangeRates = [
+  { name: 'USD/CNY', value: 7.12 },
+  { name: 'EUR/CNY', value: 7.85 },
+  { name: 'HKD/CNY', value: 0.91 },
+  { name: 'JPY/CNY', value: 0.048 },
+  { name: 'GBP/CNY', value: 9.13 },
+]
+
+// 趋势数据：用于右侧趋势/柱线图（trade/large/cash 三类示例）
+export const trendData = {
+  trade: {
+    categories: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月'],
+    bar: [320, 280, 360, 420, 390, 450, 480, 510],
+    line: [12, 8, 15, 18, 10, 16, 14, 20],
+  },
+  large: {
+    categories: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月'],
+    bar: [180, 210, 160, 240, 260, 230, 280, 300],
+    line: [5, 9, -3, 12, 8, -5, 10, 14],
+  },
+  cash: {
+    categories: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月'],
+    bar: [260, 240, 300, 280, 320, 350, 330, 360],
+    line: [6, 4, 10, -2, 9, 7, 5, 11],
+  },
+}
+
+// 原有 overviewData，保留不动，作为页面聚合示例数据
 export const overviewData = {
   // 顶部统计
   accountsSummary: {

@@ -5,6 +5,10 @@
         <slot name="title">{{ title }}</slot>
       </div>
       <div v-if="displayUnit" class="card-unit">单位: {{ displayUnit }}</div>
+      <!-- 仅长条模式显示额外的 title-tabs（不影响其他 panel） -->
+      <div v-if="isLong" class="card-title-tabs">
+        <slot name="title-tabs"></slot>
+      </div>
     </div>
     <div
       class="card-content"
@@ -140,16 +144,52 @@ export default {
   background-repeat: no-repeat;
 }
 
+.card-panel.is-long .card-title{
+  padding-right: 0;
+}
+
+
 .card-title-main {
+  /* 保持非长模式下的原始行为 */
   display: inline-flex;
   align-items: center;
   min-width: 0;
 }
 
 .card-unit {
+  /* 恢复默认单位样式，长模式下另作覆盖 */
   margin-left: auto;
   font-size: 12px;
   font-weight: 400;
+}
+
+/* 仅在长条模式下应用三等分布局与 tabs 样式，避免影响其他区域 */
+.card-panel.is-long .card-title > * {
+  /* 三等分布局：标题 / 单位 / 右侧 tabs 各占三分之一宽度 */
+  flex: 0 0 33.333%;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.card-panel.is-long .card-title-main {
+  justify-content: flex-start;
+  display: flex;
+  align-items: center;
+}
+
+.card-panel.is-long .card-unit {
+  flex: 0 0 29.5%;
+  margin-left: 0;
+  justify-content: flex-end;
+  //text-align: center;
+}
+
+.card-panel.is-long .card-title-tabs {
+  flex: 1;
+  justify-content: flex-end;
+  display: flex;
+  align-items: center;
 }
 
 .card-panel.is-dark .card-unit {
@@ -158,6 +198,76 @@ export default {
 
 .card-panel.is-light .card-unit {
   color: #666666;
+}
+
+/* 针对通过 slot 插入的 title-tabs 样式，仅在长条模式下生效 */
+.card-panel.is-long ::v-deep .title-tabs-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-panel.is-long ::v-deep .title-tabs-wrapper .period-switch {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: inherit;
+  font-weight: 400;
+}
+
+.card-panel.is-long ::v-deep .title-tabs-wrapper .period-switch label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 14px;
+}
+
+.card-panel.is-long ::v-deep .title-tabs-wrapper .period-switch input[type="radio"] {
+  margin: 0;
+  width: 14px;
+  height: 14px;
+  accent-color: #29F1FA;
+}
+
+.card-panel.is-long ::v-deep .title-tabs-wrapper .text-toggle {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.card-panel.is-long ::v-deep .title-tabs-wrapper .text-toggle .text-btn {
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 4px 6px;
+  font-size: 14px;
+  position: relative;
+  font-weight: 400;
+  width: 96px;
+  text-align: center;
+}
+
+.card-panel.is-long ::v-deep .title-tabs-wrapper .text-toggle .text-btn.selected {
+  color: #29F1FA;
+  font-weight: 700;
+}
+
+/* 被选中文字按钮下方的平行四边形指示条（仅长条模式） */
+.card-panel.is-long ::v-deep .title-tabs-wrapper .text-toggle .text-btn.selected::after {
+  content: '';
+  position: absolute;
+  left: 55%;
+  transform: translateX(-46%) skewX(-60deg);
+  bottom: -8px;
+  width: 102px;
+  height: 5px;
+  background: #29F1FA;
+  border-radius: 1px;
 }
 
 // 标题颜色使用 CSS 变量

@@ -2,7 +2,7 @@
   <div class="dashboard-content">
     <!-- 左侧区域：455px -->
     <div class="content-left">
-      <CardPanel style="height: 312px;" :title="getPanelTitle('left',0)" :unit="getPanelUnit('left',0)" :showBottomCorner="getPanelShowBottomCorner('left',0)" class="content-item">
+      <CardPanel style="height: 318px;" :title="getPanelTitle('left',0)" :unit="getPanelUnit('left',0)" :showBottomCorner="getPanelShowBottomCorner('left',0)" class="content-item">
         <template #title>
           <span>{{ getPanelTitle('left',0) }}</span>
         </template>
@@ -68,8 +68,8 @@
                 <label><input type="radio" name="centerPeriod" value="month" v-model="centerPeriod" />月</label>
               </div>
               <div class="text-toggle">
-                <button type="button" :class="['text-btn', { selected: centerMode === 'a' }]" @click="centerMode = 'a'">项一</button>
-                <button type="button" :class="['text-btn', { selected: centerMode === 'b' }]" @click="centerMode = 'b'">项二</button>
+                <button type="button" :class="['text-btn', { selected: centerMode === 'a' }]" @click="centerMode = 'a'">资金交易趋势</button>
+                <button type="button" :class="['text-btn', { selected: centerMode === 'b' }]" @click="centerMode = 'b'">大额支付</button>
               </div>
             </div>
           </template>
@@ -83,7 +83,7 @@
 
     <!-- 右侧区域：455px -->
     <div class="content-right">
-      <CardPanel style="height: 312px;" :title="getPanelTitle('right',0)" :unit="getPanelUnit('right',0)" :showBottomCorner="getPanelShowBottomCorner('right',0)" class="content-item">
+      <CardPanel style="height: 318px;" :title="getPanelTitle('right',0)" :unit="getPanelUnit('right',0)" :showBottomCorner="getPanelShowBottomCorner('right',0)" class="content-item">
         <template #title>
           <span>{{ getPanelTitle('right',0) }}</span>
         </template>
@@ -192,7 +192,8 @@ export default {
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  justify-content: space-between;
+  //gap: 15px;
   flex-shrink: 0;
 }
 
@@ -312,7 +313,8 @@ export default {
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  justify-content: space-between;
+  //gap: 15px;
   flex-shrink: 0;
 }
 
@@ -338,7 +340,7 @@ export default {
 
   .content-left,
   .content-right {
-    gap: 10px;
+    //gap: 10px;
   }
 }
 

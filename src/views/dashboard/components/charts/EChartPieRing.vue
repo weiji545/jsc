@@ -1,5 +1,5 @@
 <template>
-  <div :style="{ width: size, height: height}" ref="chartRoot"></div>
+  <div :style="{ width: size, height: height }" ref="chartRoot"></div>
 </template>
 
 <script>
@@ -29,6 +29,11 @@ export default {
     options: {
       type: Object,
       default: () => ({}),
+    },
+    // tooltip 中显示的单位（由父组件通过 panelsConfig 传入）
+    unit: {
+      type: String,
+      default: '',
     },
   },
   data() {
@@ -86,8 +91,29 @@ export default {
         return
       }
       const isDonut = this.variant === 'donut'
+      // 为 legend/tooltip 格式化使用当前 data 的值，通过闭包传入 dataList
+      const dataList = this.data || []
+      const unit = this.unit || ''
+      const legendFormatter = function (name) {
+        const it = dataList.find((d) => d.name === name)
+        return it ? `${name} ${it.value}` : name
+      }
       const defaultOption = {
-        tooltip: { trigger: 'item' },
+        tooltip: {
+          trigger: 'item',
+          formatter: function (params) {
+            // params: 单点数据对象
+            const value = params.data && typeof params.data.value !== 'undefined' ? params.data.value : params.value
+            const unitStr = unit ? ' ' + unit : ''
+            const str = `
+              ${params.name}</br>
+              数量: ${value}${unitStr}</br>
+              占比: ${params.percent}%
+              `
+            // ${params.marker}
+            return str
+          },
+        },
         // 默认显示 legend
         legend: {
           show: true,
@@ -96,23 +122,36 @@ export default {
           left: '75%',
           align: 'left',
           top: 'middle',
+          formatter: legendFormatter,
           textStyle: {
-            color:'#FFFFFF'
+            color: '#FFFFFF',
           },
-          height: 250
+          height: 250,
         },
         series: [
           {
             name: 'pie',
             type: 'pie',
             radius: isDonut ? ['45%', '70%'] : ['0%', '70%'],
-            center: ['35%', '50%'],
+            center: ['38%', '53%'],
             avoidLabelOverlap: false,
-            // 非 donut 默认不显示 label，donut 模式下由使用方传入 label 配置
-            label: { show: true },
-            // 默认显示引导线
-            labelLine: { show: true },
-            color: ['#FAC858', '#097C38', '#91CC75', '#507AFC', '#93BEFF', '#283E81'],
+            label: {
+              show: true,
+              formatter: '{b}: {d}%',
+              color: '#FFFFFF',
+            },
+            labelLine: {
+              length: 5,
+              // smooth: false,
+            },
+            color: [
+              '#FAC858',
+              '#097C38',
+              '#91CC75',
+              '#507AFC',
+              '#93BEFF',
+              '#283E81',
+            ],
             data: this.data,
           },
         ],
@@ -120,10 +159,35 @@ export default {
       let option = Object.assign({}, defaultOption)
       if (this.options && typeof this.options === 'object') {
         if (Array.isArray(this.options.series) && this.options.series[0]) {
-          option.series[0] = Object.assign({}, option.series[0], this.options.series[0])
+          option.series[0] = Object.assign(
+            {},
+            option.series[0],
+            this.options.series[0]
+          )
         }
+        // 合并顶层配置：对 tooltip 与 legend 做合并以保留默认 formatter/formatter 函数
         Object.keys(this.options).forEach((k) => {
           if (k === 'series') return
+          if (
+            k === 'tooltip' &&
+            this.options.tooltip &&
+            typeof this.options.tooltip === 'object' &&
+            option.tooltip &&
+            typeof option.tooltip === 'object'
+          ) {
+            option.tooltip = Object.assign({}, option.tooltip, this.options.tooltip)
+            return
+          }
+          if (
+            k === 'legend' &&
+            this.options.legend &&
+            typeof this.options.legend === 'object' &&
+            option.legend &&
+            typeof option.legend === 'object'
+          ) {
+            option.legend = Object.assign({}, option.legend, this.options.legend)
+            return
+          }
           option[k] = this.options[k]
         })
       }
@@ -140,14 +204,19 @@ export default {
       // donut 模式下，要求用户在 options.series[0].label 中传入 label 配置以控制 label 展示
       if (isDonut) {
         const series0 = option.series && option.series[0]
-        const hasLabelConfig = series0 && series0.label && Object.keys(series0.label).length > 0
+        const hasLabelConfig =
+          series0 && series0.label && Object.keys(series0.label).length > 0
         if (hasLabelConfig) {
           series0.label = Object.assign({ show: true }, series0.label)
         } else {
           // 未提供 label 配置：禁用 label 并给出提示，避免展示不合适的默认文本
-          if (series0) series0.label = Object.assign({}, series0.label || {}, { show: false })
+          if (series0)
+            series0.label = Object.assign({}, series0.label || {}, {
+              show: false,
+            })
           console.warn(
-            'EChartPieRing: variant="donut" requires label config in options.series[0].label to display labels')
+            'EChartPieRing: variant="donut" requires label config in options.series[0].label to display labels'
+          )
         }
       }
       try {
@@ -166,5 +235,3 @@ div {
   height: 100%;
 }
 </style>
-
-

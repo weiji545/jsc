@@ -14,6 +14,8 @@
   --color-label2-dark: #C3E2FF;
   --color-label2-light: #666666;
 
+  --color-label3-dark: #9E9E9E;
+  --color-label3-light: #666666;
 
 }
 
@@ -72,5 +74,32 @@ textarea {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+/* 主题敏感：平行四边形指示条选中颜色（donut-radio .radio-slab） */
+.is-dark-mode .donut-radio.active .radio-slab {
+  background: #29F1FA;
+}
+.is-light-mode .donut-radio.active .radio-slab {
+  background: #096DD9;
+}
+
+/* 主题敏感：周/月 切换与趋势 tabs 文本颜色 */
+.is-dark-mode .text-btn.selected,
+.is-dark-mode .trend-tab.active {
+  color: #29F1FA;
+}
+.is-dark-mode .text-btn,
+.is-dark-mode .trend-tab {
+  color: #BCDEFF;
+}
+
+.is-light-mode .text-btn.selected,
+.is-light-mode .trend-tab.active {
+  color: #096DD9;
+}
+.is-light-mode .text-btn,
+.is-light-mode .trend-tab {
+  color: #666666;
 }
 

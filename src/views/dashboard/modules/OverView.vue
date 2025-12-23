@@ -1,10 +1,13 @@
 <template>
-  <DashboardContent :data-list="dataList" :panelsConfig="panelsConfig">
+  <DashboardContent :data-list="dataList" :panelsConfig="panelsConfigComputed">
     <!-- 左上：境内账户数量 -->
     <template #left-top>
       <div class="account-summary">
         <div class="summary-top">
-          <div class="summary-box" :class="{ 'summary-box--highlight': balanceScope === 'domestic' }">
+          <div
+            class="summary-box"
+            :class="{ 'summary-box--highlight': balanceScope === 'domestic' }"
+          >
             <div class="summary-text">
               <div class="summary-number">
                 {{ formatNumber(overview.accountsSummary.domestic) }}
@@ -12,7 +15,10 @@
               <div class="summary-label">境内账户总量</div>
             </div>
           </div>
-          <div class="summary-box" :class="{ 'summary-box--highlight': balanceScope === 'overseas' }">
+          <div
+            class="summary-box"
+            :class="{ 'summary-box--highlight': balanceScope === 'overseas' }"
+          >
             <div class="summary-text">
               <div class="summary-number">
                 {{ formatNumber(overview.accountsSummary.overseas) }}
@@ -22,22 +28,32 @@
           </div>
         </div>
         <div class="summary-bottom">
-          <PagedCarousel :items="overview.ringMetrics" :perPage="4" :interval="5000" :autoplay="true">
+          <PagedCarousel
+            :items="overview.ringMetrics"
+            :perPage="4"
+            :interval="5000"
+            :autoplay="true"
+          >
             <template #item="{ item, index }">
-              <div
-                :key="index"
-                class="ring-card"
-              >
+              <div :key="index" class="ring-card">
                 <div
                   class="ring"
                   :class="{ negative: item.percent < 0 }"
                   :style="ringStyle(item.percent)"
                 >
-                  <EChartRingBar :percent="item.percent" :size="92" :height="92"/>
+                  <EChartRingBar
+                    :percent="item.percent"
+                    :size="92"
+                    :height="92"
+                  />
                   <!-- 使用 DOM 显示百分比，替代 ECharts graphic -->
                   <div
                     class="ring-percent"
-                    :style="{ color: textColor, fontSize: '18px', fontWeight: 500 }"
+                    :style="{
+                      color: textColor,
+                      fontSize: '18px',
+                      fontWeight: 500,
+                    }"
                   >
                     {{ item.percent }}%
                   </div>
@@ -67,27 +83,47 @@
         </div>
       </div>
       <div class="region-list">
-        <div
-          class="region-row"
-          v-for="item in convertedRegionPie"
-          :key="item.name"
+        <!-- 使用 PagedCarousel 每页显示 5 条，超出时自动翻页 -->
+        <PagedCarousel
+          class="region-paged"
+          :items="convertedRegionPie"
+          :perPage="5"
+          :autoplay="false"
+          :loop="false"
+          height="211px"
         >
-          <div class="region_item">
-            <img :src="ranking1" alt="" class="region_item_img" />
-            <div class="region_item_right">
-              <div class="region_item_info">
-                <div class="region-name">
-                  <span>NO.01{{ item.name }}</span>
-                  <span>456</span>
+          <template #item="{ item, index }">
+            <div class="region-row" :key="item.name">
+              <div class="region_item">
+                <!-- 前三名使用图片，其余使用灰色半透明圆形背景的数字徽章 -->
+                <img
+                  v-if="index < 3"
+                  :src="index === 0 ? ranking1 : index === 1 ? ranking2 : ranking3"
+                  alt=""
+                  class="region_item_img"
+                />
+                <div v-else class="region_item_img rank-number">
+                  {{ index + 1 }}
                 </div>
-                <span class="region-value">{{ formatNumber(item.value) }}</span>
-              </div>
-              <div class="region_item_line">
-                <div class="regin_item_gropress"></div>
+                <div class="region_item_right">
+                  <div class="region_item_info">
+                    <div class="region-name">
+                      <span>NO.0{{ index + 1 }} {{ item.name }}</span>
+                      <span>{{ item.count || 0 }}</span>
+                    </div>
+                    <span class="region-value">{{ formatNumber(item.value) }}</span>
+                  </div>
+                  <div class="region_item_line">
+                    <div
+                      class="regin_item_gropress"
+                      :style="{ width: Math.min(100, (item.value / convertedRegionPie[0].value) * 100) + '%' }"
+                    ></div>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
+          </template>
+        </PagedCarousel>
       </div>
     </template>
 
@@ -99,6 +135,7 @@
           :data="convertedCurrencyPie"
           variant="pie"
           :options="{ color: currencyColors, tooltip: { trigger: 'item' } }"
+          :unit="panelsConfigComputed.left[2].unit"
         />
       </div>
     </template>
@@ -106,7 +143,7 @@
     <!-- 中间上方：核心区域（地球 / 地图） + 通用选项卡 -->
     <template #center-top>
       <div class="core-top">
-        <CoreOverviewPanel :scope="balanceScope" :time="balanceTime"/>
+        <CoreOverviewPanel :scope="balanceScope" :time="balanceTime" />
         <FilterTabs
           :scope="balanceScope"
           :scope-options="balanceScopes"
@@ -137,28 +174,49 @@
       </div>
     </template>
     <template #center-bottom>
-      <EChartBarLine :categories="trendData[trendTab].categories" :bar-data="convertedTrendBar" :line-data="trendData[trendTab].line" :height="170"/>
+      <EChartBarLine
+        :categories="trendData[trendTab].categories"
+        :bar-data="convertedTrendBar"
+        :line-data="trendData[trendTab].line"
+        :height="170"
+      />
     </template>
 
     <!-- 右上：按“账户数量统计”布局显示资金统计（境内/境外交易金额），下方使用 EChartSparkline -->
     <template #right-top>
       <div class="account-summary">
         <div class="summary-top">
-          <div class="summary-box" :class="{ 'summary-box--highlight': balanceScope === 'domestic' }">
+          <div
+            class="summary-box"
+            :class="{ 'summary-box--highlight': balanceScope === 'domestic' }"
+          >
             <div class="summary-text">
               <div class="summary-number">
-                {{ formatNumber((overview.transactionAmount && overview.transactionAmount.domestic) ||
-                overview.accountsSummary.domestic, 2)
+                {{
+                  formatNumber(
+                    (overview.transactionAmount &&
+                      overview.transactionAmount.domestic) ||
+                      overview.accountsSummary.domestic,
+                    2
+                  )
                 }}
               </div>
               <div class="summary-label">境内交易金额</div>
             </div>
           </div>
-          <div class="summary-box" :class="{ 'summary-box--highlight': balanceScope === 'overseas' }">
+          <div
+            class="summary-box"
+            :class="{ 'summary-box--highlight': balanceScope === 'overseas' }"
+          >
             <div class="summary-text">
               <div class="summary-number">
-                {{ formatNumber((overview.transactionAmount && overview.transactionAmount.overseas) ||
-                overview.accountsSummary.overseas, 2)
+                {{
+                  formatNumber(
+                    (overview.transactionAmount &&
+                      overview.transactionAmount.overseas) ||
+                      overview.accountsSummary.overseas,
+                    2
+                  )
                 }}
               </div>
               <div class="summary-label">境外交易金额</div>
@@ -166,29 +224,40 @@
           </div>
         </div>
         <div class="summary-bottom">
-          <PagedCarousel :items="overview.rightTopLines" :perPage="4" :interval="5000" :autoplay="true">
+          <PagedCarousel
+            :items="overview.rightTopLines"
+            :perPage="4"
+            :interval="5000"
+            :autoplay="true"
+          >
             <template #item="{ item, index }">
-              <div
-                :key="index"
-                class="ring-card"
-              >
-                <div
-                  class="ring"
-                >
+              <div :key="index" class="ring-card">
+                <div class="ring">
                   <!-- 环比增长徽章（绝对定位，显示在图表左上角） -->
                   <div class="trend-badge">
                     <div class="trend-label">环比增长</div>
-                    <div class="trend-value" :style="{ color: (item.percent >= 0 ? '#0098FA' : '#FF3A3A') }">
+                    <div
+                      class="trend-value"
+                      :style="{
+                        color: item.percent >= 0 ? '#0098FA' : '#FF3A3A',
+                      }"
+                    >
                       {{ (item.percent >= 0 ? '+' : '') + item.percent }}%
                     </div>
                   </div>
-                  <EChartSparkline :data="item.data" :height="70" :color="item.percent >= 0 ? '#3AACFF' : '#FF3A3A'"/>
+                  <EChartSparkline
+                    :data="item.data"
+                    :height="70"
+                    :color="item.percent >= 0 ? '#3AACFF' : '#FF3A3A'"
+                  />
                 </div>
-                <div
-                  class="ring-value"
-                  :style="{ color: textColor }"
-                >
-                  {{ formatNumber((item.data || []).reduce((a, b) => a + b, 0), 2) }}
+                <div class="ring-value" :style="{ color: textColor }">
+                  {{
+                    formatNumber(
+                      (item.data || []).reduce((a, b) => a + b, 0),
+                      2
+                    )
+                  }}
                 </div>
                 <div class="ring-label">{{ item.label }}</div>
               </div>
@@ -200,7 +269,28 @@
 
     <!-- 右中：柱 + 线 -->
     <template #right-middle>
-      <EChartBarLine :categories="overview.rightMiddle.categories" :bar-data="convertedRightMidBar" :line-data="overview.rightMiddle.line" :height="240"/>
+      <!-- 非境外：保持原有 存款/柱+线 视图；境外：展示 汇率 柱状图（隐藏折线与图例） -->
+        <EChartBarLine
+          v-if="balanceScope !== 'overseas'"
+          :categories="overview.rightMiddle.categories"
+          :bar-data="convertedRightMidBar"
+          :line-data="overview.rightMiddle.line"
+          :height="240"
+          line-color="#FDCC00"
+          :unit="panelsConfigComputed.right[1].unit"
+          :options="rightMidEchartOptions"
+        />
+        <EChartBarLine
+          v-else
+          :categories="exchangeCategories"
+          :bar-data="convertedExchangeBar"
+          :line-data="[]"
+          :height="240"
+          line-color="#FDCC00"
+          :unit="panelsConfigComputed.right[1].unit"
+          visible-y="bar"
+          :options="exchangeEchartOptions"
+        />
     </template>
 
     <!-- 右下：环形图 + legends -->
@@ -209,7 +299,8 @@
         <EChartPieRing
           :data="donutData"
           variant="donut"
-          :options="{ color: balanceColors, tooltip: { trigger: 'item' } }"
+          :options="rightBottomData"
+          :unit="panelsConfigComputed.right[2].unit"
         />
       </div>
     </template>
@@ -225,11 +316,17 @@ import EChartRingBar from '../components/charts/EChartRingBar.vue'
 import EChartPieRing from '../components/charts/EChartPieRing.vue'
 import EChartBarLine from '../components/charts/EChartBarLine.vue'
 import EChartSparkline from '../components/charts/EChartSparkline.vue'
-import { overviewData as overview } from '../data/mock.js'
+import {
+  overviewData as overview,
+  baseDataList,
+  regionList,
+  exchangeRates,
+  trendData,
+} from '../data/mock.js'
 import { formatNumber } from '../../../utils/utils.js'
-import ranking1 from "../img/ranking-1.png";
-import ranking2 from "../img/ranking-2.png";
-import ranking3 from "../img/ranking-3.png";
+import ranking1 from '../img/ranking-1.png'
+import ranking2 from '../img/ranking-2.png'
+import ranking3 from '../img/ranking-3.png'
 
 export default {
   name: 'OverView',
@@ -246,17 +343,16 @@ export default {
   data() {
     return {
       ranking1,
-      // baseDataList 保留基础数据（不随展示货币变化）
-      baseDataList: [
-        { label: '账户总数', value: 183220, isAmount: false },
-        { label: '账户余额总数', value: 56200, isAmount: true, decimals: 2 },
-      ],
+      ranking2,
+      ranking3,
+      // baseDataList 保留基础数据（不随展示货币变化），已迁移到 mock.js
+      baseDataList,
       // panelsConfig 由 OverView 传入 DashboardContent，以便集中配置每个 panel 的 title/unit
       // 现在也可以通过 showBottomCorner 控制底部边角装饰
       panelsConfig: {
         left: [
           { title: '账户数量统计', unit: '户' },
-          { title: '账户区域统计', unit: '户', showBottomCorner: true },
+          { title: '账户区域统计', unit: '户', showBottomCorner: true, titleGap: 0 },
           { title: '账户币种统计', unit: '户', showBottomCorner: true },
         ],
         center: { title: '资金交易分析', unit: '万元' },
@@ -267,36 +363,29 @@ export default {
         ],
       },
       overview,
-      // 账户币种统计使用的颜色与数据
-      currencyColors: ['#FAC858', '#097C38', '#91CC75', '#507AFC', '#93BEFF', '#283E81'],
-      balanceColors: ['#F27629', '#FDCC00', '#3B72AD', '#00BAFF', '#0098FA', '#29F1FA'],
+      // 从 mock.js 导入的用于展示的假数据（模拟后端接口）
+      regionList,
+      exchangeRates,
+      // 账户币种颜色为组件内静态配置（非接口数据），因此在组件中定义
+      currencyColors: [
+        '#FAC858',
+        '#097C38',
+        '#91CC75',
+        '#507AFC',
+        '#93BEFF',
+        '#283E81',
+      ],
       trendTab: 'trade',
       trendTabs: [
         { label: '资金交易趋势', value: 'trade' },
         { label: '大额支付', value: 'large' },
       ],
-      trendData: {
-        trade: {
-          categories: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月'],
-          bar: [320, 280, 360, 420, 390, 450, 480, 510],
-          line: [12, 8, 15, 18, 10, 16, 14, 20],
-        },
-        large: {
-          categories: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月'],
-          bar: [180, 210, 160, 240, 260, 230, 280, 300],
-          line: [5, 9, -3, 12, 8, -5, 10, 14],
-        },
-        cash: {
-          categories: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月'],
-          bar: [260, 240, 300, 280, 320, 350, 330, 360],
-          line: [6, 4, 10, -2, 9, 7, 5, 11],
-        },
-      },
+      trendData,
       // 通用组件已替代原有实例化逻辑，相关实例/refs 已移除
-      balanceScope: 'domestic',
+      balanceScope: 'global',
       balanceScopes: [
-        { label: '境内', value: 'domestic' },
         { label: '全局', value: 'global' },
+        { label: '境内', value: 'domestic' },
         { label: '境外', value: 'overseas' },
       ],
       balanceTime: 'week',
@@ -307,14 +396,57 @@ export default {
         { label: '上月', value: 'lastMonth' },
         { label: '近一年', value: 'year' },
       ],
+      // 右下环形图的 options：为 donut 模式提供 series[0].label 配置（对象形式）
+      // EChartPieRing 要求在 donut 模式下通过 options.series[0].label 控制 label 展示
+      rightBottomData: {
+        title: {
+          text: '余额占比',
+          left: '31%',
+          top: '48%',
+          textStyle: {
+            color: '#FFFFFF',
+            fontSize: 14,
+            fontWeight: 'bold',
+          },
+        },
+        series: [
+          {
+            color: [
+              '#F27629',
+              '#FDCC00',
+              '#3B72AD',
+              '#00BAFF',
+              '#0098FA',
+              '#29F1FA',
+            ],
+          },
+        ],
+      },
+      // ECharts 配置：存款金额统计（右中第2个 panel）的额外 options
+      rightMidEchartOptions: {
+        legendName: '金额',
+        legend: { show: true }
+      },
+      // ECharts 配置：境外模式下的汇率统计 options（包括 yAxis 名称）
+      exchangeEchartOptions: {
+        legendName: '金额',
+        legend: { show: false },
+        // 不显示 yAxis.name（避免直接在 axis 上展示文字），只保留样式配置
+        yAxis: [{ type: 'value', axisLabel: { color: '#636363' } }, { show: false }],
+        // tooltip 中 bar 的标签显示为“兑换汇率”
+        tooltipBarName: '兑换汇率'
+      },
     }
   },
   computed: {
     // 根据当前选中货币返回用于展示的 dataList
     dataList() {
-      const convert = (this.$store && this.$store.getters && this.$store.getters['currency/convert'])
-        ? this.$store.getters['currency/convert']
-        : (v) => v
+      const convert =
+        this.$store &&
+        this.$store.getters &&
+        this.$store.getters['currency/convert']
+          ? this.$store.getters['currency/convert']
+          : (v) => v
       return (this.baseDataList || []).map((it) => {
         if (it.isAmount) {
           return Object.assign({}, it, { value: convert(it.value) })
@@ -331,52 +463,112 @@ export default {
     // 右下环形图 legend 使用的数据（不随 balanceScope 变化，固定使用 global）
     donutData() {
       const list = (this.overview && this.overview.balanceRing) || []
-      const convert = (this.$store && this.$store.getters && this.$store.getters['currency/convert'])
-        ? this.$store.getters['currency/convert']
-        : (v) => v
-      return list.map((it) => Object.assign({}, it, { value: convert(it.value) }))
+      const convert =
+        this.$store &&
+        this.$store.getters &&
+        this.$store.getters['currency/convert']
+          ? this.$store.getters['currency/convert']
+          : (v) => v
+      return list.map((it) =>
+        Object.assign({}, it, { value: convert(it.value) })
+      )
     },
     // 左下地区饼图数据，随 currency 转换
     convertedRegionPie() {
-      const list = this.overview.regionPie || []
-      const convert = (this.$store && this.$store.getters && this.$store.getters['currency/convert'])
-        ? this.$store.getters['currency/convert']
-        : (v) => v
-      return list.map((it) => Object.assign({}, it, { value: convert(it.value) }))
+      // 优先使用组件内部生成的假数据（便于本地预览），否则回退到 overview.regionPie
+      const rawList =
+        (this.regionList && this.regionList.length && this.regionList) ||
+        (this.overview && this.overview.regionPie) ||
+        []
+      const convert =
+        this.$store &&
+        this.$store.getters &&
+        this.$store.getters['currency/convert']
+          ? this.$store.getters['currency/convert']
+          : (v) => v
+      // 返回新的对象数组并按金额降序排序
+      return rawList
+        .map((it) => Object.assign({}, it, { value: convert(it.value) }))
+        .sort((a, b) => b.value - a.value)
     },
     // trend / rightMid 的金额需要基于当前货币转换
     convertedRightMidBar() {
-      const bar = (this.overview && this.overview.rightMiddle && this.overview.rightMiddle.bar) || []
-      const convert = (this.$store && this.$store.getters && this.$store.getters['currency/convert'])
-        ? this.$store.getters['currency/convert']
-        : (v) => v
+      const bar =
+        (this.overview &&
+          this.overview.rightMiddle &&
+          this.overview.rightMiddle.bar) ||
+        []
+      const convert =
+        this.$store &&
+        this.$store.getters &&
+        this.$store.getters['currency/convert']
+          ? this.$store.getters['currency/convert']
+          : (v) => v
       return bar.map((v) => convert(v))
+    },
+    // 境外模式下用于展示的汇率柱状图数据
+    exchangeCategories() {
+      return (this.exchangeRates || []).map((it) => it.name)
+    },
+    convertedExchangeBar() {
+      const convert =
+        this.$store &&
+        this.$store.getters &&
+        this.$store.getters['currency/convert']
+          ? this.$store.getters['currency/convert']
+          : (v) => v
+      return (this.exchangeRates || []).map((it) => convert(it.value))
     },
     convertedTrendBar() {
       const current = this.trendData[this.trendTab] || { bar: [] }
-      const convert = (this.$store && this.$store.getters && this.$store.getters['currency/convert'])
-        ? this.$store.getters['currency/convert']
-        : (v) => v
+      const convert =
+        this.$store &&
+        this.$store.getters &&
+        this.$store.getters['currency/convert']
+          ? this.$store.getters['currency/convert']
+          : (v) => v
       return (current.bar || []).map((v) => convert(v))
     },
     // 文字颜色使用 Vuex 管理的深色模式状态，localStorage 仅作缓存回退
     textColor() {
       try {
-        const titleDark = getComputedStyle(document.documentElement).getPropertyValue('--color-title-dark').trim() ||
-          '#fff'
-        const titleLight = getComputedStyle(document.documentElement).getPropertyValue('--color-title-light').trim() ||
-          '#000'
+        const titleDark =
+          getComputedStyle(document.documentElement)
+            .getPropertyValue('--color-title-dark')
+            .trim() || '#fff'
+        const titleLight =
+          getComputedStyle(document.documentElement)
+            .getPropertyValue('--color-title-light')
+            .trim() || '#000'
 
         // 优先从 Vuex 读取，其次回退到 localStorage，默认深色
-        const storeVal = this.$store && this.$store.getters && this.$store.getters['theme/isDarkMode']
+        const storeVal =
+          this.$store &&
+          this.$store.getters &&
+          this.$store.getters['theme/isDarkMode']
         const lsVal = localStorage.getItem('isDarkMode')
-        const isDark = typeof storeVal !== 'undefined'
-          ? !!storeVal
-          : (lsVal ? (lsVal === 'true' || lsVal === '1' || lsVal === 'dark') : true)
+        const isDark =
+          typeof storeVal !== 'undefined'
+            ? !!storeVal
+            : lsVal
+            ? lsVal === 'true' || lsVal === '1' || lsVal === 'dark'
+            : true
 
         return isDark ? titleDark : titleLight
       } catch (e) {
         return '#fff'
+      }
+    },
+    // 根据当前 balanceScope 动态调整 panelsConfig：境外模式下将右侧中间标题改为“汇率统计”
+    panelsConfigComputed() {
+      try {
+        const cfg = JSON.parse(JSON.stringify(this.panelsConfig || {}))
+        if (cfg && cfg.right && cfg.right[1]) {
+          cfg.right[1].title = this.balanceScope === 'overseas' ? '汇率统计' : cfg.right[1].title
+        }
+        return cfg
+      } catch (e) {
+        return this.panelsConfig
       }
     },
   },
@@ -445,16 +637,16 @@ export default {
   // padding: 10px 12px;
   // background: linear-gradient( 180deg, rgba(19,83,173,0.5) 0%, rgba(19,64,138,0.3) 50%, rgba(5,102,225,0.6) 100%);
   background: linear-gradient(
-      180deg,
-      rgba(19, 83, 173, 0.15) 0%,
-      rgba(19, 64, 138, 0.09) 50%,
-      rgba(5, 102, 225, 0.18) 100%
+    180deg,
+    rgba(19, 83, 173, 0.15) 0%,
+    rgba(19, 64, 138, 0.09) 50%,
+    rgba(5, 102, 225, 0.18) 100%
   );
   min-height: 0;
 }
 
 .summary-box--highlight {
-  border-left: 6px solid #29F1FA;
+  border-left: 6px solid #29f1fa;
   padding-left: 21px;
 }
 
@@ -523,7 +715,7 @@ export default {
 
 .trend-badge .trend-label {
   font-size: 12px;
-  color: var(--color-label2-dark, #9EC7F0);
+  color: var(--color-label2-dark, #9ec7f0);
 }
 
 .trend-badge .trend-value {
@@ -534,7 +726,7 @@ export default {
 
 /* 深浅模式下 ring 内徽章颜色跟随变量 */
 ::v-deep .card-panel.is-dark .trend-badge .trend-label {
-  color: var(--color-label2-dark, #9EC7F0);
+  color: var(--color-label2-dark, #9ec7f0);
 }
 
 ::v-deep .card-panel.is-light .trend-badge .trend-label {
@@ -608,29 +800,34 @@ export default {
   font-size: 12px;
   color: #9e9e9e;
 }
+
 .region_top_left {
   margin-right: 21px;
 }
+
 .region_top_left::before {
   display: inline-block;
-  content: "";
+  content: '';
   margin-right: 5px;
   width: 10px;
   height: 10px;
   background: #0098fa;
 }
+
 .region_top_right {
   display: flex;
   align-items: center;
 }
+
 .region_top_right::before {
   display: inline-block;
-  content: "";
+  content: '';
   margin-right: 5px;
   width: 10px;
   height: 10px;
   background: #0cd9b5;
 }
+
 .triangle-down {
   margin-left: 3px;
   width: 0;
@@ -639,6 +836,7 @@ export default {
   border-right: 5px solid transparent;
   border-top: 10px solid #9e9e9e;
 }
+
 .triangle-up {
   margin-left: 6px;
   width: 0;
@@ -647,38 +845,72 @@ export default {
   border-right: 5px solid transparent;
   border-bottom: 10px solid #0cd9b5;
 }
+
 .region_item {
   display: flex;
   align-items: flex-end;
-  justify-content: space-between;
+  justify-content: space-around;
   width: 100%;
   height: 100%;
 }
+
 .region_item_img {
+  width: 20px;
+  height: 23px;
+}
+
+/* 排名数字徽章（灰色半透明圆形背景） */
+.rank-number {
   width: 28px;
   height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.2);
+  color: #cfcfcf;
+  font-weight: 600;
 }
+
+/* 针对本页面的 PagedCarousel 做垂直排列的样式调整 */
+.region-paged ::v-deep .slide-row {
+  flex-direction: column;
+  gap: 4px;
+  align-items: stretch;
+}
+.region-paged ::v-deep .slide-row > * {
+  flex: none;
+  width: 100%;
+}
+
+.region-paged ::v-deep .el-carousel__item {
+  align-items: start;
+}
+
 .region_item_right {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  width:90%;
-  height: 35px;
+  width: 90%;
+  height: 28px;
 }
+
 .region_item_info {
   display: flex;
   justify-content: space-between;
+  font-size: 14px;
 }
+
 .region_item_line {
   width: 100%;
   height: 8px;
-  background: #0CD9B5;
+  background: #0cd9b5;
   border-radius: 4px 4px 4px 4px;
 }
+
 .regin_item_gropress {
   width: 50%;
   height: 8px;
-  background: #0098FA;
+  background: #0098fa;
   border-radius: 4px 4px 4px 4px;
 }
 
@@ -692,7 +924,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 42px;
+  height: 39px;
   // margin-bottom: 10px;
   // padding: 8px 10px;
   // background: rgba(255, 255, 255, 0.04);
@@ -916,9 +1148,9 @@ export default {
 .accent-select {
   ::v-deep .el-input__inner {
     background: linear-gradient(
-        135deg,
-        rgba(0, 212, 255, 0.25),
-        rgba(91, 141, 239, 0.25)
+      135deg,
+      rgba(0, 212, 255, 0.25),
+      rgba(91, 141, 239, 0.25)
     );
     border-color: rgba(0, 212, 255, 0.5);
     color: #fff;

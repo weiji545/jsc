@@ -39,7 +39,7 @@ export default {
     },
     height: {
       type: String,
-      default: '144px'
+      default: '147px'
     }
   },
   computed: {
