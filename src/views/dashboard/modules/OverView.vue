@@ -206,7 +206,11 @@
     <!-- 右下：环形图 + legends -->
     <template #right-bottom>
       <div class="donut-wrapper">
-        <EChartPieRing :data="donutData" variant="donut"/>
+        <EChartPieRing
+          :data="donutData"
+          variant="donut"
+          :options="{ color: balanceColors, tooltip: { trigger: 'item' } }"
+        />
       </div>
     </template>
   </DashboardContent>
@@ -265,6 +269,7 @@ export default {
       overview,
       // 账户币种统计使用的颜色与数据
       currencyColors: ['#FAC858', '#097C38', '#91CC75', '#507AFC', '#93BEFF', '#283E81'],
+      balanceColors: ['#F27629', '#FDCC00', '#3B72AD', '#00BAFF', '#0098FA', '#29F1FA'],
       trendTab: 'trade',
       trendTabs: [
         { label: '资金交易趋势', value: 'trade' },
@@ -288,10 +293,10 @@ export default {
         },
       },
       // 通用组件已替代原有实例化逻辑，相关实例/refs 已移除
-      balanceScope: 'global',
+      balanceScope: 'domestic',
       balanceScopes: [
-        { label: '全局', value: 'global' },
         { label: '境内', value: 'domestic' },
+        { label: '全局', value: 'global' },
         { label: '境外', value: 'overseas' },
       ],
       balanceTime: 'week',
@@ -325,7 +330,7 @@ export default {
     },
     // 右下环形图 legend 使用的数据（不随 balanceScope 变化，固定使用 global）
     donutData() {
-      const list = (this.overview && this.overview.balanceRing && this.overview.balanceRing.global) || []
+      const list = (this.overview && this.overview.balanceRing) || []
       const convert = (this.$store && this.$store.getters && this.$store.getters['currency/convert'])
         ? this.$store.getters['currency/convert']
         : (v) => v

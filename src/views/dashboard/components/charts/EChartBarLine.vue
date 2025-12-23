@@ -42,7 +42,7 @@ export default {
             textStyle: { color: '#9E9E9E' }
           }] },
         grid: { left: 30, right: 30, top: 25, bottom: 20 ,borderColor:'#636363'},
-        xAxis: { type: 'category', data: current.categories, axisLabel: { color: '#9E9E9E' } },
+        xAxis: { type: 'category', data: this.categories || [], axisLabel: { color: '#9E9E9E' } },
         yAxis: [
           { type: 'value', name: '账户余额', axisLabel: { color: '#636363' } },
           { type: 'value', name: '交易笔数', axisLabel: { color: '#636363' } }
@@ -51,7 +51,7 @@ export default {
           {
             name: '账户余额',
             type: 'bar',
-            data: current.bar,
+            data: this.barData || [],
             itemStyle: {
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                 { offset: 0, color: '#00d4ff' },
@@ -64,7 +64,7 @@ export default {
             name: '交易笔数',
             type: 'line',
             yAxisIndex: 1,
-            data: current.line,
+            data: this.lineData || [],
             // smooth: true,
             symbol: 'circle',
             symbolSize: 8,

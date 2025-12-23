@@ -1,5 +1,5 @@
 <template>
-  <div :style="{ width: size + 'px', height: height + 'px' }" ref="chartRoot"></div>
+  <div :style="{ width: size, height: height}" ref="chartRoot"></div>
 </template>
 
 <script>
@@ -19,11 +19,11 @@ export default {
       default: 'pie',
     },
     size: {
-      type: Number,
+      type: String,
       default: '100%',
     },
     height: {
-      type: Number,
+      type: String,
       default: '100%',
     },
     options: {
@@ -126,6 +126,16 @@ export default {
           if (k === 'series') return
           option[k] = this.options[k]
         })
+      }
+      // 如果用户在顶层 options 中传入 color 数组，要优先用于 series 的颜色
+      // 默认 option.series[0].color 会覆盖顶层 color，故在此处将其同步到 series[0].color
+      if (this.options && Array.isArray(this.options.color)) {
+        const series0 = option.series && option.series[0]
+        if (series0) {
+          series0.color = this.options.color
+        } else {
+          option.color = this.options.color
+        }
       }
       // donut 模式下，要求用户在 options.series[0].label 中传入 label 配置以控制 label 展示
       if (isDonut) {

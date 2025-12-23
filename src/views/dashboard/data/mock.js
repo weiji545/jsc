@@ -53,23 +53,14 @@ export const overviewData = {
     line: [8, 12, -4, 10],
   },
   // 右下环形
-  balanceRing: {
-    global: [
-      { name: '活期', value: 420 },
-      { name: '定期', value: 360 },
-      { name: '理财', value: 280 },
-    ],
-    domestic: [
-      { name: '活期', value: 220 },
-      { name: '定期', value: 260 },
-      { name: '理财', value: 200 },
-    ],
-    overseas: [
-      { name: '活期', value: 200 },
-      { name: '定期', value: 100 },
-      { name: '理财', value: 80 },
-    ],
-  },
+  balanceRing: [
+    { name: '人民币', value: 240 },
+    { name: '欧元', value: 190 },
+    { name: '美元', value: 150 },
+    { name: '日元', value: 180 },
+    { name: '加元', value: 190 },
+    { name: '澳元', value: 50 }
+  ],
   // 地球3D国家数据（key 为英文名，对应 world.json 的 properties.name）
   globeCountryData: {
     China: { name: 'China', chineseName: '中国', accounts: 12500, balance: 125680.5 },
