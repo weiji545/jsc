@@ -35,21 +35,21 @@ export default {
       op: {
         tooltip: { trigger: 'axis' },
         legend: { data: [{
-            name: '金额',
+            name: '账户余额',
             textStyle: { color: '#9E9E9E' }
           },{
-            name: '变化率',
+            name: '交易笔数',
             textStyle: { color: '#9E9E9E' }
           }] },
         grid: { left: 30, right: 30, top: 25, bottom: 20 ,borderColor:'#636363'},
         xAxis: { type: 'category', data: current.categories, axisLabel: { color: '#9E9E9E' } },
         yAxis: [
-          { type: 'value', name: '金额(万)', axisLabel: { color: '#636363' } },
-          { type: 'value', name: '变化率(%)', axisLabel: { color: '#636363' } }
+          { type: 'value', name: '账户余额', axisLabel: { color: '#636363' } },
+          { type: 'value', name: '交易笔数', axisLabel: { color: '#636363' } }
         ],
         series: [
           {
-            name: '金额',
+            name: '账户余额',
             type: 'bar',
             data: current.bar,
             itemStyle: {
@@ -61,7 +61,7 @@ export default {
             barMaxWidth: 26
           },
           {
-            name: '变化率',
+            name: '交易笔数',
             type: 'line',
             yAxisIndex: 1,
             data: current.line,
@@ -121,11 +121,11 @@ export default {
         legend: {
           data: [
             {
-              name: '金额',
+              name: '账户余额',
               textStyle: { color: '#9E9E9E' }
             },
             {
-              name: '变化率',
+              name: '交易笔数',
               textStyle: { color: '#9E9E9E' }
             }
           ]
@@ -133,12 +133,12 @@ export default {
         grid: { left: 30, right: 30, top: 25, bottom: 20, borderColor: '#636363' },
         xAxis: { type: 'category', data: this.categories || [], axisLabel: { color: '#9E9E9E' } },
         yAxis: [
-          { type: 'value', name: '金额(万)', axisLabel: { color: '#636363' } },
-          { type: 'value', name: '变化率(%)', axisLabel: { color: '#636363' } }
+          { type: 'value', name: '账户余额', axisLabel: { color: '#636363' } },
+          { type: 'value', name: '交易笔数', axisLabel: { color: '#636363' } }
         ],
         series: [
           {
-            name: '金额',
+            name: '账户余额',
             type: 'bar',
             data: this.barData || [],
             itemStyle: {
@@ -150,7 +150,7 @@ export default {
             barMaxWidth: 26
           },
           {
-            name: '变化率',
+            name: '交易笔数',
             type: 'line',
             yAxisIndex: 1,
             data: this.lineData || [],
@@ -159,12 +159,12 @@ export default {
             symbolSize: 8,
             itemStyle: { color: '#24D9B5' },
             lineStyle: { color: '#24D9B5' },
-            areaStyle: {
-              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                { offset: 0, color: 'rgba(255, 209, 102, 0.3)' },
-                { offset: 1, color: 'rgba(255, 209, 102, 0.05)' }
-              ])
-            }
+            // areaSty  le: {
+            //   color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            //     { offset: 0, color: 'rgba(255, 209, 102, 0.3)' },
+            //     { offset: 1, color: 'rgba(255, 209, 102, 0.05)' }
+            //   ])
+            // }
           }
         ]
       }, this.options)

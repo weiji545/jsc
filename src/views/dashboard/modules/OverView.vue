@@ -97,22 +97,9 @@
         <!-- 左侧：饼图（使用 EChartDonut 但将 radius 设置为 0% 以呈现普通饼图） -->
         <EChartPieRing
           :data="convertedCurrencyPie"
-          :height="220"
           variant="pie"
           :options="{ color: currencyColors, tooltip: { trigger: 'item' } }"
         />
-        <!-- 右侧：竖向 legend -->
-        <!--        <div class="pie-legend">-->
-        <!--          <div-->
-        <!--            class="legend-item"-->
-        <!--            v-for="(item, idx) in convertedCurrencyPie"-->
-        <!--            :key="item.name"-->
-        <!--          >-->
-        <!--            <span class="legend-dot" :style="{ background: currencyColors[idx] }"></span>-->
-        <!--            <span class="legend-name">{{ item.name }}</span>-->
-        <!--            <span class="legend-value">{{ formatNumber(item.value) }}</span>-->
-        <!--          </div>-->
-        <!--        </div>-->
       </div>
     </template>
 
@@ -219,14 +206,7 @@
     <!-- 右下：环形图 + legends -->
     <template #right-bottom>
       <div class="donut-wrapper">
-        <EChartPieRing :data="donutData" variant="donut" :height="240"/>
-        <div class="donut-legend">
-          <div class="legend-item" v-for="item in donutData" :key="item.name">
-            <span class="legend-dot"></span>
-            <span class="legend-name">{{ item.name }}</span>
-            <span class="legend-value">{{ formatNumber(item.value) }}</span>
-          </div>
-        </div>
+        <EChartPieRing :data="donutData" variant="donut"/>
       </div>
     </template>
   </DashboardContent>
@@ -729,8 +709,8 @@ export default {
 
 .pie-wrapper {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 10px;
+  //grid-template-columns: 2fr 1fr;
+  //gap: 10px;
   align-items: center;
   height: 100%;
 }
@@ -854,8 +834,8 @@ export default {
 
 .donut-wrapper {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 12px;
+  //grid-template-columns: 2fr 1fr;
+  //gap: 12px;
   align-items: center;
   height: 100%;
 }
