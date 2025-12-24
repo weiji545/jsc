@@ -143,7 +143,9 @@
     <!-- 中间上方：核心区域（地球 / 地图） + 通用选项卡 -->
     <template #center-top>
       <div class="core-top">
-        <CoreOverviewPanel :scope="balanceScope" :time="balanceTime" />
+        
+        <CoreOverviewPanel :scope="balanceScope" :time="balanceTime" v-if="balanceScope ==='global'"/>
+        <ChinaMap v-else-if="balanceScope==='domestic'"></ChinaMap>
         <FilterTabs
           :scope="balanceScope"
           :scope-options="balanceScopes"
@@ -316,6 +318,7 @@ import EChartRingBar from '../components/charts/EChartRingBar.vue'
 import EChartPieRing from '../components/charts/EChartPieRing.vue'
 import EChartBarLine from '../components/charts/EChartBarLine.vue'
 import EChartSparkline from '../components/charts/EChartSparkline.vue'
+import ChinaMap from '../components/chinamap/ChinaMap.vue'
 import {
   overviewData as overview,
   baseDataList,
@@ -339,6 +342,7 @@ export default {
     EChartPieRing,
     EChartBarLine,
     EChartSparkline,
+    ChinaMap
   },
   data() {
     return {
