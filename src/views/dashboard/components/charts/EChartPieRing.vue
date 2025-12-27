@@ -114,25 +114,34 @@ export default {
             return str
           },
         },
-        // 默认显示 legend
+        // 默认显示 legend，支持翻页
         legend: {
           show: true,
           type: 'scroll',
           orient: 'vertical',
-          left: '75%',
+          left: '76%',
           align: 'left',
           top: 'middle',
           formatter: legendFormatter,
           textStyle: {
             color: '#FFFFFF',
           },
-          height: 250,
+          height: 180,
+          pageButtonItemGap: 5,
+          pageButtonGap: 10,
+          pageIconColor: '#29F1FA',
+          pageIconInactiveColor: '#666',
+          pageIconSize: 12,
+          pageTextStyle: {
+            color: '#9E9E9E',
+            fontSize: 12,
+          },
         },
         series: [
           {
             name: 'pie',
             type: 'pie',
-            radius: isDonut ? ['45%', '70%'] : ['0%', '70%'],
+            radius: isDonut ? ['38%', '63%'] : ['0%', '63%'],
             center: ['38%', '53%'],
             avoidLabelOverlap: false,
             label: {
@@ -142,7 +151,7 @@ export default {
             },
             labelLine: {
               length: 5,
-              // smooth: false,
+              smooth: false,
             },
             color: [
               '#FAC858',

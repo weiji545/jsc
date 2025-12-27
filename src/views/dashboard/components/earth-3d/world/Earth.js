@@ -34,6 +34,18 @@ import {
 } from '../utils/common'
 import { flyArc } from '../utils/arc'
 
+/**
+ * 基于Three.js的3D地球组件类
+ * 提供地球渲染、旋转控制、数据点位显示、交互等功能
+ *
+ * @param {Object} options - 配置选项
+ * @param {Object} options.earth - 地球相关配置
+ * @param {number} options.earth.radius - 地球半径，默认50
+ * @param {boolean} options.earth.isRotation - 是否开启自动旋转，默认true
+ * @param {number} options.earth.rotateSpeed - 旋转速度，默认0.01
+ * @param {number} options.earth.scale - 地球缩放比例，默认1.0
+ * @param {number} options.scale - 整体缩放比例（优先级高于earth.scale），默认1.0
+ */
 export default class Earth {
   constructor(options) {
     this.options = options
@@ -54,6 +66,9 @@ export default class Earth {
     this.x = 0
     this.n = 0
 
+    // 控制地球自转的参数
+    // isRotation: 布尔值，true表示开启地球自动旋转，false表示停止旋转
+    // rotateSpeed: 数值，控制地球旋转的速度，建议值范围：0.005-0.02
     this.isRotation = this.options.earth.isRotation
 
     this.raycaster = new Raycaster()
@@ -529,8 +544,10 @@ export default class Earth {
   }
 
   show() {
-    // 使用 options 中的 scale（或 earth.scale）作为目标缩放，默认为 1
-    const targetScale = (this.options && (this.options.scale || (this.options.earth && this.options.earth.scale))) || 1
+    // 默认视角缩放的参数
+    // scale 或 earth.scale: 数值，控制地球整体的缩放比例，1.0表示原始大小
+    // 建议值范围：0.5-2.0，小于1缩小，大于1放大
+    const targetScale = (this.options && (this.options.scale || (this.options.earth && this.options.earth.scale))) || 1.2
     gsap.to(this.group.scale, {
       x: targetScale,
       y: targetScale,
@@ -789,6 +806,9 @@ export default class Earth {
         if (fly.rotation.z >= fly.flyEndAngle) fly.rotation.z = 0
       })
 
+    // 地球自转动画逻辑
+    // 当 isRotation 为 true 时，每帧增加地球的Y轴旋转角度
+    // rotateSpeed 控制旋转速度，正值顺时针，负值逆时针
     if (this.isRotation) {
       this.earthGroup.rotation.y += this.options.earth.rotateSpeed
     }

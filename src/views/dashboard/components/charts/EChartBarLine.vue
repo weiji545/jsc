@@ -84,8 +84,8 @@ export default {
         grid: { left: 30, right: 30, top: 25, bottom: 20 ,borderColor:'#636363'},
         xAxis: { type: 'category', data: this.categories || [], axisLabel: { color: '#9E9E9E' } },
         yAxis: [
-          { type: 'value', name: this.legendName || '账户余额', axisLabel: { color: '#636363' } },
-          { type: 'value', name: this.series2Name || '交易笔数', axisLabel: { color: '#636363' } }
+          { type: 'value', name: this.legendName || '账户余额', axisLabel: { color: '#636363' }, axisLine: {show: false} },
+          { type: 'value', name: this.series2Name || '交易笔数', axisLabel: { color: '#636363' }, axisLine: {show: false}}
         ],
         series: [
           {
@@ -108,8 +108,8 @@ export default {
             // smooth: true,
             symbol: 'circle',
             symbolSize: 8,
-            itemStyle: { color: '#24D9B5' },
-            lineStyle: { color: '#24D9B5' },
+            itemStyle: { color: '#FAC858' },
+            lineStyle: { color: '#FAC858', width: 2 },
             areaStyle: {
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                 { offset: 0, color: 'rgba(255, 209, 102, 0.3)' },
@@ -196,30 +196,21 @@ export default {
     },
     updateChart() {
       if (!this.chart) return
-      const axisLabelColor = this.getAxisLabelColor()
       const effectiveLegendName = (this.options && this.options.legendName) || this.legendName || '账户余额'
       const effectiveSeries2Name = (this.options && this.options.series2Name) || this.series2Name || '交易笔数'
-      // 主题判断：优先根据根节点 class（is-light-mode / is-dark-mode）判断，避免与其它存储产生不一致
+
+      // 主题判断
       let isDark = true
       try {
         const root = document && document.documentElement
         if (root && root.classList) {
           isDark = !root.classList.contains('is-light-mode')
-        } else {
-          const storeVal = this.$store && this.$store.getters && this.$store.getters['theme/isDarkMode']
-          const lsVal = localStorage.getItem('isDarkMode')
-          isDark =
-            typeof storeVal !== 'undefined'
-              ? !!storeVal
-              : lsVal
-              ? lsVal === 'true' || lsVal === '1' || lsVal === 'dark'
-              : true
         }
       } catch (e) {}
-      const legendActiveColor = isDark ? '#29F1FA' : '#096DD9'
+
       const legendInactiveColor = isDark ? '#BCDEFF' : '#666666'
       const tooltipBarLabel = (this.options && this.options.tooltipBarName) || effectiveLegendName
-      // 解析 visibleY 配置，确定是否显示 bar/line 的 y 轴（默认只显示折线 y 轴）
+
       const visibleCfg = this.visibleY
       let showBarAxis = false
       let showLineAxis = false
@@ -234,130 +225,144 @@ export default {
         showLineAxis = true
       }
 
-      // 构建 yAxis 配置，确保单轴时显示在左侧，不显示 name（除非 showYAxisName 为 true）
       const yAxisArray = []
-      if (showBarAxis && showLineAxis) {
-        yAxisArray.push({ name: this.showYAxisName ? effectiveLegendName : '', axisLabel: { color: axisLabelColor }, show: true, position: 'left' })
-        yAxisArray.push({ name: this.showYAxisName ? effectiveSeries2Name : '', axisLabel: { color: axisLabelColor }, show: true, position: 'right' })
-      } else if (showBarAxis) {
-        yAxisArray.push({ name: this.showYAxisName ? effectiveLegendName : '', axisLabel: { color: axisLabelColor }, show: true, position: 'left' })
-        yAxisArray.push({ name: '', axisLabel: { color: axisLabelColor }, show: false })
-      } else if (showLineAxis) {
-        yAxisArray.push({ name: '', axisLabel: { color: axisLabelColor }, show: false })
-        yAxisArray.push({ name: this.showYAxisName ? effectiveSeries2Name : '', axisLabel: { color: axisLabelColor }, show: true, position: 'left' })
-      } else {
-        yAxisArray.push({ name: '', axisLabel: { color: axisLabelColor }, show: false })
-        yAxisArray.push({ name: '', axisLabel: { color: axisLabelColor }, show: false })
-      }
-
-      yAxisArray.forEach(yAxis => {
-        yAxis.type = 'value'
-        yAxis.axisLine = {
-          show: false // 隐藏背景网格线
+      // 始终提供两个轴对象，确保 index 1 始终有效且不会导致 ECharts 内部 coordinate 系统混乱
+      yAxisArray.push({
+        type: 'value',
+        show: showBarAxis,
+        name: this.showYAxisName && showBarAxis ? effectiveLegendName : '',
+        position: 'left',
+        axisLabel: { color: '#9E9E9E' },
+        axisLine: { show: false },
+        splitLine: {
+          show: true,
+          lineStyle: { color: '#636363' }
+        }
+      })
+      yAxisArray.push({
+        type: 'value',
+        show: showLineAxis,
+        name: this.showYAxisName && showLineAxis ? effectiveSeries2Name : '',
+        position: showBarAxis ? 'right' : 'left', // 如果 bar 轴显示，line 轴在右，否则也在左
+        axisLabel: { color: '#9E9E9E' },
+        axisLine: { show: false },
+        splitLine: {
+          show: !showBarAxis, // 仅当左侧轴隐藏时显示
+          lineStyle: { color: '#636363' }
         }
       })
 
       const option = Object.assign({
-        tooltip: { trigger: 'axis' },
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: 'rgba(0,0,0,0.7)',
+          borderColor: '#00d4ff',
+          textStyle: { color: '#fff' }
+        },
         legend: {
-          textStyle: { color: legendActiveColor },
+          textStyle: { color: '#9E9E9E' },
           inactiveColor: legendInactiveColor,
           data: (function () {
             const arr = [effectiveLegendName]
-            if (showLineAxis) arr.push(effectiveSeries2Name)
+            // 只有当有折线数据时才添加折线图例
+            if ((this.lineData && this.lineData.length > 0) && showLineAxis) {
+              arr.push(effectiveSeries2Name)
+            }
             return arr
-          })()
+          }.bind(this))()
         },
-        grid: { left: 30, right: 30, top: 25, bottom: 20, borderColor: '#636363' },
-        xAxis: { type: 'category', data: this.categories || [], axisLabel: { color: axisLabelColor } },
+        grid: {
+          left: '50px',
+          right: '30px',
+          top: '18%',
+          bottom: '15%',
+          containLabel: false
+        },
+        xAxis: {
+          type: 'category',
+          data: this.categories || [],
+          axisLabel: { color: '#9E9E9E' },
+          axisLine: {
+            show: true,
+            lineStyle: { color: '#636363' }
+          },
+          boundaryGap: true
+        },
         yAxis: yAxisArray,
         series: [
-            {
+          {
             name: effectiveLegendName,
             type: 'bar',
+            yAxisIndex: 0,
             data: this.barData || [],
             itemStyle: {
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                { offset: 0, color: '#00d4ff' },
-                { offset: 1, color: '#5b8def' }
+                { offset: 0, color: '#3FB4F0' },
+                { offset: 1, color: '#086ED9' }
               ])
             },
-            barMaxWidth: 26
+            barMaxWidth: 26,
+            z: 2
           },
-          {
+          // 只有当有折线数据时才添加折线系列
+          ...((this.lineData && this.lineData.length > 0) ? [{
             name: effectiveSeries2Name,
             type: 'line',
             yAxisIndex: 1,
             data: this.lineData || [],
             symbol: 'circle',
-            symbolSize: 8,
-            itemStyle: { color: '#24D9B5' },
-            lineStyle: { color: '#24D9B5' },
-            // areaStyle: {
-            //   color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            //     { offset: 0, color: 'rgba(255, 209, 102, 0.3)' },
-            //     { offset: 1, color: 'rgba(255, 209, 102, 0.05)' }
-            //   ])
-            // }
-          }
+            symbolSize: 6,
+            itemStyle: { color: '#FAC858' },
+            lineStyle: { color: '#FAC858', width: 2 },
+            z: 3
+          }] : [])
         ]
       }, this.options)
-      // 确保 legend 的颜色与显示项在合并 options 后仍然正确（覆盖用户传入的 legend 配置）
-      try {
-        option.legend = option.legend || {}
-        option.legend.textStyle = Object.assign({}, option.legend.textStyle || {}, { color: legendActiveColor })
-        option.legend.inactiveColor = option.legend.inactiveColor || legendInactiveColor
-        option.legend.data = option.legend.data && option.legend.data.length ? option.legend.data : (showLineAxis ? [effectiveLegendName, effectiveSeries2Name] : [effectiveLegendName])
-      } catch (e) {}
-      // tooltip formatter：在账户余额与数量后追加单位（来自 prop unit 或 options.unit）
-      try {
-        const effectiveUnit = this.unit || (this.options && this.options.unit) || ''
-        const unitSuffix = effectiveUnit ? ' ' + effectiveUnit : ''
-        option.tooltip = option.tooltip || {}
-        option.tooltip.formatter = function (params) {
-          // params 为数组（按 axis），第一行为横坐标
-          try {
-            const axis = params && params[0] && params[0].axisValue ? params[0].axisValue : ''
-            let lines = axis ? axis + '</br>' : ''
-            ;(params || []).forEach((p) => {
-              if (!p) return
-              const name = p.seriesName === effectiveLegendName ? tooltipBarLabel : (p.seriesName === effectiveSeries2Name ? effectiveSeries2Name : '数量')
-              const val = (typeof p.value !== 'undefined' ? p.value : (p.data && p.data.value)) || 0
-              // ${p.marker}
-              lines += `${name}: ${val}${unitSuffix}</br>`
-            })
-            return lines
-          } catch (e) {
-            return ''
-          }
-        }
-      } catch (e) {}
-      // 如果外部传入了 lineColor，则覆盖默认折线样式（保留 bar 的默认渐变）
+
+      // Apply lineColor prop if provided (must happen after options merge)
       try {
         const effectiveLineColor = this.lineColor || (this.options && this.options.lineColor) || null
         if (effectiveLineColor && option.series && option.series[1]) {
           option.series[1].itemStyle = Object.assign({}, option.series[1].itemStyle, { color: effectiveLineColor })
           option.series[1].lineStyle = Object.assign({}, option.series[1].lineStyle, { color: effectiveLineColor })
-          // 覆盖 areaStyle 为与折线颜色协调的渐变（半透明）
-          // option.series[1].areaStyle = {
-          //   color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-          //     { offset: 0, color: 'rgba(253,204,0,0.25)' },
-          //     { offset: 1, color: 'rgba(253,204,0,0.05)' }
-          //   ])
-          // }
         }
       } catch (e) {}
-      // 如果传入了 yAxisName，则仅替换第一个轴的 name（保持自动构造的 yAxis 逻辑）
+
+      // 修正 legend 合并 - 确保颜色不被覆盖
+      if (this.options && this.options.legend) {
+        const mergedLegend = Object.assign({}, option.legend, this.options.legend)
+        // 保持 textStyle.color 为 #9E9E9E
+        if (!mergedLegend.textStyle) {
+          mergedLegend.textStyle = { color: '#9E9E9E' }
+        } else if (!mergedLegend.textStyle.color) {
+          mergedLegend.textStyle.color = '#9E9E9E'
+        }
+        option.legend = mergedLegend
+      }
+
+      // Tooltip Formatter
       try {
-        if (this.yAxisName && option && Array.isArray(option.yAxis) && option.yAxis.length > 0) {
-          option.yAxis = option.yAxis.map((ya, idx) => {
-            if (idx === 0) {
-              return Object.assign({}, ya, { name: this.yAxisName })
-            }
-            return ya
-          })
+        const effectiveUnit = this.unit || (this.options && this.options.unit) || ''
+        const unitSuffix = effectiveUnit ? ' ' + effectiveUnit : ''
+        option.tooltip.formatter = function (params) {
+          try {
+            const axis = params && params[0] && params[0].axisValue ? params[0].axisValue : ''
+            let lines = `<div style="margin-bottom:4px;font-weight:bold;">${axis}</div>`
+            ;(params || []).forEach((p) => {
+              if (!p) return
+              p.marker = p.marker.replace('[object Object]', '#509AE2')
+              const name = p.seriesName === effectiveLegendName ? tooltipBarLabel : p.seriesName
+              const val = (typeof p.value !== 'undefined' ? p.value : (p.data && p.data.value)) || 0
+              lines += `<div style="display:flex;justify-content:space-between;align-items:center;">
+                <span>${p.marker} ${name}:</span>
+                <span style="margin-left:12px;font-weight:bold;">${val}${unitSuffix}</span>
+              </div>`
+            })
+            return lines
+          } catch (e) { return '' }
         }
       } catch (e) {}
+
       try {
         this.chart.setOption(option, true)
       } catch (e) {

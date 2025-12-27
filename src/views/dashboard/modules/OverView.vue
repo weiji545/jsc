@@ -1,6 +1,11 @@
 <template>
-  <DashboardContent :data-list="dataList" :panelsConfig="panelsConfigComputed">
-    <!-- 左上：境内账户数量 -->
+  <DashboardContent
+    :data-list="dataList"
+    :panelsConfig="panelsConfigComputed"
+    :centerBottomMode.sync="centerBottomMode"
+    :centerPeriod.sync="centerPeriodSync"
+  >
+    <!-- 左上：账户数量统计 -->
     <template #left-top>
       <div class="account-summary">
         <div class="summary-top">
@@ -78,8 +83,10 @@
         <div class="region_top_left">金额</div>
         <div class="region_top_right">
           账户数量
-          <div class="triangle-up"></div>
-          <div class="triangle-down"></div>
+          <div class="triangle_group" @click="leftTopOrderByAscOnClick">
+            <div :class="leftTopOrderByAsc ? 'triangle-up-on' : 'triangle-up-off'"></div>
+            <div :class="leftTopOrderByAsc ? 'triangle-down-off' : 'triangle-down-on'"></div>
+          </div>
         </div>
       </div>
       <div class="region-list">
@@ -90,7 +97,7 @@
           :perPage="5"
           :autoplay="false"
           :loop="false"
-          height="211px"
+          height="210px"
         >
           <template #item="{ item, index }">
             <div class="region-row" :key="item.name">
@@ -127,7 +134,7 @@
       </div>
     </template>
 
-    <!-- 左下：饼图 + legends -->
+    <!-- 左下：账户币种统计 饼图 + legends -->
     <template #left-bottom>
       <div class="pie-wrapper">
         <!-- 左侧：饼图（使用 EChartDonut 但将 radius 设置为 0% 以呈现普通饼图） -->
@@ -143,9 +150,8 @@
     <!-- 中间上方：核心区域（地球 / 地图） + 通用选项卡 -->
     <template #center-top>
       <div class="core-top">
-        
-        <CoreOverviewPanel :scope="balanceScope" :time="balanceTime" v-if="balanceScope ==='global'"/>
-        <ChinaMap v-else-if="balanceScope==='domestic'"></ChinaMap>
+
+        <CoreOverviewPanel :scope="balanceScope" :time="balanceTime"/>
         <FilterTabs
           :scope="balanceScope"
           :scope-options="balanceScopes"
@@ -157,7 +163,7 @@
       </div>
     </template>
 
-    <!-- 中间下方：趋势分析 -->
+    <!-- 中间下方：余额变动趋势分析 -->
     <template #center-bottom-title>
       <div class="trend-title-bar">
         <div class="trend-title">余额变动趋势分析</div>
@@ -176,15 +182,34 @@
       </div>
     </template>
     <template #center-bottom>
-      <EChartBarLine
-        :categories="trendData[trendTab].categories"
-        :bar-data="convertedTrendBar"
-        :line-data="trendData[trendTab].line"
-        :height="170"
-      />
+      <div v-if="centerBottomMode === 'a'">
+        <EChartBarLine
+          :categories="trendData[trendTab].categories"
+          :bar-data="convertedTrendBar"
+          :line-data="trendData[trendTab].line"
+          :height="170"
+          line-color="#24D9B5"
+        />
+      </div>
+      <div v-else class="large-payments" style="height:100%;">
+        <div class="large-left">
+          <el-table :data="largePayments" size="small" style="width:100%" max-height="170px">
+            <el-table-column align="center" header-align="center" prop="index" label="序号" width="78" :formatter="formatIndex"></el-table-column>
+            <el-table-column align="center" header-align="center" prop="payer" label="付款账户"></el-table-column>
+            <el-table-column align="center" header-align="center" prop="payee" label="收款帐户"></el-table-column>
+            <el-table-column align="center" header-align="center" prop="amount" label="付款金额(万元)" :formatter="formatAmount"></el-table-column>
+            <el-table-column align="center" header-align="center" prop="date" label="支付日期"></el-table-column>
+          </el-table>
+        </div>
+        <div class="large-right">
+          <div style="display:flex;align-items:center;justify-content:center;height:100%;">
+            <EchartGauge :value="95" width="140px" height="140px"/>
+          </div>
+        </div>
+      </div>
     </template>
 
-    <!-- 右上：按“账户数量统计”布局显示资金统计（境内/境外交易金额），下方使用 EChartSparkline -->
+    <!-- 右上：资金金额统计 ，下方使用 EChartSparkline -->
     <template #right-top>
       <div class="account-summary">
         <div class="summary-top">
@@ -198,8 +223,8 @@
                   formatNumber(
                     (overview.transactionAmount &&
                       overview.transactionAmount.domestic) ||
-                      overview.accountsSummary.domestic,
-                    2
+                    overview.accountsSummary.domestic,
+                    2,
                   )
                 }}
               </div>
@@ -216,8 +241,8 @@
                   formatNumber(
                     (overview.transactionAmount &&
                       overview.transactionAmount.overseas) ||
-                      overview.accountsSummary.overseas,
-                    2
+                    overview.accountsSummary.overseas,
+                    2,
                   )
                 }}
               </div>
@@ -257,7 +282,7 @@
                   {{
                     formatNumber(
                       (item.data || []).reduce((a, b) => a + b, 0),
-                      2
+                      2,
                     )
                   }}
                 </div>
@@ -269,30 +294,29 @@
       </div>
     </template>
 
-    <!-- 右中：柱 + 线 -->
+    <!-- 右中：存款金额统计 / 汇率统计 柱 + 线 -->
     <template #right-middle>
       <!-- 非境外：保持原有 存款/柱+线 视图；境外：展示 汇率 柱状图（隐藏折线与图例） -->
-        <EChartBarLine
-          v-if="balanceScope !== 'overseas'"
-          :categories="overview.rightMiddle.categories"
-          :bar-data="convertedRightMidBar"
-          :line-data="overview.rightMiddle.line"
-          :height="240"
-          line-color="#FDCC00"
-          :unit="panelsConfigComputed.right[1].unit"
-          :options="rightMidEchartOptions"
-        />
-        <EChartBarLine
-          v-else
-          :categories="exchangeCategories"
-          :bar-data="convertedExchangeBar"
-          :line-data="[]"
-          :height="240"
-          line-color="#FDCC00"
-          :unit="panelsConfigComputed.right[1].unit"
-          visible-y="bar"
-          :options="exchangeEchartOptions"
-        />
+
+      <EChartBarLine
+        v-if="previousBalanceScope === 'domestic'"
+        :categories="overview.rightMiddle.categories"
+        :bar-data="convertedRightMidBar"
+        :line-data="overview.rightMiddle.line"
+        :height="240"
+        :unit="panelsConfigComputed.right[1].unit"
+        :options="rightMidEchartOptions"
+      />
+      <EChartBarLine
+        v-else-if="previousBalanceScope === 'overseas'"
+        :categories="exchangeCategories"
+        :bar-data="convertedExchangeBar"
+        :line-data="[]"
+        :height="240"
+        :unit="panelsConfigComputed.right[1].unit"
+        visible-y="bar"
+        :options="exchangeEchartOptions"
+      />
     </template>
 
     <!-- 右下：环形图 + legends -->
@@ -318,7 +342,7 @@ import EChartRingBar from '../components/charts/EChartRingBar.vue'
 import EChartPieRing from '../components/charts/EChartPieRing.vue'
 import EChartBarLine from '../components/charts/EChartBarLine.vue'
 import EChartSparkline from '../components/charts/EChartSparkline.vue'
-import ChinaMap from '../components/chinamap/ChinaMap.vue'
+import EchartGauge from '../components/charts/EchartGauge.vue'
 import {
   overviewData as overview,
   baseDataList,
@@ -342,103 +366,105 @@ export default {
     EChartPieRing,
     EChartBarLine,
     EChartSparkline,
-    ChinaMap
+    EchartGauge,
   },
   data() {
     return {
+      // ========== 图片资源 ==========
       ranking1,
       ranking2,
       ranking3,
-      // baseDataList 保留基础数据（不随展示货币变化），已迁移到 mock.js
+
+      // ========== 基础数据 ==========
       baseDataList,
-      // panelsConfig 由 OverView 传入 DashboardContent，以便集中配置每个 panel 的 title/unit
-      // 现在也可以通过 showBottomCorner 控制底部边角装饰
+      overview,
+      regionList,
+      exchangeRates,
+      trendData,
+
+      // ========== 面板配置 ==========
       panelsConfig: {
         left: [
           { title: '账户数量统计', unit: '户' },
-          { title: '账户区域统计', unit: '户', showBottomCorner: true, titleGap: 0 },
+          {
+            title: '账户区域统计',
+            unit: '户',
+            showBottomCorner: true,
+            contentPadding: { paddingTop: 9, paddingLeft: 14, paddingRight: 14 },
+          },
           { title: '账户币种统计', unit: '户', showBottomCorner: true },
         ],
-        center: { title: '资金交易分析', unit: '万元' },
+        center: { title: '余额变动趋势分析', unit: '万元', contentPadding: { paddingTop: 0 } },
         right: [
           { title: '资金金额统计', unit: '万元' },
           { title: '存款金额统计', unit: '万元', showBottomCorner: true },
           { title: '币种余额统计', unit: '万元', showBottomCorner: true },
         ],
       },
-      overview,
-      // 从 mock.js 导入的用于展示的假数据（模拟后端接口）
-      regionList,
-      exchangeRates,
-      // 账户币种颜色为组件内静态配置（非接口数据），因此在组件中定义
-      currencyColors: [
-        '#FAC858',
-        '#097C38',
-        '#91CC75',
-        '#507AFC',
-        '#93BEFF',
-        '#283E81',
-      ],
-      trendTab: 'trade',
-      trendTabs: [
-        { label: '资金交易趋势', value: 'trade' },
-        { label: '大额支付', value: 'large' },
-      ],
-      trendData,
-      // 通用组件已替代原有实例化逻辑，相关实例/refs 已移除
+
+      // ========== 视图状态 ==========
       balanceScope: 'global',
+      previousBalanceScope: 'domestic',
+      balanceTime: ['day', '7'],
+      trendTab: 'large',
+      centerBottomMode: 'a',
+      leftTopOrderByAsc: true,
+
+      // ========== 选项配置 ==========
       balanceScopes: [
         { label: '全局', value: 'global' },
         { label: '境内', value: 'domestic' },
         { label: '境外', value: 'overseas' },
       ],
-      balanceTime: 'week',
       balanceTimeOptions: [
-        { label: '本周', value: 'week' },
-        { label: '上周', value: 'lastWeek' },
-        { label: '本月', value: 'month' },
-        { label: '上月', value: 'lastMonth' },
-        { label: '近一年', value: 'year' },
+        {
+          value: 'day',
+          label: '按天',
+          children: [
+            { value: '7', label: '近七天' },
+            { value: '77', label: '近一周' },
+            { value: '111', label: '自定义天' },
+          ],
+        },
+        {
+          value: 'month',
+          label: '按月',
+          children: [
+            { value: '31', label: '近一月' },
+            { value: '365', label: '近一年' },
+            { value: '222', label: '自定义月' },
+          ],
+        },
       ],
-      // 右下环形图的 options：为 donut 模式提供 series[0].label 配置（对象形式）
-      // EChartPieRing 要求在 donut 模式下通过 options.series[0].label 控制 label 展示
+      trendTabs: [
+        { label: '资金交易趋势', value: 'trade' },
+        { label: '大额支付', value: 'large' },
+      ],
+
+      // ========== 图表配置 ==========
+      currencyColors: ['#FAC858', '#097C38', '#91CC75', '#507AFC', '#93BEFF', '#283E81'],
       rightBottomData: {
         title: {
           text: '余额占比',
           left: '31%',
           top: '48%',
-          textStyle: {
-            color: '#FFFFFF',
-            fontSize: 14,
-            fontWeight: 'bold',
-          },
+          textStyle: { color: '#FFFFFF', fontSize: 14, fontWeight: 'bold' },
         },
         series: [
           {
-            color: [
-              '#F27629',
-              '#FDCC00',
-              '#3B72AD',
-              '#00BAFF',
-              '#0098FA',
-              '#29F1FA',
-            ],
+            color: ['#F27629', '#FDCC00', '#3B72AD', '#00BAFF', '#0098FA', '#29F1FA'],
           },
         ],
       },
-      // ECharts 配置：存款金额统计（右中第2个 panel）的额外 options
       rightMidEchartOptions: {
         legendName: '金额',
-        legend: { show: true }
+        legend: { show: true },
       },
-      // ECharts 配置：境外模式下的汇率统计 options（包括 yAxis 名称）
       exchangeEchartOptions: {
         legendName: '金额',
-        legend: { show: false },
-        // 不显示 yAxis.name（避免直接在 axis 上展示文字），只保留样式配置
-        yAxis: [{ type: 'value', axisLabel: { color: '#636363' } }, { show: false }],
-        // tooltip 中 bar 的标签显示为“兑换汇率”
-        tooltipBarName: '兑换汇率'
+        legend: { show: true },
+        yAxis: [{ type: 'value', axisLabel: { color: '#9E9E9E' }, axisLine: { show: false } }, { show: false }],
+        tooltipBarName: '兑换汇率',
       },
     }
   },
@@ -474,7 +500,7 @@ export default {
           ? this.$store.getters['currency/convert']
           : (v) => v
       return list.map((it) =>
-        Object.assign({}, it, { value: convert(it.value) })
+        Object.assign({}, it, { value: convert(it.value) }),
       )
     },
     // 左下地区饼图数据，随 currency 转换
@@ -491,9 +517,7 @@ export default {
           ? this.$store.getters['currency/convert']
           : (v) => v
       // 返回新的对象数组并按金额降序排序
-      return rawList
-        .map((it) => Object.assign({}, it, { value: convert(it.value) }))
-        .sort((a, b) => b.value - a.value)
+      return rawList.map((it) => Object.assign({}, it, { value: convert(it.value) })).sort((a, b) => b.value - a.value)
     },
     // trend / rightMid 的金额需要基于当前货币转换
     convertedRightMidBar() {
@@ -508,7 +532,7 @@ export default {
         this.$store.getters['currency/convert']
           ? this.$store.getters['currency/convert']
           : (v) => v
-      return bar.map((v) => convert(v))
+      return bar.map((v) => Number(convert(v) || 0))
     },
     // 境外模式下用于展示的汇率柱状图数据
     exchangeCategories() {
@@ -521,7 +545,7 @@ export default {
         this.$store.getters['currency/convert']
           ? this.$store.getters['currency/convert']
           : (v) => v
-      return (this.exchangeRates || []).map((it) => convert(it.value))
+      return (this.exchangeRates || []).map((it) => Number(convert(it.value) || 0))
     },
     convertedTrendBar() {
       const current = this.trendData[this.trendTab] || { bar: [] }
@@ -531,19 +555,26 @@ export default {
         this.$store.getters['currency/convert']
           ? this.$store.getters['currency/convert']
           : (v) => v
-      return (current.bar || []).map((v) => convert(v))
+      return (current.bar || []).map((v) => Number(convert(v) || 0))
+    },
+    // 用于大额支付表格的示例数据（从 mock trendData.large 映射生成）
+    largePayments() {
+      const raw = (this.trendData && this.trendData.large && this.trendData.large.bar) || []
+      return raw.map((v, idx) => ({
+        index: idx + 1,
+        payer: `付款账户${idx + 1}`,
+        payee: `收款帐户${idx + 1}`,
+        amount: Number((v || 0).toFixed(2)),
+        date: '2025-12-24',
+      }))
     },
     // 文字颜色使用 Vuex 管理的深色模式状态，localStorage 仅作缓存回退
     textColor() {
       try {
         const titleDark =
-          getComputedStyle(document.documentElement)
-            .getPropertyValue('--color-title-dark')
-            .trim() || '#fff'
+          getComputedStyle(document.documentElement).getPropertyValue('--color-title-dark').trim() || '#fff'
         const titleLight =
-          getComputedStyle(document.documentElement)
-            .getPropertyValue('--color-title-light')
-            .trim() || '#000'
+          getComputedStyle(document.documentElement).getPropertyValue('--color-title-light').trim() || '#000'
 
         // 优先从 Vuex 读取，其次回退到 localStorage，默认深色
         const storeVal =
@@ -555,8 +586,8 @@ export default {
           typeof storeVal !== 'undefined'
             ? !!storeVal
             : lsVal
-            ? lsVal === 'true' || lsVal === '1' || lsVal === 'dark'
-            : true
+              ? lsVal === 'true' || lsVal === '1' || lsVal === 'dark'
+              : true
 
         return isDark ? titleDark : titleLight
       } catch (e) {
@@ -568,13 +599,27 @@ export default {
       try {
         const cfg = JSON.parse(JSON.stringify(this.panelsConfig || {}))
         if (cfg && cfg.right && cfg.right[1]) {
-          cfg.right[1].title = this.balanceScope === 'overseas' ? '汇率统计' : cfg.right[1].title
+          cfg.right[1].title = this.previousBalanceScope === 'overseas' ? '汇率统计' : cfg.right[1].title
         }
         return cfg
       } catch (e) {
         return this.panelsConfig
       }
     },
+    // 将平衡时间（天/月）与 DashboardContent 中的单选按钮同步
+    centerPeriodSync: {
+      get() {
+        return this.balanceTime && this.balanceTime[0]
+      },
+      set(val) {
+        // 当用户在中间下方面板切换 天/月 时，同步更新全局的 balanceTime
+        if (val === 'day') {
+          this.balanceTime = ['day', '7']
+        } else if (val === 'month') {
+          this.balanceTime = ['month', '31']
+        }
+      }
+    }
   },
   mounted() {
     // 通用图表组件会自行初始化并响应数据变化
@@ -585,6 +630,17 @@ export default {
   },
   methods: {
     formatNumber,
+    formatAmount(row, column, cellValue) {
+      return this.formatNumber(cellValue, 2)
+    },
+    formatIndex(row, column, cellValue) {
+      try {
+        const v = typeof cellValue === 'undefined' || cellValue === null ? (row && row.index) || 0 : cellValue
+        return String(Number(v)).padStart(3, '0')
+      } catch (e) {
+        return String(cellValue || '')
+      }
+    },
     // 主题状态由 Vuex 管理，localStorage 仍作为缓存由其他地方写入
     ringStyle(percent) {
       // 使用 ECharts 渲染环形图，样式由 ECharts 控制
@@ -601,8 +657,23 @@ export default {
     },
     changeBalanceScope(val) {
       if (this.balanceScope === val) return
+      if (val !== 'global') {
+        this.previousBalanceScope = val
+      }
       this.balanceScope = val
       // balanceScope 仍用于其它面板，但 donutData 与左下饼图不受其影响
+    },
+    // 处理 dashboard 缩放变化，修复首次加载时图表尺寸异常问题
+    handleScaleChanged() {
+      // 使用更精确的方法触发所有 ECharts 图表重绘
+      this.$nextTick(() => {
+        // 触发 window resize 事件，让所有图表组件自动响应
+        window.dispatchEvent(new Event('resize'))
+      })
+    },
+    // 左中 账户区域统计 切换排序状态
+    leftTopOrderByAscOnClick() {
+      this.leftTopOrderByAsc = !this.leftTopOrderByAsc
     },
   },
 }
@@ -641,10 +712,10 @@ export default {
   // padding: 10px 12px;
   // background: linear-gradient( 180deg, rgba(19,83,173,0.5) 0%, rgba(19,64,138,0.3) 50%, rgba(5,102,225,0.6) 100%);
   background: linear-gradient(
-    180deg,
-    rgba(19, 83, 173, 0.15) 0%,
-    rgba(19, 64, 138, 0.09) 50%,
-    rgba(5, 102, 225, 0.18) 100%
+      180deg,
+      rgba(19, 83, 173, 0.15) 0%,
+      rgba(19, 64, 138, 0.09) 50%,
+      rgba(5, 102, 225, 0.18) 100%
   );
   min-height: 0;
 }
@@ -832,23 +903,46 @@ export default {
   background: #0cd9b5;
 }
 
-.triangle-down {
-  margin-left: 3px;
-  width: 0;
-  height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-top: 10px solid #9e9e9e;
+
+.triangle_group {
+  margin-left: 7px;
+  display: flex;
+  cursor: pointer;
+  gap: 5px;
+
+  .triangle-up-on {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 10px solid #0cd9b5;
+  }
+
+  .triangle-up-off {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 10px solid #9e9e9e;
+  }
+
+  .triangle-down-on {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 10px solid #0cd9b5;
+  }
+
+  .triangle-down-off {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 10px solid #9e9e9e;
+  }
 }
 
-.triangle-up {
-  margin-left: 6px;
-  width: 0;
-  height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-bottom: 10px solid #0cd9b5;
-}
 
 .region_item {
   display: flex;
@@ -878,9 +972,10 @@ export default {
 /* 针对本页面的 PagedCarousel 做垂直排列的样式调整 */
 .region-paged ::v-deep .slide-row {
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   align-items: stretch;
 }
+
 .region-paged ::v-deep .slide-row > * {
   flex: none;
   width: 100%;
@@ -928,7 +1023,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 39px;
+  height: 38px;
   // margin-bottom: 10px;
   // padding: 8px 10px;
   // background: rgba(255, 255, 255, 0.04);
@@ -1000,12 +1095,12 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 100%;
+  //width: 100%;
 }
 
 .trend-title {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 700;
   color: #fff;
 }
 
@@ -1033,6 +1128,87 @@ export default {
 .trend-chart {
   width: 100%;
   height: 260px;
+}
+
+/* 大额支付两栏布局：右侧固定 165px，左侧剩余空间用于表格 */
+.large-payments {
+  display: flex;
+  height: 100%;
+  gap: 12px;
+}
+
+.large-payments .large-left {
+  flex: 1;
+  min-width: 0; /* allow table to truncate properly */
+}
+
+.large-payments .large-right {
+  width: 165px;
+  flex-shrink: 0;
+}
+
+/* 大额支付表格样式：透明背景、表头渐变、表头字体随深浅切换 */
+.large-payments ::v-deep .el-table {
+  &::before {
+    height: 0;
+  }
+
+  &, tr, .el-table__cell {
+    background: transparent !important;
+  }
+
+  .el-table__cell {
+    color: var(--color-title-dark, #fff);
+    border: none;
+  }
+
+  &.el-table--enable-row-hover .el-table__body tr:hover {
+    background-image: url('../img/line-hover.png') !important; // 或 transparent
+    background-size: 100% 100% !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+  }
+
+  // 自定义滚动条样式
+  .el-table__body-wrapper {
+    &::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(0, 212, 255, 0.6);
+      border-radius: 3px;
+
+      &:hover {
+        background: rgba(0, 212, 255, 0.8);
+      }
+    }
+  }
+}
+
+.large-payments ::v-deep .el-table__header-wrapper {
+  background: linear-gradient(180deg, #1C3B68 0%, rgba(47, 61, 82, 0.0885) 100%);
+}
+
+.large-payments ::v-deep .el-table__header-wrapper th {
+  background: transparent;
+  color: var(--color-title-dark, #fff);
+}
+
+.is-light-mode .large-payments ::v-deep .el-table__header-wrapper th,
+:deep(.card-panel.is-light) .large-payments ::v-deep .el-table__header-wrapper th {
+  color: var(--color-title-light, #181818) !important;
+}
+
+.large-payments ::v-deep .el-table__body,
+.large-payments ::v-deep .el-table__row {
+  background: transparent;
 }
 
 .top-line-grid {
@@ -1152,9 +1328,9 @@ export default {
 .accent-select {
   ::v-deep .el-input__inner {
     background: linear-gradient(
-      135deg,
-      rgba(0, 212, 255, 0.25),
-      rgba(91, 141, 239, 0.25)
+        135deg,
+        rgba(0, 212, 255, 0.25),
+        rgba(91, 141, 239, 0.25)
     );
     border-color: rgba(0, 212, 255, 0.5);
     color: #fff;

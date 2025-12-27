@@ -40,6 +40,19 @@ export default class World {
     })
   }
 
+  /**
+   * 基于Three.js的3D地球组件类
+   * 提供地球渲染、旋转控制、数据点位显示、交互等功能
+   *
+   * @param {Object} options - 配置选项
+   * @param {Object} options.earth - 地球相关配置
+   * @param {number} options.earth.radius - 地球半径，默认50
+   * @param {boolean} options.earth.isRotation - 是否开启自动旋转，默认true
+   * @param {number} options.earth.rotateSpeed - 旋转速度，默认0.01
+   * @param {number} options.earth.scale - 地球缩放比例，默认1.0
+   * @param {number} options.scale - 整体缩放比例（优先级高于earth.scale），默认1.0
+   */
+
   async createEarth() {
     this.earth = new Earth({
       data: Data,
@@ -49,7 +62,7 @@ export default class World {
       textures: this.resources.textures,
       earth: {
         radius: 50,
-        rotateSpeed: 0.001,
+        rotateSpeed: 0.008,
         isRotation: true
       },
       satellite: {

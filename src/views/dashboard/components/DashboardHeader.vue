@@ -128,11 +128,16 @@ export default {
     this.timeTimer = setInterval(() => {
       this.updateTime()
     }, 1000)
+
+    // 监听全屏状态变化，确保组件状态与实际全屏状态同步
+    document.addEventListener('fullscreenchange', this.handleFullscreenChange)
   },
   beforeDestroy() {
     if (this.timeTimer) {
       clearInterval(this.timeTimer)
     }
+    // 移除全屏状态变化监听
+    document.removeEventListener('fullscreenchange', this.handleFullscreenChange)
   },
   methods: {
     // 处理顶部三个选项点击
@@ -161,19 +166,53 @@ export default {
     },
     // 全屏切换
     toggleFullscreen() {
+      // 检查是否在iframe中
+      const isInIframe = window.self !== window.top
+
       if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().then(() => {
+        // 优先尝试整个文档全屏
+        const targetElement = document.documentElement
+
+        targetElement.requestFullscreen().then(() => {
           this.isFullscreen = true
         }).catch(err => {
-          console.error('全屏失败:', err)
+          console.warn('文档全屏失败，尝试其他方式:', err)
+
+          // 如果在iframe中，尝试向上级窗口发送消息
+          if (isInIframe && window.parent) {
+            try {
+              window.parent.postMessage({
+                type: 'TOGGLE_FULLSCREEN',
+                action: 'enter'
+              }, '*')
+            } catch (e) {
+              console.error('向父窗口发送全屏消息失败:', e)
+            }
+          }
         })
       } else {
         document.exitFullscreen().then(() => {
           this.isFullscreen = false
         }).catch(err => {
-          console.error('退出全屏失败:', err)
+          console.warn('退出全屏失败:', err)
+
+          // 如果在iframe中，尝试向上级窗口发送消息
+          if (isInIframe && window.parent) {
+            try {
+              window.parent.postMessage({
+                type: 'TOGGLE_FULLSCREEN',
+                action: 'exit'
+              }, '*')
+            } catch (e) {
+              console.error('向父窗口发送退出全屏消息失败:', e)
+            }
+          }
         })
       }
+    },
+    // 处理全屏状态变化
+    handleFullscreenChange() {
+      this.isFullscreen = !!document.fullscreenElement
     },
     // 深色模式切换
     toggleDarkMode(val) {

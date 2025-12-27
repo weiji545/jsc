@@ -68,6 +68,9 @@ export default {
   background: #29F1FA;
 }
 
+.paged-carousel ::v-deep .el-carousel__indicator--horizontal {
+  padding: 4px 4px;
+}
 
 .slide-row {
   display: flex;

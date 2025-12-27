@@ -1,10 +1,9 @@
 const getInitialDarkMode = () => {
   try {
     const v = localStorage.getItem('isDarkMode')
+    // 如果 localStorage 有值，使用存储的值
     if (v !== null) return v === 'true' || v === '1' || v === 'dark'
-    if (typeof window !== 'undefined' && window.matchMedia) {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches
-    }
+    // 如果 localStorage 为空，默认使用深色模式，不检查系统偏好
     return true
   } catch (e) {
     return true

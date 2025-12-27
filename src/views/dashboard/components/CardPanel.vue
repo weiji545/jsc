@@ -3,6 +3,10 @@
     <div class="card-title">
       <div class="card-title-main">
         <slot name="title">{{ title }}</slot>
+        <span class="currency-indicator">
+          <img src="@/views/dashboard/img/warning-currency.png" alt="" class="currency-icon" />
+          <span class="currency-text">{{ currencyText }}</span>
+        </span>
       </div>
       <div v-if="displayUnit" class="card-unit">单位: {{ displayUnit }}</div>
       <!-- 仅长条模式显示额外的 title-tabs（不影响其他 panel） -->
@@ -26,56 +30,51 @@ export default {
   props: {
     title: {
       type: String,
-      default: ''
+      default: '',
     },
     unit: {
       type: String,
-      default: ''
-    },
-    // card-title 与 card-content 之间的间距，默认 12px
-    titleGap: {
-      type: Number,
-      default: 12
+      default: '',
     },
     // card-content 的 padding 配置，默认都为 0
     contentPadding: {
       type: Object,
       default: () => ({
-        paddingTop: 0,
+        paddingTop: 12, // card-title 与 card-content 之间的间距，默认 12px, 下面还有一处需要更改
         paddingLeft: 0,
         paddingRight: 0,
-        paddingBottom: 0
-      })
+        paddingBottom: 0,
+      }),
     }
     ,
     // 是否为长条模式（中间下方的长窗口）
     isLong: {
       type: Boolean,
-      default: false
+      default: false,
     }
     ,
     // 长条模式的可配置尺寸（默认与样式一致）
     longWidth: {
-      type: Number,
-      default: 918
+      type: String,
+      default: '100%',
     },
     longHeight: {
-      type: Number,
-      default: 213
+      type: String,
+      default: '100%',
     }
     ,
     // 是否显示容器底部的装饰边角图片（默认关闭）
     showBottomCorner: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   computed: {
     isDarkMode() {
       try {
         return this.$store && this.$store.getters && typeof this.$store.getters['theme/isDarkMode'] !== 'undefined'
           ? this.$store.getters['theme/isDarkMode']
-        : true
+          : true
       } catch (e) {
         return true
       }
@@ -83,18 +82,21 @@ export default {
     displayUnit() {
       return (this.unit || '').trim()
     },
+    currencyText() {
+      try {
+        const currency = this.$store?.getters?.['currency/selectedCurrency'] || 'RMB'
+        return currency === 'DOLLAR' ? '以美元计价' : '以人民币计价'
+      } catch (e) {
+        return '以人民币计价'
+      }
+    },
     // 计算最终的 padding 样式
     contentPaddingStyle() {
       const padding = {
-        paddingTop: this.contentPadding.paddingTop || 0,
+        paddingTop: this.contentPadding.paddingTop ?? 12,
         paddingLeft: this.contentPadding.paddingLeft || 0,
         paddingRight: this.contentPadding.paddingRight || 0,
-        paddingBottom: this.contentPadding.paddingBottom || 0
-      }
-
-      // 如果设置了 titleGap，覆盖 paddingTop
-      if (this.titleGap !== undefined && this.titleGap !== null) {
-        padding.paddingTop = this.titleGap
+        paddingBottom: this.contentPadding.paddingBottom || 0,
       }
 
       // 转换为 CSS 样式对象
@@ -102,18 +104,17 @@ export default {
         paddingTop: padding.paddingTop + 'px',
         paddingLeft: padding.paddingLeft + 'px',
         paddingRight: padding.paddingRight + 'px',
-        paddingBottom: padding.paddingBottom + 'px'
+        paddingBottom: padding.paddingBottom + 'px',
       }
-    }
-    ,
+    },
     panelStyle() {
       if (!this.isLong) return {}
       return {
-        width: this.longWidth + 'px',
-        height: this.longHeight + 'px'
+        width: this.longWidth,
+        height: this.longHeight,
       }
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -144,7 +145,7 @@ export default {
   background-repeat: no-repeat;
 }
 
-.card-panel.is-long .card-title{
+.card-panel.is-long .card-title {
   padding-right: 0;
 }
 
@@ -154,6 +155,25 @@ export default {
   display: inline-flex;
   align-items: center;
   min-width: 0;
+  gap: 8px;
+}
+
+.currency-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.currency-icon {
+  width: 11px;
+  height: 11px;
+  display: block;
+}
+
+.currency-text {
+  font-size: 12px;
+  font-weight: 400;
+  color: #9E9E9E;
 }
 
 .card-unit {
@@ -165,8 +185,7 @@ export default {
 
 /* 仅在长条模式下应用三等分布局与 tabs 样式，避免影响其他区域 */
 .card-panel.is-long .card-title > * {
-  /* 三等分布局：标题 / 单位 / 右侧 tabs 各占三分之一宽度 */
-  flex: 0 0 33.333%;
+  flex: 0 0 38%;
   display: flex;
   align-items: center;
   min-width: 0;
@@ -179,7 +198,7 @@ export default {
 }
 
 .card-panel.is-long .card-unit {
-  flex: 0 0 29.5%;
+  flex: 0 0 24%;
   margin-left: 0;
   justify-content: flex-end;
   //text-align: center;
@@ -291,6 +310,7 @@ export default {
     color: var(--color-label2-dark, #c3e2ff);
   }
 }
+
 .card-panel.is-light {
   ::v-deep .ring-label {
     color: var(--color-label2-light, #666666);
@@ -306,7 +326,7 @@ export default {
 
   // 深色模式
   &.is-dark {
-    background: rgba(0,60,123,0.1625);
+    background: rgba(0, 60, 123, 0.1625);
 
     // 文字数字部分颜色同标题（使用 CSS 变量）
     ::v-deep .text-number,
@@ -366,7 +386,7 @@ export default {
 
 /* 长条模式样式（用于中间下方长窗口） */
 .card-panel.is-long {
-  width: 918px;
+  width: 100%; // 918px;
   height: 213px;
 }
 

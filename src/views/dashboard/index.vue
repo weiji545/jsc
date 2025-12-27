@@ -1,5 +1,5 @@
 <template>
-  <div class="dashboard-outer">
+  <div class="dashboard-outer" :class="{'white-bg': !isDarkMode}">
     <div class="dashboard-screen" :style="screenStyle">
       <div class="dashboard-container" :class="isDarkMode ? 'is-dark-mode' : 'is-light-mode'">
         <!-- Header 部分 -->
@@ -46,8 +46,8 @@ export default {
     return {
       getIsDarkMode: () => {
         try {
-          return this.$store && this.$store.getters && typeof this.$store.getters['theme/isDarkMode'] !== 'undefined'
-            ? this.$store.getters['theme/isDarkMode']
+          return this.$store && this.$store.getters && typeof this.$store.getters.isDarkMode !== 'undefined'
+            ? this.$store.getters.isDarkMode
             : true
         } catch (e) {
           return true
@@ -58,8 +58,8 @@ export default {
   computed: {
     isDarkMode() {
       try {
-        return this.$store && this.$store.getters && typeof this.$store.getters['theme/isDarkMode'] !== 'undefined'
-          ? this.$store.getters['theme/isDarkMode']
+        return this.$store && this.$store.getters && typeof this.$store.getters.isDarkMode !== 'undefined'
+          ? this.$store.getters.isDarkMode
           : true
       } catch (e) {
         return true
@@ -118,10 +118,16 @@ export default {
     updateScale() {
       const vw = window.innerWidth
       const vh = window.innerHeight
-      const scale = Math.min(vw / this.baseWidth, vh / this.baseHeight)
+      // 优先保证宽度占满屏幕，允许垂直滚动
+      const scale = vw / this.baseWidth
       this.scale = Number(scale.toFixed(4))
-      this.offsetX = (vw - this.baseWidth * this.scale) / 2
-      this.offsetY = (vh - this.baseHeight * this.scale) / 2
+      // 水平方向不需要偏移，垂直方向贴近顶部，避免下方空白
+      this.offsetX = 0
+      this.offsetY = 0
+      // 通知子组件图表重绘
+      this.$nextTick(() => {
+        this.$emit('scale-changed')
+      })
     }
   }
 }
@@ -131,9 +137,14 @@ export default {
 .dashboard-outer {
   width: 100vw;
   height: 100vh;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   //background: linear-gradient( 90deg, #08194E 0%, #083391 51%, #000F35 100%), #FFFFFF;
   background-image: url("./img/bg.png");
+}
+
+.white-bg {
+  background-image: url("./img/white-bg.png");
 }
 
 .dashboard-screen {

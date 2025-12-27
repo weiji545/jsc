@@ -81,11 +81,17 @@ export const overviewData = {
   // 账户币种统计
   currencyPie: [
     { name: '人民币', value: 240 },
-    { name: '欧元', value: 190 },
-    { name: '美元', value: 150 },
+    { name: '美元', value: 190 },
+    { name: '欧元', value: 150 },
     { name: '日元', value: 180 },
-    { name: '加元', value: 190 },
-    { name: '澳元', value: 50 }
+    { name: '英镑', value: 120 },
+    { name: '加元', value: 95 },
+    { name: '澳元', value: 85 },
+    { name: '港币', value: 110 },
+    { name: '新加坡元', value: 75 },
+    { name: '瑞士法郎', value: 65 },
+    { name: '韩元', value: 55 },
+    { name: '泰铢', value: 45 },
   ],
   // 右上折线（4块）
   rightTopLines: [
@@ -105,11 +111,17 @@ export const overviewData = {
   // 右下环形
   balanceRing: [
     { name: '人民币', value: 240 },
-    { name: '欧元', value: 190 },
-    { name: '美元', value: 150 },
+    { name: '美元', value: 190 },
+    { name: '欧元', value: 150 },
     { name: '日元', value: 180 },
-    { name: '加元', value: 190 },
-    { name: '澳元', value: 50 }
+    { name: '英镑', value: 120 },
+    { name: '加元', value: 95 },
+    { name: '澳元', value: 85 },
+    { name: '港币', value: 110 },
+    { name: '新加坡元', value: 75 },
+    { name: '瑞士法郎', value: 65 },
+    { name: '韩元', value: 55 },
+    { name: '泰铢', value: 45 },
   ],
   // 地球3D国家数据（key 为英文名，对应 world.json 的 properties.name）
   globeCountryData: {

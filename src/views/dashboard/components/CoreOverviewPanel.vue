@@ -1,24 +1,22 @@
 <template>
   <div class="core-panel">
-    <Globe3D :scope="scope" :time="time" />
+    <Globe3D v-if="scope === 'global'" />
+    <ChinaMap v-else-if="scope === 'domestic'"/>
   </div>
 </template>
 
 <script>
 import Globe3D from './Globe3D.vue'
+import ChinaMap from '../components/chinamap/ChinaMap.vue'
 
 export default {
   name: 'CoreOverviewPanel',
-  components: { Globe3D },
+  components: { Globe3D, ChinaMap },
   props: {
     scope: {
       type: String,
       default: 'global'
     },
-    time: {
-      type: String,
-      default: 'week'
-    }
   }
 }
 </script>

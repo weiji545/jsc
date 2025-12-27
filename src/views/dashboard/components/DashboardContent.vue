@@ -2,7 +2,7 @@
   <div class="dashboard-content">
     <!-- 左侧区域：455px -->
     <div class="content-left">
-      <CardPanel style="height: 318px;" :title="getPanelTitle('left',0)" :unit="getPanelUnit('left',0)" :showBottomCorner="getPanelShowBottomCorner('left',0)" class="content-item">
+      <CardPanel style="height: 318px;" :title="getPanelTitle('left',0)" :unit="getPanelUnit('left',0)" :showBottomCorner="getPanelShowBottomCorner('left',0)" :contentPadding="getPanelContentPadding('left',0)" class="content-item">
         <template #title>
           <span>{{ getPanelTitle('left',0) }}</span>
         </template>
@@ -12,7 +12,7 @@
         </div>
       </CardPanel>
 
-      <CardPanel :title="getPanelTitle('left',1)" :unit="getPanelUnit('left',1)" :showBottomCorner="getPanelShowBottomCorner('left',1)" class="content-item">
+      <CardPanel :title="getPanelTitle('left',1)" :unit="getPanelUnit('left',1)" :showBottomCorner="getPanelShowBottomCorner('left',1)" :contentPadding="getPanelContentPadding('left',1)" class="content-item">
         <template #title>
           <span>{{ getPanelTitle('left',1) }}</span>
         </template>
@@ -22,7 +22,7 @@
         </div>
       </CardPanel>
 
-      <CardPanel :title="getPanelTitle('left',2)" :unit="getPanelUnit('left',2)" :showBottomCorner="getPanelShowBottomCorner('left',2)" class="content-item">
+      <CardPanel :title="getPanelTitle('left',2)" :unit="getPanelUnit('left',2)" :showBottomCorner="getPanelShowBottomCorner('left',2)" :contentPadding="getPanelContentPadding('left',2)" class="content-item">
         <template #title>
           <span>{{ getPanelTitle('left',2) }}</span>
         </template>
@@ -54,7 +54,7 @@
 
       <!-- 下层区域 -->
       <div class="center-bottom">
-        <CardPanel :title="panelsConfig.center.title" :unit="panelsConfig.center.unit" class="center-bottom-panel" :titleGap="0" :is-long="true" :showBottomCorner="getPanelShowBottomCorner('center',0)">
+        <CardPanel :title="panelsConfig.center.title" :unit="panelsConfig.center.unit" class="center-bottom-panel" :isLong="true" :showBottomCorner="getPanelShowBottomCorner('center',0)" :contentPadding="getPanelContentPadding('center',0)">
           <template #title>
             <slot name="center-bottom-title">
               <span>{{ panelsConfig.center.title }}</span>
@@ -64,12 +64,12 @@
           <template #title-tabs>
             <div class="title-tabs-wrapper">
               <div class="period-switch">
-                <label><input type="radio" name="centerPeriod" value="week" v-model="centerPeriod" />周</label>
-                <label><input type="radio" name="centerPeriod" value="month" v-model="centerPeriod" />月</label>
+                <label><input type="radio" name="centerPeriod" value="day" v-model="centerPeriodComputed" />天</label>
+                <label><input type="radio" name="centerPeriod" value="month" v-model="centerPeriodComputed" />月</label>
               </div>
               <div class="text-toggle">
-                <button type="button" :class="['text-btn', { selected: centerMode === 'a' }]" @click="centerMode = 'a'">资金交易趋势</button>
-                <button type="button" :class="['text-btn', { selected: centerMode === 'b' }]" @click="centerMode = 'b'">大额支付</button>
+                <button type="button" :class="['text-btn', { selected: centerBottomModeComputed === 'a' }]" @click="centerBottomModeComputed = 'a'">资金交易趋势</button>
+                <button type="button" :class="['text-btn', { selected: centerBottomModeComputed === 'b' }]" @click="centerBottomModeComputed = 'b'">大额支付</button>
               </div>
             </div>
           </template>
@@ -83,7 +83,7 @@
 
     <!-- 右侧区域：455px -->
     <div class="content-right">
-      <CardPanel style="height: 318px;" :title="getPanelTitle('right',0)" :unit="getPanelUnit('right',0)" :showBottomCorner="getPanelShowBottomCorner('right',0)" class="content-item">
+      <CardPanel style="height: 318px;" :title="getPanelTitle('right',0)" :unit="getPanelUnit('right',0)" :showBottomCorner="getPanelShowBottomCorner('right',0)" :contentPadding="getPanelContentPadding('right',0)" class="content-item">
         <template #title>
           <span>{{ getPanelTitle('right',0) }}</span>
         </template>
@@ -93,7 +93,7 @@
         </div>
       </CardPanel>
 
-      <CardPanel :title="getPanelTitle('right',1)" :unit="getPanelUnit('right',1)" :showBottomCorner="getPanelShowBottomCorner('right',1)" class="content-item">
+      <CardPanel :title="getPanelTitle('right',1)" :unit="getPanelUnit('right',1)" :showBottomCorner="getPanelShowBottomCorner('right',1)" :contentPadding="getPanelContentPadding('right',1)" class="content-item">
         <template #title>
           <span>{{ getPanelTitle('right',1) }}</span>
         </template>
@@ -103,7 +103,7 @@
         </div>
       </CardPanel>
 
-      <CardPanel :title="getPanelTitle('right',2)" :unit="getPanelUnit('right',2)" :showBottomCorner="getPanelShowBottomCorner('right',2)" class="content-item">
+      <CardPanel :title="getPanelTitle('right',2)" :unit="getPanelUnit('right',2)" :showBottomCorner="getPanelShowBottomCorner('right',2)" :contentPadding="getPanelContentPadding('right',2)" class="content-item">
         <template #title>
           <span>{{ getPanelTitle('right',2) }}</span>
         </template>
@@ -128,8 +128,9 @@ export default {
   data() {
     // 中间下方面板的局部状态（周/月 与 文字按钮切换）
     return {
-      centerPeriod: 'week',
-      centerMode: 'a'
+      // internal fallback for center mode when parent does not control it
+      centerBottomModeInternal: 'a',
+      centerPeriodInternal: 'day',
     }
   },
   props: {
@@ -140,10 +141,47 @@ export default {
         { label: '', value: 0 },
       ]
     },
+    // allow parent to control centerBottomMode via .sync (if provided)
+    centerBottomMode: {
+      type: String,
+      default: null
+    },
+    centerPeriod: {
+      type: String,
+      default: null
+    },
     // panelsConfig: 可配置左右侧三个 panel 的 title/unit
     panelsConfig: {
       type: Object,
       default: () => ({})
+    }
+  },
+  computed: {
+    centerPeriodComputed: {
+      get() {
+        return this.centerPeriod !== null ? this.centerPeriod : this.centerPeriodInternal
+      },
+      set(val) {
+        if (this.centerPeriod !== null) {
+          this.$emit('update:centerPeriod', val)
+        } else {
+          this.centerPeriodInternal = val
+        }
+      }
+    },
+    // proxy for centerBottomMode: prefer parent-controlled prop, otherwise use internal state
+    centerBottomModeComputed: {
+      get() {
+        return this.centerBottomMode !== null ? this.centerBottomMode : this.centerBottomModeInternal
+      },
+      set(val) {
+        if (this.centerBottomMode !== null) {
+          // parent is controlling value -> emit update for .sync
+          this.$emit('update:centerBottomMode', val)
+        } else {
+          this.centerBottomModeInternal = val
+        }
+      }
     }
   },
   methods: {
@@ -170,6 +208,22 @@ export default {
         return !!(this.panelsConfig && this.panelsConfig[side] && this.panelsConfig[side][idx] && this.panelsConfig[side][idx].showBottomCorner)
       } catch (e) {
         return false
+      }
+    }
+    ,
+    // 从 panelsConfig 中读取 contentPadding；支持 side 为对象或数组的情况，未配置时返回空对象
+    getPanelContentPadding(side, idx) {
+      try {
+        const sideConfig = this.panelsConfig && this.panelsConfig[side]
+        if (!sideConfig) return {}
+        // 如果 sideConfig 是数组（左右两侧），读取对应索引
+        if (Array.isArray(sideConfig)) {
+          return (sideConfig[idx] && sideConfig[idx].contentPadding) || {}
+        }
+        // 如果 sideConfig 是对象（如 center）
+        return sideConfig.contentPadding || {}
+      } catch (e) {
+        return {}
       }
     }
   }
@@ -205,6 +259,12 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 15px;
+}
+
+.period-switch {
+  label, input {
+    cursor: pointer;
+  }
 }
 
 // 核心区域（上方）
@@ -328,7 +388,7 @@ export default {
 .panel-content {
   width: 100%;
   height: 100%;
-  overflow: auto;
+  overflow: hidden;
 }
 
 // 响应式布局（可选，根据需求调整）
@@ -338,10 +398,7 @@ export default {
     padding: 10px;
   }
 
-  .content-left,
-  .content-right {
-    //gap: 10px;
-  }
+  /* responsive adjustments removed for now */
 }
 
 @media (max-width: 1366px) {
