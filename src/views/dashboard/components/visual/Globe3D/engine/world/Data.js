@@ -1,4 +1,4 @@
-import capitals from '@/views/dashboard/data/world-capitals.zh.json'
+import capitals from '../../../../../data/world-capitals.zh.json'
 
 export default (capitals?.features || [])
   .map(feature => {

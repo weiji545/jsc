@@ -7,131 +7,24 @@
   >
     <!-- 左上：账户数量统计 -->
     <template #left-top>
-      <div class="account-summary">
-        <div class="summary-top">
-          <div
-            class="summary-box"
-            :class="{ 'summary-box--highlight': balanceScope === 'domestic' }"
-          >
-            <div class="summary-text">
-              <div class="summary-number">
-                {{ formatNumber(overview.accountsSummary.domestic) }}
-              </div>
-              <div class="summary-label">境内账户总量</div>
-            </div>
-          </div>
-          <div
-            class="summary-box"
-            :class="{ 'summary-box--highlight': balanceScope === 'overseas' }"
-          >
-            <div class="summary-text">
-              <div class="summary-number">
-                {{ formatNumber(overview.accountsSummary.overseas) }}
-              </div>
-              <div class="summary-label">境外账户总量</div>
-            </div>
-          </div>
-        </div>
-        <div class="summary-bottom">
-          <PagedCarousel
-            :items="overview.ringMetrics"
-            :perPage="4"
-            :interval="5000"
-            :autoplay="true"
-          >
-            <template #item="{ item, index }">
-              <div :key="index" class="ring-card">
-                <div
-                  class="ring"
-                  :class="{ negative: item.percent < 0 }"
-                  :style="ringStyle(item.percent)"
-                >
-                  <EChartRingBar
-                    :percent="item.percent"
-                    :size="92"
-                    :height="92"
-                  />
-                  <!-- 使用 DOM 显示百分比，替代 ECharts graphic -->
-                  <div
-                    class="ring-percent"
-                    :style="{
-                      color: textColor,
-                      fontSize: '18px',
-                      fontWeight: 500,
-                    }"
-                  >
-                    {{ item.percent }}%
-                  </div>
-                </div>
-                <div
-                  class="ring-value"
-                  :style="{ color: item.percent < 0 ? '#D92424' : '#24D9B5' }"
-                >
-                  {{ formatNumber(item.value) }}
-                </div>
-                <div class="ring-label">{{ item.label }}</div>
-              </div>
-            </template>
-          </PagedCarousel>
-        </div>
-      </div>
+      <OverviewMetricPanel
+        :domestic-value="overview.accountsSummary.domestic"
+        domestic-label="境内账户总量"
+        :overseas-value="overview.accountsSummary.overseas"
+        overseas-label="境外账户总量"
+        :highlight-scope="balanceScope"
+        :carousel-items="overview.ringMetrics"
+        variant="ring"
+        :text-color="textColor"
+      />
     </template>
 
     <!-- 左中：账户区域统计（列表展示） -->
     <template #left-middle>
-      <div class="region_top">
-        <div class="region_top_left">金额</div>
-        <div class="region_top_right">
-          账户数量
-          <div class="triangle_group" @click="leftTopOrderByAscOnClick">
-            <div :class="leftTopOrderByAsc ? 'triangle-up-on' : 'triangle-up-off'"></div>
-            <div :class="leftTopOrderByAsc ? 'triangle-down-off' : 'triangle-down-on'"></div>
-          </div>
-        </div>
-      </div>
-      <div class="region-list">
-        <!-- 使用 PagedCarousel 每页显示 5 条，超出时自动翻页 -->
-        <PagedCarousel
-          class="region-paged"
-          :items="convertedRegionPie"
-          :perPage="5"
-          :autoplay="false"
-          :loop="false"
-          height="210px"
-        >
-          <template #item="{ item, index }">
-            <div class="region-row" :key="item.name">
-              <div class="region_item">
-                <!-- 前三名使用图片，其余使用灰色半透明圆形背景的数字徽章 -->
-                <img
-                  v-if="index < 3"
-                  :src="index === 0 ? ranking1 : index === 1 ? ranking2 : ranking3"
-                  alt=""
-                  class="region_item_img"
-                />
-                <div v-else class="region_item_img rank-number">
-                  {{ index + 1 }}
-                </div>
-                <div class="region_item_right">
-                  <div class="region_item_info">
-                    <div class="region-name">
-                      <span>NO.0{{ index + 1 }} {{ item.name }}</span>
-                      <span>{{ item.count || 0 }}</span>
-                    </div>
-                    <span class="region-value">{{ formatNumber(item.value) }}</span>
-                  </div>
-                  <div class="region_item_line">
-                    <div
-                      class="regin_item_gropress"
-                      :style="{ width: Math.min(100, (item.value / convertedRegionPie[0].value) * 100) + '%' }"
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </template>
-        </PagedCarousel>
-      </div>
+      <RegionRankList
+        :data="convertedRegionPie"
+        :order-by-asc.sync="leftTopOrderByAsc"
+      />
     </template>
 
     <!-- 左下：账户币种统计 饼图 + legends -->
@@ -182,140 +75,41 @@
       </div>
     </template>
     <template #center-bottom>
-      <div v-if="centerBottomMode === 'a'">
-        <EChartBarLine
-          :categories="trendData[trendTab].categories"
-          :bar-data="convertedTrendBar"
-          :line-data="trendData[trendTab].line"
-          :height="170"
-          line-color="#24D9B5"
-        />
-      </div>
-      <div v-else class="large-payments" style="height:100%;">
-        <div class="large-left">
-          <el-table :data="largePayments" size="small" style="width:100%" max-height="170px">
-            <el-table-column align="center" header-align="center" prop="index" label="序号" width="78" :formatter="formatIndex"></el-table-column>
-            <el-table-column align="center" header-align="center" prop="payer" label="付款账户"></el-table-column>
-            <el-table-column align="center" header-align="center" prop="payee" label="收款帐户"></el-table-column>
-            <el-table-column align="center" header-align="center" prop="amount" label="付款金额(万元)" :formatter="formatAmount"></el-table-column>
-            <el-table-column align="center" header-align="center" prop="date" label="支付日期"></el-table-column>
-          </el-table>
-        </div>
-        <div class="large-right">
-          <div style="display:flex;align-items:center;justify-content:center;height:100%;">
-            <EchartGauge :value="95" width="140px" height="140px"/>
-          </div>
-        </div>
-      </div>
+      <TrendAnalysis
+        :mode="centerBottomMode"
+        :categories="trendData[trendTab].categories"
+        :bar-data="convertedTrendBar"
+        :line-data="trendData[trendTab].line"
+        :table-data="largePayments"
+      />
     </template>
 
     <!-- 右上：资金金额统计 ，下方使用 EChartSparkline -->
     <template #right-top>
-      <div class="account-summary">
-        <div class="summary-top">
-          <div
-            class="summary-box"
-            :class="{ 'summary-box--highlight': balanceScope === 'domestic' }"
-          >
-            <div class="summary-text">
-              <div class="summary-number">
-                {{
-                  formatNumber(
-                    (overview.transactionAmount &&
-                      overview.transactionAmount.domestic) ||
-                    overview.accountsSummary.domestic,
-                    2,
-                  )
-                }}
-              </div>
-              <div class="summary-label">境内交易金额</div>
-            </div>
-          </div>
-          <div
-            class="summary-box"
-            :class="{ 'summary-box--highlight': balanceScope === 'overseas' }"
-          >
-            <div class="summary-text">
-              <div class="summary-number">
-                {{
-                  formatNumber(
-                    (overview.transactionAmount &&
-                      overview.transactionAmount.overseas) ||
-                    overview.accountsSummary.overseas,
-                    2,
-                  )
-                }}
-              </div>
-              <div class="summary-label">境外交易金额</div>
-            </div>
-          </div>
-        </div>
-        <div class="summary-bottom">
-          <PagedCarousel
-            :items="overview.rightTopLines"
-            :perPage="4"
-            :interval="5000"
-            :autoplay="true"
-          >
-            <template #item="{ item, index }">
-              <div :key="index" class="ring-card">
-                <div class="ring">
-                  <!-- 环比增长徽章（绝对定位，显示在图表左上角） -->
-                  <div class="trend-badge">
-                    <div class="trend-label">环比增长</div>
-                    <div
-                      class="trend-value"
-                      :style="{
-                        color: item.percent >= 0 ? '#0098FA' : '#FF3A3A',
-                      }"
-                    >
-                      {{ (item.percent >= 0 ? '+' : '') + item.percent }}%
-                    </div>
-                  </div>
-                  <EChartSparkline
-                    :data="item.data"
-                    :height="70"
-                    :color="item.percent >= 0 ? '#3AACFF' : '#FF3A3A'"
-                  />
-                </div>
-                <div class="ring-value" :style="{ color: textColor }">
-                  {{
-                    formatNumber(
-                      (item.data || []).reduce((a, b) => a + b, 0),
-                      2,
-                    )
-                  }}
-                </div>
-                <div class="ring-label">{{ item.label }}</div>
-              </div>
-            </template>
-          </PagedCarousel>
-        </div>
-      </div>
+      <OverviewMetricPanel
+        :domestic-value="overview.transactionAmount.domestic || overview.accountsSummary.domestic"
+        domestic-label="境内交易金额"
+        :overseas-value="overview.transactionAmount.overseas || overview.accountsSummary.overseas"
+        overseas-label="境外交易金额"
+        :highlight-scope="balanceScope"
+        :carousel-items="overview.rightTopLines"
+        variant="sparkline"
+        :decimals="2"
+        :text-color="textColor"
+      />
     </template>
 
-    <!-- 右中：存款金额统计 / 汇率统计 柱 + 线 -->
     <template #right-middle>
-      <!-- 非境外：保持原有 存款/柱+线 视图；境外：展示 汇率 柱状图（隐藏折线与图例） -->
-
-      <EChartBarLine
-        v-if="previousBalanceScope === 'domestic'"
-        :categories="overview.rightMiddle.categories"
-        :bar-data="convertedRightMidBar"
-        :line-data="overview.rightMiddle.line"
-        :height="240"
+      <RightMiddleChart
+        :scope="previousBalanceScope"
         :unit="panelsConfigComputed.right[1].unit"
-        :options="rightMidEchartOptions"
-      />
-      <EChartBarLine
-        v-else-if="previousBalanceScope === 'overseas'"
-        :categories="exchangeCategories"
-        :bar-data="convertedExchangeBar"
-        :line-data="[]"
-        :height="240"
-        :unit="panelsConfigComputed.right[1].unit"
-        visible-y="bar"
-        :options="exchangeEchartOptions"
+        :domestic-categories="overview.rightMiddle.categories"
+        :domestic-bar-data="convertedRightMidBar"
+        :domestic-line-data="overview.rightMiddle.line"
+        :domestic-options="rightMidEchartOptions"
+        :overseas-categories="exchangeCategories"
+        :overseas-bar-data="convertedExchangeBar"
+        :overseas-options="exchangeEchartOptions"
       />
     </template>
 
@@ -334,26 +128,27 @@
 </template>
 
 <script>
-import DashboardContent from '../components/DashboardContent.vue'
-import CoreOverviewPanel from '../components/CoreOverviewPanel.vue'
-import FilterTabs from '../components/FilterTabs.vue'
-import PagedCarousel from '../components/PagedCarousel.vue'
+import DashboardContent from '../components/layout/DashboardContent.vue'
+import CoreOverviewPanel from '../components/panels/CoreOverviewPanel.vue'
+import FilterTabs from '../components/common/FilterTabs.vue'
+import PagedCarousel from '../components/common/PagedCarousel.vue'
 import EChartRingBar from '../components/charts/EChartRingBar.vue'
 import EChartPieRing from '../components/charts/EChartPieRing.vue'
 import EChartBarLine from '../components/charts/EChartBarLine.vue'
 import EChartSparkline from '../components/charts/EChartSparkline.vue'
 import EchartGauge from '../components/charts/EchartGauge.vue'
+import RankingStats from './overview-widgets/RegionRankList.vue'
+import OverviewMetricPanel from './overview-widgets/OverviewMetricPanel.vue'
+import TrendAnalysis from './overview-widgets/TrendAnalysis.vue'
+import RightMiddleChart from './overview-widgets/RightMiddleChart.vue'
 import {
-  overviewData as overview,
-  baseDataList,
-  regionList,
-  exchangeRates,
-  trendData,
-} from '../data/mock.js'
+  getOverviewData,
+  getBaseDataList,
+  getRegionList,
+  getExchangeRates,
+  getTrendData
+} from '@/api/dashboard'
 import { formatNumber } from '../../../utils/utils.js'
-import ranking1 from '../img/ranking-1.png'
-import ranking2 from '../img/ranking-2.png'
-import ranking3 from '../img/ranking-3.png'
 
 export default {
   name: 'OverView',
@@ -367,20 +162,37 @@ export default {
     EChartBarLine,
     EChartSparkline,
     EchartGauge,
+    RegionRankList: RankingStats,
+    OverviewMetricPanel,
+    TrendAnalysis,
+    RightMiddleChart
   },
   data() {
     return {
       // ========== 图片资源 ==========
-      ranking1,
-      ranking2,
-      ranking3,
+      ranking1: null,
+      ranking2: null,
+      ranking3: null,
 
       // ========== 基础数据 ==========
-      baseDataList,
-      overview,
-      regionList,
-      exchangeRates,
-      trendData,
+      baseDataList: [],
+      overview: {
+        accountsSummary: { domestic: 0, overseas: 0 },
+        ringMetrics: [],
+        transactionAmount: { domestic: 0, overseas: 0 },
+        regionPie: [],
+        currencyPie: [],
+        rightTopLines: [],
+        rightMiddle: { categories: [], bar: [], line: [] },
+        balanceRing: []
+      },
+      regionList: [],
+      exchangeRates: [],
+      trendData: {
+        trade: { categories: [], bar: [], line: [] },
+        large: { categories: [], bar: [], line: [] },
+        cash: { categories: [], bar: [], line: [] }
+      },
 
       // ========== 面板配置 ==========
       panelsConfig: {
@@ -622,6 +434,7 @@ export default {
     }
   },
   mounted() {
+    this.fetchData();
     // 通用图表组件会自行初始化并响应数据变化
     window.addEventListener('resize', this.handleResize)
   },
@@ -629,679 +442,43 @@ export default {
     window.removeEventListener('resize', this.handleResize)
   },
   methods: {
-    formatNumber,
-    formatAmount(row, column, cellValue) {
-      return this.formatNumber(cellValue, 2)
-    },
-    formatIndex(row, column, cellValue) {
+    async fetchData() {
       try {
-        const v = typeof cellValue === 'undefined' || cellValue === null ? (row && row.index) || 0 : cellValue
-        return String(Number(v)).padStart(3, '0')
-      } catch (e) {
-        return String(cellValue || '')
+        const [overviewRes, baseRes, regionRes, exchangeRes, trendRes] = await Promise.all([
+          getOverviewData(),
+          getBaseDataList(),
+          getRegionList(),
+          getExchangeRates(),
+          getTrendData()
+        ]);
+
+        if (overviewRes.code === 200) this.overview = overviewRes.data;
+        if (baseRes.code === 200) this.baseDataList = baseRes.data;
+        if (regionRes.code === 200) this.regionList = regionRes.data;
+        if (exchangeRes.code === 200) this.exchangeRates = exchangeRes.data;
+        if (trendRes.code === 200) this.trendData = trendRes.data;
+      } catch (error) {
+        console.error('Failed to fetch overview data:', error);
       }
     },
-    // 主题状态由 Vuex 管理，localStorage 仍作为缓存由其他地方写入
-    ringStyle(percent) {
-      // 使用 ECharts 渲染环形图，样式由 ECharts 控制
-      return {}
-    },
-    // 使用通用组件渲染，移除手动初始化/销毁逻辑
-    handleResize() {
-      // 通用组件会自行响应 window resize，无需手动调用 resize
-    },
-    changeTrendTab(tab) {
-      if (this.trendTab === tab) return
-      this.trendTab = tab
-      // EChartBarLine 会响应 props 更新并重绘
-    },
+    formatNumber,
     changeBalanceScope(val) {
       if (this.balanceScope === val) return
       if (val !== 'global') {
         this.previousBalanceScope = val
       }
       this.balanceScope = val
-      // balanceScope 仍用于其它面板，但 donutData 与左下饼图不受其影响
     },
-    // 处理 dashboard 缩放变化，修复首次加载时图表尺寸异常问题
     handleScaleChanged() {
-      // 使用更精确的方法触发所有 ECharts 图表重绘
       this.$nextTick(() => {
-        // 触发 window resize 事件，让所有图表组件自动响应
         window.dispatchEvent(new Event('resize'))
       })
-    },
-    // 左中 账户区域统计 切换排序状态
-    leftTopOrderByAscOnClick() {
-      this.leftTopOrderByAsc = !this.leftTopOrderByAsc
     },
   },
 }
 </script>
 
 <style lang="scss" scoped>
-.module-content.placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 16px;
-}
-
-.account-summary {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  gap: 12px;
-}
-
-.summary-top {
-  flex: 1;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  min-height: 0;
-}
-
-.summary-box {
-  display: flex;
-  align-items: center;
-  padding: 0 27px;
-  // padding: 10px 12px;
-  // background: linear-gradient( 180deg, rgba(19,83,173,0.5) 0%, rgba(19,64,138,0.3) 50%, rgba(5,102,225,0.6) 100%);
-  background: linear-gradient(
-      180deg,
-      rgba(19, 83, 173, 0.15) 0%,
-      rgba(19, 64, 138, 0.09) 50%,
-      rgba(5, 102, 225, 0.18) 100%
-  );
-  min-height: 0;
-}
-
-.summary-box--highlight {
-  border-left: 6px solid #29f1fa;
-  padding-left: 21px;
-}
-
-.summary-text {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 6px;
-}
-
-.summary-number {
-  font-size: 28px;
-  font-weight: 500;
-  color: #00d4ff;
-  line-height: 1.1;
-}
-
-.summary-label {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.summary-bottom {
-  flex: 2;
-  display: flex;
-  flex-direction: row;
-  gap: 12px;
-  min-height: 0;
-}
-
-.ring-card {
-  //flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  width: 105px;
-  //background: rgba(255, 255, 255, 0.05);
-  //border: 1px solid rgba(255, 255, 255, 0.08);
-  //border-radius: 8px;
-  //padding: 12px;
-  //gap: 6px;
-}
-
-.ring {
-  width: 92px;
-  height: 92px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  transition: all 0.2s ease;
-  position: relative;
-}
-
-/* 环比增长徽章（显示在每个小图表的左上角） */
-.trend-badge {
-  position: absolute;
-  top: 6px;
-  left: 6px;
-  font-size: 12px;
-  line-height: 1;
-  text-align: left;
-  z-index: 20;
-}
-
-.trend-badge .trend-label {
-  font-size: 12px;
-  color: var(--color-label2-dark, #9ec7f0);
-}
-
-.trend-badge .trend-value {
-  font-size: 12px;
-  font-weight: 600;
-  margin-top: 5px;
-}
-
-/* 深浅模式下 ring 内徽章颜色跟随变量 */
-::v-deep .card-panel.is-dark .trend-badge .trend-label {
-  color: var(--color-label2-dark, #9ec7f0);
-}
-
-::v-deep .card-panel.is-light .trend-badge .trend-label {
-  color: var(--color-label2-light, #666666);
-}
-
-.ring-chart {
-  width: 92px;
-  height: 92px;
-}
-
-.ring-percent {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 18px;
-  font-weight: 500;
-  pointer-events: none;
-}
-
-.ring.negative {
-  filter: drop-shadow(0 0 6px rgba(255, 95, 95, 0.35));
-}
-
-.ring:not(.negative) {
-  filter: drop-shadow(0 0 6px rgba(0, 212, 255, 0.35));
-}
-
-.ring-inner {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: #0f1b2d;
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.ring-value {
-  font-size: 16px;
-  color: #fff;
-}
-
-.ring-label {
-  font-size: 14px;
-  max-width: 74px;
-  height: 36px;
-  line-height: 18px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  word-break: break-word;
-  text-align: center;
-  // 使用配置的 label2Dark 颜色（深色模式），加 !important 以确保不被覆盖
-  color: var(--color-label2-dark, #c3e2ff);
-}
-
-// 浅色模式下使用 label2Light, 加 !important
-:deep(.card-panel.is-light) .ring-label {
-  color: var(--color-label2-light, #666666) !important;
-}
-
-.region_top {
-  display: flex;
-  justify-content: center;
-  font-size: 12px;
-  color: #9e9e9e;
-}
-
-.region_top_left {
-  margin-right: 21px;
-}
-
-.region_top_left::before {
-  display: inline-block;
-  content: '';
-  margin-right: 5px;
-  width: 10px;
-  height: 10px;
-  background: #0098fa;
-}
-
-.region_top_right {
-  display: flex;
-  align-items: center;
-}
-
-.region_top_right::before {
-  display: inline-block;
-  content: '';
-  margin-right: 5px;
-  width: 10px;
-  height: 10px;
-  background: #0cd9b5;
-}
-
-
-.triangle_group {
-  margin-left: 7px;
-  display: flex;
-  cursor: pointer;
-  gap: 5px;
-
-  .triangle-up-on {
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-bottom: 10px solid #0cd9b5;
-  }
-
-  .triangle-up-off {
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-bottom: 10px solid #9e9e9e;
-  }
-
-  .triangle-down-on {
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 10px solid #0cd9b5;
-  }
-
-  .triangle-down-off {
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 10px solid #9e9e9e;
-  }
-}
-
-
-.region_item {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-around;
-  width: 100%;
-  height: 100%;
-}
-
-.region_item_img {
-  width: 20px;
-  height: 23px;
-}
-
-/* 排名数字徽章（灰色半透明圆形背景） */
-.rank-number {
-  width: 28px;
-  height: 30px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: rgba(255, 255, 255, 0.2);
-  color: #cfcfcf;
-  font-weight: 600;
-}
-
-/* 针对本页面的 PagedCarousel 做垂直排列的样式调整 */
-.region-paged ::v-deep .slide-row {
-  flex-direction: column;
-  gap: 2px;
-  align-items: stretch;
-}
-
-.region-paged ::v-deep .slide-row > * {
-  flex: none;
-  width: 100%;
-}
-
-.region-paged ::v-deep .el-carousel__item {
-  align-items: start;
-}
-
-.region_item_right {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  width: 90%;
-  height: 28px;
-}
-
-.region_item_info {
-  display: flex;
-  justify-content: space-between;
-  font-size: 14px;
-}
-
-.region_item_line {
-  width: 100%;
-  height: 8px;
-  background: #0cd9b5;
-  border-radius: 4px 4px 4px 4px;
-}
-
-.regin_item_gropress {
-  width: 50%;
-  height: 8px;
-  background: #0098fa;
-  border-radius: 4px 4px 4px 4px;
-}
-
-.region-list {
-  display: flex;
-  flex-direction: column;
-  //gap: 10px;
-}
-
-.region-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 38px;
-  // margin-bottom: 10px;
-  // padding: 8px 10px;
-  // background: rgba(255, 255, 255, 0.04);
-  // border: 1px solid rgba(255, 255, 255, 0.08);
-  // border-radius: 6px;
-}
-
-.region-name {
-  display: flex;
-  justify-content: space-between;
-  width: 50%;
-  color: #fff;
-}
-
-.region-value {
-  color: #00d4ff;
-  font-weight: bold;
-}
-
-.pie-wrapper {
-  display: grid;
-  //grid-template-columns: 2fr 1fr;
-  //gap: 10px;
-  align-items: center;
-  height: 100%;
-}
-
-.pie-chart {
-  width: 100%;
-  height: 220px;
-}
-
-.pie-legend {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
-  padding: 8px 10px;
-}
-
-.legend-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #00d4ff, #5b8def);
-  margin-right: 6px;
-}
-
-.legend-name {
-  flex: 1;
-}
-
-.legend-value {
-  color: #00d4ff;
-  font-weight: bold;
-}
-
-.trend-title-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  //width: 100%;
-}
-
-.trend-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: #fff;
-}
-
-.trend-tabs {
-  display: flex;
-  gap: 8px;
-}
-
-.trend-tab {
-  padding: 6px 12px;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.05);
-  color: #fff;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.trend-tab.active {
-  border-color: rgba(0, 212, 255, 0.8);
-  color: #00d4ff;
-  box-shadow: 0 0 8px rgba(0, 212, 255, 0.25);
-}
-
-.trend-chart {
-  width: 100%;
-  height: 260px;
-}
-
-/* 大额支付两栏布局：右侧固定 165px，左侧剩余空间用于表格 */
-.large-payments {
-  display: flex;
-  height: 100%;
-  gap: 12px;
-}
-
-.large-payments .large-left {
-  flex: 1;
-  min-width: 0; /* allow table to truncate properly */
-}
-
-.large-payments .large-right {
-  width: 165px;
-  flex-shrink: 0;
-}
-
-/* 大额支付表格样式：透明背景、表头渐变、表头字体随深浅切换 */
-.large-payments ::v-deep .el-table {
-  &::before {
-    height: 0;
-  }
-
-  &, tr, .el-table__cell {
-    background: transparent !important;
-  }
-
-  .el-table__cell {
-    color: var(--color-title-dark, #fff);
-    border: none;
-  }
-
-  &.el-table--enable-row-hover .el-table__body tr:hover {
-    background-image: url('../img/line-hover.png') !important; // 或 transparent
-    background-size: 100% 100% !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
-  }
-
-  // 自定义滚动条样式
-  .el-table__body-wrapper {
-    &::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 3px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: rgba(0, 212, 255, 0.6);
-      border-radius: 3px;
-
-      &:hover {
-        background: rgba(0, 212, 255, 0.8);
-      }
-    }
-  }
-}
-
-.large-payments ::v-deep .el-table__header-wrapper {
-  background: linear-gradient(180deg, #1C3B68 0%, rgba(47, 61, 82, 0.0885) 100%);
-}
-
-.large-payments ::v-deep .el-table__header-wrapper th {
-  background: transparent;
-  color: var(--color-title-dark, #fff);
-}
-
-.is-light-mode .large-payments ::v-deep .el-table__header-wrapper th,
-:deep(.card-panel.is-light) .large-payments ::v-deep .el-table__header-wrapper th {
-  color: var(--color-title-light, #181818) !important;
-}
-
-.large-payments ::v-deep .el-table__body,
-.large-payments ::v-deep .el-table__row {
-  background: transparent;
-}
-
-.top-line-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  gap: 12px;
-  height: 100%;
-}
-
-.line-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.line-card-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #fff;
-}
-
-.line-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #00d4ff;
-}
-
-.sparkline {
-  flex: 1;
-  width: 100%;
-  height: 70px;
-}
-
-.donut-wrapper {
-  display: grid;
-  //grid-template-columns: 2fr 1fr;
-  //gap: 12px;
-  align-items: center;
-  height: 100%;
-}
-
-.donut-chart {
-  width: 100%;
-  height: 240px;
-}
-
-.donut-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  align-items: stretch;
-}
-
-.donut-radios {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.donut-radio {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.donut-radio .radio-slab {
-  width: 32px;
-  height: 10px;
-  background: rgba(255, 255, 255, 0.25);
-  clip-path: polygon(0 0, 90% 0, 100% 100%, 10% 100%);
-}
-
-.donut-radio.active .radio-slab {
-  background: #00d4ff;
-}
-
-.donut-radio .radio-label {
-  color: #fff;
-  font-size: 14px;
-}
-
 .core-top {
   position: relative;
   display: flex;
@@ -1325,24 +502,46 @@ export default {
   }
 }
 
-.accent-select {
-  ::v-deep .el-input__inner {
-    background: linear-gradient(
-        135deg,
-        rgba(0, 212, 255, 0.25),
-        rgba(91, 141, 239, 0.25)
-    );
-    border-color: rgba(0, 212, 255, 0.5);
-    color: #fff;
-  }
+.pie-wrapper, .donut-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
 
-  ::v-deep .el-input__suffix {
-    color: #fff;
+.trend-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+
+  .is-light-mode & {
+    color: var(--color-title-light, #181818) !important;
   }
 }
 
-/* 强制深色模式下 ring-label 使用深色变量，覆盖其它样式 */
-::v-deep .card-panel.is-dark .ring-label {
-  color: var(--color-label2-dark, #c3e2ff) !important;
+.trend-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.trend-tab {
+  padding: 6px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &.active {
+    border-color: rgba(0, 212, 255, 0.8);
+    color: #00d4ff;
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.25);
+  }
+}
+
+/* 覆盖 DashboardContent 中的单选按钮颜色 */
+:deep(.period-switch input[type="radio"]) {
+  accent-color: #29F1FA;
 }
 </style>

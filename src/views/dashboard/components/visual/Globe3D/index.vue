@@ -22,8 +22,8 @@
 </template>
 
 <script>
-import { World } from './earth-3d'
-import { overviewData as overview } from '../data/mock.js'
+import { World } from './engine'
+import { getOverviewData } from '@/api/dashboard'
 
 export default {
   name: 'Globe3D',
@@ -31,21 +31,38 @@ export default {
     return {
       world: null,
       // 当 accounts 和 balance 都为空时是否渲染该国家
-      renderEmptyCountry: false
+      renderEmptyCountry: false,
+      globeCountryData: {}
     }
   },
   mounted() {
-    this.$nextTick(() => {
-      const dom = this.$refs.earthCanvas
-      if (!dom) {
-        return
+    this.fetchData()
+  },
+  methods: {
+    async fetchData() {
+      try {
+        const res = await getOverviewData()
+        if (res.code === 200) {
+          this.globeCountryData = res.data.globeCountryData
+          this.initWorld()
+        }
+      } catch (error) {
+        console.error('Failed to fetch globe data:', error)
       }
-      this.world = new World({ 
-        dom, 
-        globeCountryData: overview.globeCountryData,
-        renderEmptyCountry: this.renderEmptyCountry
+    },
+    initWorld() {
+      this.$nextTick(() => {
+        const dom = this.$refs.earthCanvas
+        if (!dom) {
+          return
+        }
+        this.world = new World({ 
+          dom, 
+          globeCountryData: this.globeCountryData,
+          renderEmptyCountry: this.renderEmptyCountry
+        })
       })
-    })
+    }
   },
   beforeDestroy() {
     if (this.world && this.world.earth && typeof this.world.earth.dispose === 'function') {

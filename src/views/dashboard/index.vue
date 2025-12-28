@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import DashboardHeader from './components/DashboardHeader.vue'
+import DashboardHeader from './components/layout/DashboardHeader.vue'
 import OverView from './modules/OverView.vue'
 import Module2 from './modules/Module2.vue'
 import Module3 from './modules/Module3.vue'

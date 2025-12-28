@@ -39,6 +39,8 @@ export default {
   data() {
     return {
       chart: null,
+      _themePoll: null,
+      _lastTheme: null
     }
   },
   mounted() {
@@ -65,6 +67,11 @@ export default {
       },
       deep: true,
     },
+    '$store.getters.isDarkMode': {
+      handler() {
+        this.updateChart()
+      }
+    }
   },
   methods: {
     initChart() {
@@ -83,6 +90,17 @@ export default {
     },
     resizeHandler() {
       if (this.chart && this.chart.resize) this.chart.resize()
+    },
+    getThemeColors() {
+      try {
+        const isLight = !this.$store.getters.isDarkMode
+        const rootStyle = getComputedStyle(document.documentElement)
+        const labelLight = rootStyle.getPropertyValue('--color-label-light').trim() || '#666666'
+        const titleDark = rootStyle.getPropertyValue('--color-title-dark').trim() || '#FFFFFF'
+        return isLight ? labelLight : titleDark
+      } catch (e) {
+        return '#FFFFFF'
+      }
     },
     updateChart() {
       if (!this.chart) return
@@ -124,7 +142,7 @@ export default {
           top: 'middle',
           formatter: legendFormatter,
           textStyle: {
-            color: '#FFFFFF',
+            color: this.getThemeColors(),
           },
           height: 180,
           pageButtonItemGap: 5,
@@ -133,7 +151,7 @@ export default {
           pageIconInactiveColor: '#666',
           pageIconSize: 12,
           pageTextStyle: {
-            color: '#9E9E9E',
+            color: this.getThemeColors(),
             fontSize: 12,
           },
         },
@@ -147,7 +165,7 @@ export default {
             label: {
               show: true,
               formatter: '{b}: {d}%',
-              color: '#FFFFFF',
+              color: this.getThemeColors(),
             },
             labelLine: {
               length: 5,

@@ -4,7 +4,7 @@
       <div class="card-title-main">
         <slot name="title">{{ title }}</slot>
         <span class="currency-indicator">
-          <img src="@/views/dashboard/img/warning-currency.png" alt="" class="currency-icon" />
+          <img src="../../img/warning-currency.png" alt="" class="currency-icon" />
           <span class="currency-text">{{ currencyText }}</span>
         </span>
       </div>
@@ -276,6 +276,10 @@ export default {
   font-weight: 700;
 }
 
+.card-panel.is-long.is-light ::v-deep .title-tabs-wrapper .text-toggle .text-btn.selected {
+  color: #096DD9;
+}
+
 /* 被选中文字按钮下方的平行四边形指示条（仅长条模式） */
 .card-panel.is-long ::v-deep .title-tabs-wrapper .text-toggle .text-btn.selected::after {
   content: '';
@@ -287,6 +291,10 @@ export default {
   height: 5px;
   background: #29F1FA;
   border-radius: 1px;
+}
+
+.card-panel.is-long.is-light ::v-deep .title-tabs-wrapper .text-toggle .text-btn.selected::after {
+  background: #096DD9;
 }
 
 // 标题颜色使用 CSS 变量

@@ -117,8 +117,8 @@
 </template>
 
 <script>
-import CardPanel from './CardPanel.vue'
-import { formatNumber } from '../../../utils/utils.js'
+import CardPanel from '../panels/CardPanel.vue'
+import { formatNumber } from '../../../../utils/utils.js'
 
 export default {
   name: 'DashboardContent',
@@ -315,10 +315,9 @@ export default {
   &:nth-child(3) .data-number {
     color: #24D9B5;
   }
-  /* 浅色模式下统一为 #181818（全局 light 模式类或 card-panel.is-light 都会生效） */
-  .is-light-mode .dashboard-content .data-number,
-  :deep(.card-panel.is-light) .dashboard-content .data-number {
-    color: #181818 !important;
+  /* 浅色模式下统一使用变量 */
+  .is-light-mode & .data-number {
+    color: var(--color-title-light, #181818) !important;
   }
 }
 
@@ -344,9 +343,16 @@ export default {
 }
 
 /* 浅色模式下 data-label 使用 --color-label-light */
-.is-light-mode .dashboard-content .data-label,
-:deep(.card-panel.is-light) .dashboard-content .data-label {
+.is-light-mode .data-label {
   color: var(--color-label-light, #666666) !important;
+}
+
+/* 趋势标题颜色 */
+.trend-title {
+  color: #FFFFFF;
+  .is-light-mode & {
+    color: var(--color-title-light, #181818);
+  }
 }
 
 .center-top-content {

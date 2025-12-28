@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import DashboardContent from '../components/DashboardContent.vue'
+import DashboardContent from '../components/layout/DashboardContent.vue'
 
 export default {
   name: 'Module3',

@@ -67,9 +67,9 @@
 </template>
 
 <script>
-import headlineImg from '@/views/dashboard/img/headline.png'
-import fullScreenIcon from '@/views/dashboard/img/full-screen-icon.png'
-import fullScreenIconShrink from '@/views/dashboard/img/full-screen-icon-shrink.png'
+import headlineImg from '../../img/headline.png'
+import fullScreenIcon from '../../img/full-screen-icon.png'
+import fullScreenIconShrink from '../../img/full-screen-icon-shrink.png'
 
 export default {
   name: 'DashboardHeader',
@@ -235,7 +235,7 @@ export default {
   padding: 0 30px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
-  background-image: url("../img/headline.png");
+  background-image: url("../../img/headline.png");
   background-size: 1246px 100%;
   background-position: center center;
   background-repeat: no-repeat;
@@ -384,7 +384,7 @@ export default {
 
 .accent-select {
   ::v-deep .el-input__inner {
-    background: rgba(0,152,250,0.45);
+    background: #142765; // rgba(0, 152, 250, 0.45);
     border: 1px solid #0098FA;
     color: #BCDEFF;
     font-size: 14px;

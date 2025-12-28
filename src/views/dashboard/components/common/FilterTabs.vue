@@ -139,8 +139,12 @@ export default {
   flex-direction: column;
   align-items: center;
   cursor: pointer;
-  color: #fff;
+  color: #9EC7F0; // Default dark unselected
   font-size: 14px;
+
+  .is-light-mode & {
+    color: var(--color-label-light, #666666); // Light unselected
+  }
 }
 
 .core-slab {
@@ -157,14 +161,24 @@ export default {
   }
 
   .core-label {
-    color: #29F1FA;
+    color: #29F1FA; // Dark selected
+  }
+
+  .is-light-mode & {
+    .core-label {
+      color: #0098FA; // Light selected
+    }
   }
 }
 
-
 .core-label {
   font-size: 14px;
-  color: #9EC7F0;
+}
+
+.data-number {
+  .is-light-mode & {
+    color: var(--color-title-light, #181818);
+  }
 }
 
 
@@ -179,7 +193,7 @@ export default {
 
 
   ::v-deep .el-input__inner {
-    background: rgba(0, 152, 250, 0.45);
+    background: #142765; // rgba(0, 152, 250, 0.45);
     border: 1px solid #0098FA;
     color: #BCDEFF;
     font-size: 14px;

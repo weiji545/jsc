@@ -11,6 +11,8 @@
 <script>
 import * as echarts from "echarts";
 import chinaJson from "./china.json";
+import { getChinaMapData } from "@/api/dashboard";
+
 export default {
   name: "ChinaMap",
   data() {
@@ -24,30 +26,34 @@ export default {
       highlightTimer: null,
       outId: null,
       geojsonData: null,
+      mapData: [],
     };
   },
   mounted() {
-    this.initMaps();
+    this.fetchData();
   },
   beforeDestroy() {
-    console.log(123);
-
     window.removeEventListener("resize", this.handleResize);
+    if (this.highlightTimer) clearInterval(this.highlightTimer);
+    if (this.outId) clearTimeout(this.outId);
   },
   methods: {
+    async fetchData() {
+      try {
+        const res = await getChinaMapData();
+        if (res.code === 200) {
+          this.mapData = res.data;
+          this.initMaps();
+        }
+      } catch (error) {
+        console.error("Failed to fetch China map data:", error);
+      }
+    },
     async initMaps() {
-      // 加载地理数据
-      //   this.geojsonData = chinadata
-      // const res = await fetch(
-      //   "./china.geojson"
-      // );
-      // const chinaJson = await res.json();
-      // console.log(chinaJson);
-
       // 注册地图数据
       echarts.registerMap("china", chinaJson);
 
-      // 获取所有省份名称
+      // 如果 API 返回的数据不全，补全其它省份（赋予 0 值）
       const allProvinces = [];
       chinaJson.features.forEach((feature) => {
         if (feature.properties && feature.properties.name) {
@@ -55,20 +61,13 @@ export default {
         }
       });
 
-      // 创建数据
-      const dataValues = [20000000, 80000000, 250000000, 340000000];
-      let dataIndex = 0;
-      const allData = allProvinces.map((provinceName) => {
-        if (dataIndex > dataValues.length - 1) {
-          dataIndex = 0;
-        }
-        return {
-          name: provinceName,
-          value: dataValues[dataIndex++],
-        };
+      const fullData = allProvinces.map(name => {
+        const item = this.mapData.find(d => d.name === name);
+        return item || { name, value: 0 };
       });
-      console.log(allData);
-      this.highlightProvinces = allData
+
+      this.highlightProvinces = fullData
+        .filter(d => d.value > 0)
         .sort((a, b) => b.value - a.value)
         .slice(0, 3)
         .map((item) => item.name);
@@ -279,7 +278,7 @@ export default {
                 shadowBlur: 10,
               },
             },
-            data: allData,
+            data: fullData,
           },
         ],
       };

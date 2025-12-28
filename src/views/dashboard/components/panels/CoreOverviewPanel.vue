@@ -2,16 +2,18 @@
   <div class="core-panel">
     <Globe3D v-if="scope === 'global'" />
     <ChinaMap v-else-if="scope === 'domestic'"/>
+    <WorldMap v-else-if="scope === 'overseas'"/>
   </div>
 </template>
 
 <script>
-import Globe3D from './Globe3D.vue'
-import ChinaMap from '../components/chinamap/ChinaMap.vue'
+import Globe3D from '../visual/Globe3D'
+import ChinaMap from '../visual/ChinaMap'
+import WorldMap from '../visual/WorldMap'
 
 export default {
   name: 'CoreOverviewPanel',
-  components: { Globe3D, ChinaMap },
+  components: { Globe3D, ChinaMap, WorldMap },
   props: {
     scope: {
       type: String,
