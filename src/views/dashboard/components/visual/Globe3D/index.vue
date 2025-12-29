@@ -29,10 +29,8 @@ export default {
   name: 'Globe3D',
   data() {
     return {
-      world: null,
-      // 当 accounts 和 balance 都为空时是否渲染该国家
       renderEmptyCountry: false,
-      globeCountryData: {}
+      globeCountryData: {},
     }
   },
   mounted() {
@@ -56,19 +54,19 @@ export default {
         if (!dom) {
           return
         }
-        this.world = new World({ 
-          dom, 
+        this.world = new World({
+          dom,
           globeCountryData: this.globeCountryData,
-          renderEmptyCountry: this.renderEmptyCountry
+          renderEmptyCountry: this.renderEmptyCountry,
         })
       })
-    }
+    },
   },
   beforeDestroy() {
     if (this.world && this.world.earth && typeof this.world.earth.dispose === 'function') {
       this.world.earth.dispose()
     }
-  }
+  },
 }
 </script>
 
@@ -171,36 +169,47 @@ export default {
 .sk-chase-dot:nth-child(1) {
   animation-delay: -1.1s;
 }
+
 .sk-chase-dot:nth-child(2) {
   animation-delay: -1s;
 }
+
 .sk-chase-dot:nth-child(3) {
   animation-delay: -0.9s;
 }
+
 .sk-chase-dot:nth-child(4) {
   animation-delay: -0.8s;
 }
+
 .sk-chase-dot:nth-child(5) {
   animation-delay: -0.7s;
 }
+
 .sk-chase-dot:nth-child(6) {
   animation-delay: -0.6s;
 }
+
 .sk-chase-dot:nth-child(1)::before {
   animation-delay: -1.1s;
 }
+
 .sk-chase-dot:nth-child(2)::before {
   animation-delay: -1s;
 }
+
 .sk-chase-dot:nth-child(3)::before {
   animation-delay: -0.9s;
 }
+
 .sk-chase-dot:nth-child(4)::before {
   animation-delay: -0.8s;
 }
+
 .sk-chase-dot:nth-child(5)::before {
   animation-delay: -0.7s;
 }
+
 .sk-chase-dot:nth-child(6)::before {
   animation-delay: -0.6s;
 }

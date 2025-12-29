@@ -19,28 +19,28 @@ export default {
   props: {
     items: {
       type: Array,
-      default: () => []
+      default: () => [],
     },
     perPage: {
       type: Number,
-      default: 4
+      default: 4,
     },
     autoplay: {
       type: Boolean,
-      default: false
+      default: false,
     },
     interval: {
       type: Number,
-      default: 5000
+      default: 3000,
     },
     loop: {
       type: Boolean,
-      default: true
+      default: true,
     },
     height: {
       type: String,
-      default: '147px'
-    }
+      default: '147px',
+    },
   },
   computed: {
     slides() {
@@ -50,8 +50,8 @@ export default {
         res.push(this.items.slice(i, i + this.perPage))
       }
       return res
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -78,33 +78,39 @@ export default {
   align-items: center;
   justify-content: start;
 }
+
 /* 将指示器小横线改为小圆点 */
 .paged-carousel ::v-deep .el-carousel__indicator button {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.5);
+  background: rgba(255, 255, 255, 0.5);
   margin: 0 6px;
   border: none;
   padding: 0;
 }
+
 .paged-carousel ::v-deep .el-carousel__indicator .is-active {
   background: #00d4ff;
 }
+
 .paged-carousel {
   width: 100%;
   display: block;
   box-sizing: border-box;
 }
+
 .paged-carousel ::v-deep .el-carousel__item {
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
 .slide-row {
   justify-content: start;
   width: 100%;
 }
+
 .slide-row > * {
   flex: 1;
   min-width: 0;

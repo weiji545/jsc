@@ -62,7 +62,7 @@ export default class World {
       textures: this.resources.textures,
       earth: {
         radius: 50,
-        rotateSpeed: 0.008,
+        rotateSpeed: 0.003, // 自转速度
         isRotation: true
       },
       satellite: {
@@ -99,23 +99,57 @@ export default class World {
   }
 
   setupMouseEvents() {
-    const handleMouseMove = event => {
+    this._handleMouseMove = event => {
       this.earth.handleMouseMove(event, this.camera)
     }
 
-    const handleMouseLeave = () => {
+    this._handleMouseLeave = () => {
       this.earth.handleMouseLeave()
     }
 
-    this.option.dom.addEventListener('mousemove', handleMouseMove)
-    this.option.dom.addEventListener('mouseleave', handleMouseLeave)
+    this.option.dom.addEventListener('mousemove', this._handleMouseMove)
+    this.option.dom.addEventListener('mouseleave', this._handleMouseLeave)
   }
 
   render() {
-    requestAnimationFrame(this.render.bind(this))
+    if (this.isDestroyed) return
+    this.animationFrameId = requestAnimationFrame(this.render.bind(this))
     this.renderer.render(this.scene, this.camera)
     this.controls && this.controls.update()
     this.earth && this.earth.render()
+  }
+
+  dispose() {
+    this.isDestroyed = true
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId)
+    }
+
+    // Dispose Earth
+    if (this.earth) {
+      this.earth.dispose()
+    }
+
+    // Dispose Basic (renderer, controls) - Assuming Basic has dispose or we do it manually
+    if (this.renderer) {
+      this.renderer.dispose()
+      if (this.option.dom && this.renderer.domElement) {
+        // checks if domElement is child of option.dom or just handle removal?
+        // Usually renderer.dispose() is enough for WebGL context, but we might want to remove the canvas
+        // The canvas is appended by renderer? Check Basic.js.
+      }
+    }
+
+    // Remove listeners
+    if (this.option.dom) {
+      // Cloning listeners removal logic if named functions were kept,
+      // but they were defined inside setupMouseEvents as closures.
+      // We need to store them to remove them.
+      // Or just cloning the node to clear listeners (a bit aggressive).
+      // Better: Store the listener functions.
+      if (this._handleMouseMove) this.option.dom.removeEventListener('mousemove', this._handleMouseMove)
+      if (this._handleMouseLeave) this.option.dom.removeEventListener('mouseleave', this._handleMouseLeave)
+    }
   }
 }
 

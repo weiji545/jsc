@@ -44,7 +44,7 @@
                   {{ (item.percent >= 0 ? '+' : '') + item.percent }}%
                 </div>
               </div>
-              
+
               <EChartRingBar
                 v-if="variant === 'ring'"
                 :percent="item.percent"
@@ -69,7 +69,9 @@
             <div class="ring-value" :style="{ color: textColor }">
               {{ formatCellValue(item) }}
             </div>
-            <div class="ring-label">{{ item.label }}</div>
+            <el-tooltip class="item" effect="dark" :content="item.label" placement="top">
+              <div class="ring-label">{{ item.label }}</div>
+            </el-tooltip>
           </div>
         </template>
       </PagedCarousel>
@@ -95,16 +97,16 @@ export default {
     carouselItems: Array,
     variant: {
       type: String, // 'ring' or 'sparkline'
-      default: 'ring'
+      default: 'ring',
     },
     decimals: {
       type: Number,
-      default: 0
+      default: 0,
     },
     textColor: {
       type: String,
-      default: '#fff'
-    }
+      default: '#fff',
+    },
   },
   methods: {
     formatNumber,
@@ -115,8 +117,8 @@ export default {
         const sum = (item.data || []).reduce((a, b) => a + b, 0)
         return formatNumber(sum, 2)
       }
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -197,9 +199,14 @@ export default {
   display: grid;
   place-items: center;
   position: relative;
-  
-  &.negative { filter: drop-shadow(0 0 6px rgba(255, 95, 95, 0.35)); }
-  &:not(.negative) { filter: drop-shadow(0 0 6px rgba(0, 212, 255, 0.35)); }
+
+  &.negative {
+    filter: drop-shadow(0 0 6px rgba(255, 95, 95, 0.35));
+  }
+
+  &:not(.negative) {
+    filter: drop-shadow(0 0 6px rgba(0, 212, 255, 0.35));
+  }
 }
 
 .ring-percent {
@@ -240,7 +247,14 @@ export default {
   text-align: left;
   z-index: 20;
 
-  .trend-label { font-size: 12px; }
-  .trend-value { font-size: 12px; font-weight: 600; margin-top: 5px; }
+  .trend-label {
+    font-size: 12px;
+  }
+
+  .trend-value {
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 5px;
+  }
 }
 </style>

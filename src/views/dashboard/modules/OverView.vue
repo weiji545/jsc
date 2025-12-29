@@ -5,7 +5,7 @@
     :centerBottomMode.sync="centerBottomMode"
     :centerPeriod.sync="centerPeriodSync"
   >
-    <!-- 左上：账户数量统计 -->
+    <!-- 左上 账户数量统计 -->
     <template #left-top>
       <OverviewMetricPanel
         :domestic-value="overview.accountsSummary.domestic"
@@ -19,18 +19,19 @@
       />
     </template>
 
-    <!-- 左中：账户区域统计（列表展示） -->
+    <!-- 左中 账户区域统计（列表展示） -->
     <template #left-middle>
       <RegionRankList
         :data="convertedRegionPie"
         :order-by-asc.sync="leftTopOrderByAsc"
+        @change-order="handleRegionSortChange"
       />
     </template>
 
-    <!-- 左下：账户币种统计 饼图 + legends -->
+    <!-- 左下 账户币种统计 饼图 + legends -->
     <template #left-bottom>
       <div class="pie-wrapper">
-        <!-- 左侧：饼图（使用 EChartDonut 但将 radius 设置为 0% 以呈现普通饼图） -->
+        <!-- 左侧 饼图（使用 EChartDonut 但将 radius 设置为 0% 以呈现普通饼图） -->
         <EChartPieRing
           :data="convertedCurrencyPie"
           variant="pie"
@@ -40,7 +41,7 @@
       </div>
     </template>
 
-    <!-- 中间上方：核心区域（地球 / 地图） + 通用选项卡 -->
+    <!-- 中间上方 核心区域（地球 / 地图） + 通用选项卡 -->
     <template #center-top>
       <div class="core-top">
 
@@ -52,11 +53,12 @@
           :time-options="balanceTimeOptions"
           @change-scope="changeBalanceScope"
           @change-time="(val) => (balanceTime = val)"
+          @change-custom-time="handleCustomTimeChange"
         />
       </div>
     </template>
 
-    <!-- 中间下方：余额变动趋势分析 -->
+    <!-- 中间下方 余额变动趋势分析 -->
     <template #center-bottom-title>
       <div class="trend-title-bar">
         <div class="trend-title">余额变动趋势分析</div>
@@ -81,10 +83,13 @@
         :bar-data="convertedTrendBar"
         :line-data="trendData[trendTab].line"
         :table-data="largePayments"
+        :unit="panelsConfigComputed.center.unit"
+        line-unit="笔"
+        @sort-change="handleTrendSortChange"
       />
     </template>
 
-    <!-- 右上：资金金额统计 ，下方使用 EChartSparkline -->
+    <!-- 右上 资金金额统计 ，下方使用 EChartSparkline -->
     <template #right-top>
       <OverviewMetricPanel
         :domestic-value="overview.transactionAmount.domestic || overview.accountsSummary.domestic"
@@ -99,6 +104,7 @@
       />
     </template>
 
+<!--    右中 存款金额统计-->
     <template #right-middle>
       <RightMiddleChart
         :scope="previousBalanceScope"
@@ -113,7 +119,7 @@
       />
     </template>
 
-    <!-- 右下：环形图 + legends -->
+    <!-- 右下 环形图 + legends -->
     <template #right-bottom>
       <div class="donut-wrapper">
         <EChartPieRing
@@ -146,7 +152,7 @@ import {
   getBaseDataList,
   getRegionList,
   getExchangeRates,
-  getTrendData
+  getTrendData,
 } from '@/api/dashboard'
 import { formatNumber } from '../../../utils/utils.js'
 
@@ -165,10 +171,16 @@ export default {
     RegionRankList: RankingStats,
     OverviewMetricPanel,
     TrendAnalysis,
-    RightMiddleChart
+    RightMiddleChart,
   },
   data() {
     return {
+      // ========== 时间范围 ==========
+      customTimeRange: {
+        startBsnDate: '',
+        endBsnDate: '',
+      },
+
       // ========== 图片资源 ==========
       ranking1: null,
       ranking2: null,
@@ -184,14 +196,14 @@ export default {
         currencyPie: [],
         rightTopLines: [],
         rightMiddle: { categories: [], bar: [], line: [] },
-        balanceRing: []
+        balanceRing: [],
       },
       regionList: [],
       exchangeRates: [],
       trendData: {
         trade: { categories: [], bar: [], line: [] },
         large: { categories: [], bar: [], line: [] },
-        cash: { categories: [], bar: [], line: [] }
+        cash: { categories: [], bar: [], line: [] },
       },
 
       // ========== 面板配置 ==========
@@ -219,8 +231,9 @@ export default {
       previousBalanceScope: 'domestic',
       balanceTime: ['day', '7'],
       trendTab: 'large',
-      centerBottomMode: 'a',
-      leftTopOrderByAsc: true,
+      centerBottomMode: 'b',
+      trendSort: { prop: '', order: '' },
+      leftTopOrderByAsc: false,
 
       // ========== 选项配置 ==========
       balanceScopes: [
@@ -233,18 +246,17 @@ export default {
           value: 'day',
           label: '按天',
           children: [
-            { value: '7', label: '近七天' },
-            { value: '77', label: '近一周' },
-            { value: '111', label: '自定义天' },
+            { value: '7', label: '近7天' },
+            { value: 'customizedDay', label: '自定义天' },
           ],
         },
         {
           value: 'month',
           label: '按月',
           children: [
-            { value: '31', label: '近一月' },
-            { value: '365', label: '近一年' },
-            { value: '222', label: '自定义月' },
+            { value: 'month', label: '近一月' },
+            { value: 'year', label: '近一年' },
+            { value: 'customizedMonth', label: '自定义月' },
           ],
         },
       ],
@@ -296,7 +308,7 @@ export default {
         return it
       })
     },
-    // 账户币种统计：固定数据（可在未来改为从后端或 mock 中读取）
+    // 账户币种统计 固定数据（可在未来改为从后端或 mock 中读取）
     convertedCurrencyPie() {
       const list = (this.overview && this.overview.currencyPie) || []
       // 保持与其它 computed 的风格，返回新对象数组
@@ -328,8 +340,8 @@ export default {
         this.$store.getters['currency/convert']
           ? this.$store.getters['currency/convert']
           : (v) => v
-      // 返回新的对象数组并按金额降序排序
-      return rawList.map((it) => Object.assign({}, it, { value: convert(it.value) })).sort((a, b) => b.value - a.value)
+      // 返回新的对象数组，不再强制按金额排序，以尊重接口返回的顺序（如按金额排序）
+      return rawList.map((it) => Object.assign({}, it, { value: convert(it.value) }))
     },
     // trend / rightMid 的金额需要基于当前货币转换
     convertedRightMidBar() {
@@ -371,6 +383,15 @@ export default {
     },
     // 用于大额支付表格的示例数据（从 mock trendData.large 映射生成）
     largePayments() {
+      // 优先使用后端返回的具体列表 list，如果没有则回退并生成
+      const list = (this.trendData && this.trendData.large && this.trendData.large.list)
+      if (list && list.length) {
+        return list.map((it, idx) => ({
+          ...it,
+          index: idx + 1,
+        }))
+      }
+
       const raw = (this.trendData && this.trendData.large && this.trendData.large.bar) || []
       return raw.map((v, idx) => ({
         index: idx + 1,
@@ -406,12 +427,13 @@ export default {
         return '#fff'
       }
     },
-    // 根据当前 balanceScope 动态调整 panelsConfig：境外模式下将右侧中间标题改为“汇率统计”
+    // 根据当前 balanceScope 动态调整 panelsConfig 境外模式下将右侧中间标题改为“汇率统计”
     panelsConfigComputed() {
       try {
         const cfg = JSON.parse(JSON.stringify(this.panelsConfig || {}))
         if (cfg && cfg.right && cfg.right[1]) {
           cfg.right[1].title = this.previousBalanceScope === 'overseas' ? '汇率统计' : cfg.right[1].title
+          cfg.right[1].unit = this.previousBalanceScope === 'overseas' ? '元' : cfg.right[1].unit
         }
         return cfg
       } catch (e) {
@@ -430,11 +452,11 @@ export default {
         } else if (val === 'month') {
           this.balanceTime = ['month', '31']
         }
-      }
-    }
+      },
+    },
   },
   mounted() {
-    this.fetchData();
+    this.fetchData()
     // 通用图表组件会自行初始化并响应数据变化
     window.addEventListener('resize', this.handleResize)
   },
@@ -447,18 +469,18 @@ export default {
         const [overviewRes, baseRes, regionRes, exchangeRes, trendRes] = await Promise.all([
           getOverviewData(),
           getBaseDataList(),
-          getRegionList(),
+          getRegionList(this.leftTopOrderByAsc),
           getExchangeRates(),
-          getTrendData()
-        ]);
+          getTrendData(this.trendSort),
+        ])
 
-        if (overviewRes.code === 200) this.overview = overviewRes.data;
-        if (baseRes.code === 200) this.baseDataList = baseRes.data;
-        if (regionRes.code === 200) this.regionList = regionRes.data;
-        if (exchangeRes.code === 200) this.exchangeRates = exchangeRes.data;
-        if (trendRes.code === 200) this.trendData = trendRes.data;
+        if (overviewRes.code === 200) this.overview = overviewRes.data
+        if (baseRes.code === 200) this.baseDataList = baseRes.data
+        if (regionRes.code === 200) this.regionList = regionRes.data
+        if (exchangeRes.code === 200) this.exchangeRates = exchangeRes.data
+        if (trendRes.code === 200) this.trendData = trendRes.data
       } catch (error) {
-        console.error('Failed to fetch overview data:', error);
+        console.error('Failed to fetch overview data:', error)
       }
     },
     formatNumber,
@@ -469,10 +491,41 @@ export default {
       }
       this.balanceScope = val
     },
-    handleScaleChanged() {
-      this.$nextTick(() => {
-        window.dispatchEvent(new Event('resize'))
-      })
+    handleCustomTimeChange(payload) {
+      this.customTimeRange = payload
+      console.log('Parent received custom time:', payload)
+      // TODO: 根据 customTimeRange 重新获取数据
+      // this.fetchData()
+    },
+    changeTrendTab(val) {
+      this.trendTab = val
+      this.centerBottomMode = val === 'large' ? 'b' : 'a'
+    },
+    async handleTrendSortChange({ prop, order }) {
+      // payer ascending
+      // payer descending
+      // payee ascending
+      // amount ascending
+      // date ascending
+      this.trendSort = { prop, order }
+      try {
+        const res = await getTrendData(this.trendSort)
+        if (res.code === 200) {
+          this.trendData = res.data
+        }
+      } catch (e) {
+        console.error('Failed to sort trend data:', e)
+      }
+    },
+    async handleRegionSortChange(val) {
+      try {
+        const res = await getRegionList(val)
+        if (res.code === 200) {
+          this.regionList = res.data
+        }
+      } catch (e) {
+        console.error('Failed to fetch sorted region list:', e)
+      }
     },
   },
 }

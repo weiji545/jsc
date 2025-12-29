@@ -10,24 +10,24 @@ export default {
   props: {
     percent: {
       type: Number,
-      default: null
+      default: null,
     },
     size: {
       type: Number,
-      default: 240
+      default: 240,
     },
     height: {
       type: Number,
-      default: 240
+      default: 240,
     },
     options: {
       type: Object,
-      default: () => ({})
-    }
+      default: () => ({}),
+    },
   },
   data() {
     return {
-      chart: null
+      chart: null,
     }
   },
   mounted() {
@@ -46,8 +46,8 @@ export default {
       handler() {
         this.updateChart()
       },
-      deep: true
-    }
+      deep: true,
+    },
   },
   methods: {
     initChart() {
@@ -80,7 +80,7 @@ export default {
           max: 100,
           startAngle: 90,
           show: false,
-          clockwise: this.percent > 0
+          clockwise: this.percent > 0,
         },
         radiusAxis: { type: 'category', show: false },
         polar: { center: ['50%', '50%'], radius: ['67%', '83%'] },
@@ -97,10 +97,10 @@ export default {
             silent: true,
             hoverAnimation: false,
             itemStyle: {
-              color: this.percent < 0 ? '#D92424' : '#24D9B5'
-            }
-          }
-        ]
+              color: this.percent < 0 ? '#D92424' : '#24D9B5',
+            },
+          },
+        ],
       }
       const option = Object.assign({}, defaultOption, this.options || {})
       try {
@@ -108,8 +108,8 @@ export default {
       } catch (e) {
         console.warn('EChartRingBar setOption failed', e)
       }
-    }
-  }
+    },
+  },
 }
 </script>
 

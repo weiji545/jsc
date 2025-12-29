@@ -20,7 +20,7 @@ import {
   Vector2,
   Vector3
 } from 'three'
-import html2canvas from 'html2canvas'
+import { CanvasTexture } from 'three'
 import gsap from 'gsap'
 
 import { earthVertex, earthFragment } from '../shaders/earth'
@@ -358,81 +358,93 @@ export default class Earth {
     }))
   }
 
+  createTextCanvas(text) {
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+    const scale = 2.5
+    const fontSize = 36 * scale
+    const paddingX = 24 * scale
+    const paddingY = 12 * scale
+    const borderTop = 3 * scale// thickness
+
+    // Initial font setting to measure text
+    ctx.font = `600 ${fontSize}px "Microsoft YaHei", sans-serif`
+    const metrics = ctx.measureText(text)
+    const textWidth = Math.ceil(metrics.width)
+
+    // Calculate canvas size
+    const width = textWidth + paddingX * 2
+    const height = Math.ceil(fontSize * 1.2) + paddingY * 2 + borderTop
+
+    // Set canvas dimensions (clears context)
+    canvas.width = width
+    canvas.height = height
+
+    // Re-set context properties after resize
+    ctx.font = `600 ${fontSize}px "Microsoft YaHei", sans-serif`
+    ctx.textBaseline = 'middle'
+    ctx.textAlign = 'center'
+
+    // Draw Background
+    ctx.fillStyle = 'rgba(40, 108, 181, 0.5)'
+    ctx.fillRect(0, 0, width, height)
+
+    // Draw Top Border
+    ctx.fillStyle = '#0cd1eb'
+    ctx.fillRect(0, 0, width, borderTop)
+
+    // Draw Text
+    ctx.fillStyle = '#ffffff'
+    const x = width / 2
+    // Vertical center inside the content area (excluding top border mostly, but keeping visual balance)
+    const y = borderTop + paddingY + (fontSize * 1.2) / 2 * 0.9 // *0.9 for visual adjustment
+    ctx.fillText(text, x, y)
+
+    return canvas
+  }
+
   async createSpriteLabel() {
-    await Promise.all(this.options.data.map(async item => {
+    this.options.data.forEach(item => {
       let cityArry = []
       cityArry.push(item.startArray)
       cityArry = cityArry.concat(...item.endArray)
-      await Promise.all(cityArry.map(async e => {
+      cityArry.forEach(e => {
         // 检查是否应该渲染该区域的标签
         if (!this.shouldRenderRegion(e)) {
           return
         }
 
         const p = lon2xyz(this.options.earth.radius * 1.001, e.E, e.N)
-        // 使用更小的字体与紧凑内边距，避免高分辨率下文字溢出
-        const div = `<div class="fire-div" style="font-size:36px; padding:12px 24px; line-height:1;">${e.name}</div>`
-        const shareContent = document.getElementById('html2canvas')
-        if (!shareContent) return
-        shareContent.innerHTML = div
-        const dpi = window.devicePixelRatio || 1
-        const opts = {
-          backgroundColor: null,
-          // 以设备像素比生成高分辨率画布以保持清晰度
-          scale: dpi,
-          dpi: 96,
-          useCORS: true,
-          logging: false,
-          onclone: (clonedDoc) => {
-            // 为克隆文档中的所有 canvas 设置 willReadFrequently 属性
-            const canvases = clonedDoc.querySelectorAll('canvas')
-            canvases.forEach(canvas => {
-              try {
-                const ctx = canvas.getContext('2d')
-                if (ctx && ctx.canvas) {
-                  // 创建新的 canvas 并设置 willReadFrequently
-                  const newCanvas = clonedDoc.createElement('canvas')
-                  newCanvas.width = canvas.width
-                  newCanvas.height = canvas.height
-                  const newCtx = newCanvas.getContext('2d', { willReadFrequently: true })
-                  if (newCtx) {
-                    newCtx.drawImage(canvas, 0, 0)
-                    if (canvas.parentNode) {
-                      canvas.parentNode.replaceChild(newCanvas, canvas)
-                    }
-                  }
-                }
-              } catch (e) {
-                // 忽略错误，继续处理其他 canvas
-                console.warn('Failed to set willReadFrequently for canvas:', e)
-              }
-            })
-          }
-        }
-        const canvas = await html2canvas(shareContent, opts)
-        const dataURL = canvas.toDataURL('image/png')
-        const map = new TextureLoader().load(dataURL)
-        // 使用线性过滤改善缩放清晰度
-        try {
-          map.minFilter = LinearFilter
-          map.magFilter = LinearFilter
-        } catch (e) {}
+
+        const canvas = this.createTextCanvas(e.name)
+        const map = new CanvasTexture(canvas)
+
+        map.minFilter = LinearFilter
+        map.magFilter = LinearFilter
+
         const material = new SpriteMaterial({
           map,
           transparent: true
         })
         const sprite = new Sprite(material)
-        // 依据 canvas 的像素尺寸与设备像素比映射为世界单位，保证清晰且不过大
-        const pixelWidth = canvas.width / dpi
-        const pixelHeight = canvas.height / dpi
-        const pixelPerUnit = 12 // 每世界单位对应的像素（可调）
-        const worldWidth = Math.max(0.5, pixelWidth / pixelPerUnit)
-        const worldHeight = Math.max(0.5, pixelHeight / pixelPerUnit)
+
+        // Scale calculation to match world units
+        // Previous code: scale = (canvas.width / dpi) / 12
+        // We can simplify. Let's say 12 pixels = 1 unit.
+        // But since we are not using high-DPI scaling on the canvas manually (implied 1:1),
+        // we might need to adjust.
+        // Original code used 36px font.
+        // Let's stick to a similar ratio.
+
+        const pixelPerUnit = 24
+        const worldWidth = canvas.width / pixelPerUnit
+        const worldHeight = canvas.height / pixelPerUnit
+
         sprite.scale.set(worldWidth, worldHeight, 1)
         sprite.position.set(p.x * 1.1, p.y * 1.1, p.z * 1.1)
         this.earth.add(sprite)
-      }))
-    }))
+      })
+    })
   }
 
   createAnimateCircle() {
@@ -661,6 +673,18 @@ export default class Earth {
     this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
     this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1
 
+    // Throttle raycasting: only if we haven't done it recently or if we aren't already hovering
+    // But for smooth hovering effect, we might need it.
+    // Optimization: Check distance from center first?
+    // Optimization: Limit frequency
+
+    // Check if enough time passed since last check
+    const now = Date.now()
+    if (this._lastMouseMoveTime && (now - this._lastMouseMoveTime < 32)) { // ~30fps cap for raycasting
+       return
+    }
+    this._lastMouseMoveTime = now
+
     this.raycaster.setFromCamera(this.mouse, camera)
     const intersects = this.raycaster.intersectObject(this.earth)
 
@@ -850,6 +874,31 @@ export default class Earth {
     if (this.options.dom) {
       this.options.dom.style.background = '#010826'
     }
+
+    // Recursively dispose all objects in the group
+    if (this.group) {
+      this.group.traverse(obj => {
+        if (obj.geometry) {
+          obj.geometry.dispose()
+        }
+
+        if (obj.material) {
+          if (Array.isArray(obj.material)) {
+            obj.material.forEach(m => {
+              if (m.map) m.map.dispose()
+              m.dispose()
+            })
+          } else {
+            if (obj.material.map) obj.material.map.dispose()
+            obj.material.dispose()
+          }
+        }
+      })
+    }
+
+    this.waveMeshArr = []
+    this.circleList = []
+    this.circleLineList = []
   }
 }
 

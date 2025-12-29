@@ -33,7 +33,7 @@ import DashboardContent from '../components/layout/DashboardContent.vue'
 export default {
   name: 'Module2',
   components: {
-    DashboardContent
+    DashboardContent,
   },
   data() {
     return {
@@ -41,10 +41,10 @@ export default {
       dataList: [
         { label: '模块二', value: 1230000 },
         { label: '数据二', value: 4560000 },
-        { label: '统计二', value: 789000 }
-      ]
+        { label: '统计二', value: 789000 },
+      ],
     }
-  }
+  },
 }
 </script>
 

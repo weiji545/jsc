@@ -9,12 +9,12 @@
   </div>
 </template>
 <script>
-import * as echarts from "echarts";
-import chinaJson from "./china.json";
-import { getChinaMapData } from "@/api/dashboard";
+import * as echarts from 'echarts'
+import chinaJson from './china.json'
+import { getChinaMapData } from '@/api/dashboard'
 
 export default {
-  name: "ChinaMap",
+  name: 'ChinaMap',
   data() {
     return {
       shadowChart: null,
@@ -27,64 +27,100 @@ export default {
       outId: null,
       geojsonData: null,
       mapData: [],
-    };
+    }
   },
   mounted() {
-    this.fetchData();
+    this.fetchData()
   },
   beforeDestroy() {
-    window.removeEventListener("resize", this.handleResize);
-    if (this.highlightTimer) clearInterval(this.highlightTimer);
-    if (this.outId) clearTimeout(this.outId);
+    window.removeEventListener('resize', this.handleResize)
+    if (this.highlightTimer) clearInterval(this.highlightTimer)
+    if (this.outId) clearTimeout(this.outId)
+  },
+  watch: {
+    '$store.getters.isDarkMode': {
+      handler() {
+        this.updateThemeColors()
+      },
+    },
   },
   methods: {
+    getThemeTitleColor() {
+      try {
+        const isLight = !this.$store.getters.isDarkMode
+        const rootStyle = getComputedStyle(document.documentElement)
+        const titleLight = rootStyle.getPropertyValue('--color-title-light').trim() || '#181818'
+        const titleDark = rootStyle.getPropertyValue('--color-title-dark').trim() || '#FFFFFF'
+        return isLight ? titleLight : titleDark
+      } catch (e) {
+        return '#FFFFFF'
+      }
+    },
+    updateThemeColors() {
+      if (this.mainChart) {
+        this.mainChart.setOption({
+          visualMap: {
+            textStyle: {
+              color: this.getThemeTitleColor(),
+            },
+          },
+        })
+      }
+    },
     async fetchData() {
       try {
-        const res = await getChinaMapData();
+        const res = await getChinaMapData()
         if (res.code === 200) {
-          this.mapData = res.data;
-          this.initMaps();
+          this.mapData = res.data
+          this.initMaps()
         }
       } catch (error) {
-        console.error("Failed to fetch China map data:", error);
+        console.error('Failed to fetch China map data:', error)
       }
     },
     async initMaps() {
       // 注册地图数据
-      echarts.registerMap("china", chinaJson);
+      echarts.registerMap('china', chinaJson)
 
-      // 如果 API 返回的数据不全，补全其它省份（赋予 0 值）
-      const allProvinces = [];
+      // 获取所有省份名称以补全 0 值数据
+      const allProvinces = []
       chinaJson.features.forEach((feature) => {
         if (feature.properties && feature.properties.name) {
-          allProvinces.push(feature.properties.name);
+          allProvinces.push(feature.properties.name)
         }
-      });
+      })
 
-      const fullData = allProvinces.map(name => {
-        const item = this.mapData.find(d => d.name === name);
-        return item || { name, value: 0 };
-      });
+      // 将 API 数据与所有省份对齐，增加模糊匹配鲁棒性
+      const finalData = allProvinces.map(name => {
+        const item = (this.mapData || []).find(d => 
+          name === d.name || 
+          name.startsWith(d.name) || 
+          d.name.startsWith(name)
+        )
+        // 保持 name 为 GeoJSON 中的标准名称，合并业务数据
+        return item ? { ...item, name } : { name, value: 0 }
+      })
 
-      this.highlightProvinces = fullData
-        .filter(d => d.value > 0)
+      // 提取前三名作为轮播重点
+      this.highlightProvinces = finalData
+        .slice()
         .sort((a, b) => b.value - a.value)
         .slice(0, 3)
-        .map((item) => item.name);
+        .map(item => item.name);
 
       // ========== 初始化阴影地图 ==========
-      const shadowDom = document.getElementById("shadow-map");
-      this.shadowChart = echarts.init(shadowDom);
+      const shadowDom = document.getElementById('shadow-map')
+      this.shadowChart = echarts.init(shadowDom)
 
       const shadowOption = {
-        backgroundColor: "transparent",
+        backgroundColor: 'transparent',
         tooltip: {
           show: false, // 阴影层不显示tooltip
         },
         series: [
           {
-            type: "map",
-            map: "china",
+            type: 'map',
+            map: 'china',
             roam: false, // 不允许缩放和平移
             silent: true, // 不响应任何事件
             zoom: 1.5,
@@ -93,10 +129,10 @@ export default {
               show: false, // 不显示标签
             },
             itemStyle: {
-              areaColor: "rgba(11, 79, 157, 0.6)", // 深色阴影
-              borderColor: "rgba(0, 0, 0, 0.8)",
+              areaColor: 'rgba(11, 79, 157, 0.6)', // 深色阴影
+              borderColor: 'rgba(0, 0, 0, 0.8)',
               borderWidth: 1,
-              shadowColor: "rgba(0, 0, 0, 0.8)",
+              shadowColor: 'rgba(0, 0, 0, 0.8)',
               shadowBlur: 10,
               shadowOffsetX: 5,
               shadowOffsetY: 5,
@@ -119,115 +155,124 @@ export default {
         grid: { show: false },
         xAxis: { show: false },
         yAxis: { show: false },
-      };
+      }
 
-      this.shadowChart.setOption(shadowOption);
+      this.shadowChart.setOption(shadowOption)
 
       // ========== 初始化主地图 ==========
-      const mainDom = document.getElementById("main-map");
-      console.log(mainDom.clientHeight, shadowDom.clientHeight);
+      const mainDom = document.getElementById('main-map')
+      console.log(mainDom.clientHeight, shadowDom.clientHeight)
 
-      this.mainChart = echarts.init(mainDom);
+      this.mainChart = echarts.init(mainDom)
       const mainOption = {
-        backgroundColor: "transparent",
+        backgroundColor: 'transparent',
         tooltip: {
-          trigger: "item",
+          show: true,
+          trigger: 'item',
+          alwaysShowContent: true, // 确保轮播时内容不消失
           formatter: (params) => {
-            if (params.value) {
-              return `
+            // 尝试获取业务数据
+            const businessData = params.data || {}
+            const val = businessData.value !== undefined ? businessData.value : (params.value || 0)
+            const count = businessData.count || 0
+            return `
+              <div style="
+                padding: 16px;
+                background: rgba(10, 25, 41, 0.95);
+                backdrop-filter: blur(10px);
+                border-radius: 12px;
+                border: 1px solid rgba(0, 212, 255, 0.4);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+                min-width: 200px;
+                color: #fff;
+                font-family: inherit;
+              ">
                 <div style="
-                  padding: 12px;
-                  background: rgba(255, 255, 255, 0.95);
-                  border-radius: 6px;
-                  border: 1px solid #e6e6e6;
-                  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-                  min-width: 180px;
+                  margin-bottom: 12px;
+                  color: #00D4FF;
+                  font-weight: bold;
+                  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                  padding-bottom: 8px;
+                  font-size: 16px;
+                  display: flex;
+                  align-items: center;
                 ">
-                  <div style="
-                    margin-bottom: 8px;
-                    color: #265CE0;
-                    font-weight: bold;
-                    border-bottom: 1px solid #eee;
-                    padding-bottom: 6px;
-                  ">
-                    <span style="
-                      display: inline-block;
-                      width: 10px;
-                      height: 10px;
-                      border-radius: 50%;
-                      background: #FFDD33;
-                      margin-right: 6px;
-                    "></span>
-                    ${params.name}
-                  </div>
-                  <div style="margin: 6px 0; color: #555;">
-                    账户数量: <span style="color: #265CE0; font-weight: bold;">${
-                      Math.floor(Math.random() * 50) + 10
-                    }</span>
-                  </div>
-                  <div style="margin: 6px 0; color: #555;">
-                    账户余额: <span style="color: #1842A1; font-weight: bold;">¥${this.formatNumber(
-                      params.value
-                    )}</span>
-                  </div>
-                </div>`;
-            }
-            return params.name;
+                  <span style="
+                    display: inline-block;
+                    width: 8px;
+                    height: 8px;
+                    border-radius: 50%;
+                    background: #FFDD33;
+                    margin-right: 8px;
+                    box-shadow: 0 0 8px #FFDD33;
+                  "></span>
+                  ${params.name}
+                </div>
+                <div style="margin: 8px 0; color: rgba(255,255,255,0.8); font-size: 14px; display: flex; justify-content: space-between;">
+                  <span>账户数量:</span>
+                  <span style="color: #00D4FF; font-weight: bold;">${count}</span>
+                </div>
+                <div style="margin: 8px 0; color: rgba(255,255,255,0.8); font-size: 14px; display: flex; justify-content: space-between;">
+                  <span>账户余额:</span>
+                  <span style="color: #FFDD33; font-weight: bold;">${(val / 10000).toFixed(2)} 万元</span>
+                </div>
+              </div>`
           },
-          backgroundColor: "transparent",
+          backgroundColor: 'transparent',
           borderWidth: 0,
           padding: 0,
+          extraCssText: 'z-index: 999999; pointer-events: none;',
         },
         visualMap: {
           show: true,
-          type: "piecewise",
+          type: 'piecewise',
           pieces: [
             {
               min: 0,
               max: 50000000,
-              label: "0-5000万",
-              color: "rgba(78,156,239,0.9)",
+              label: '0-5000万',
+              color: 'rgba(78,156,239,0.9)',
             },
             {
               min: 50000001,
               max: 100000000,
-              label: "5000万-1亿",
-              color: "rgba(38,92,224,0.9)",
+              label: '5000万-1亿',
+              color: 'rgba(38,92,224,0.9)',
             },
             {
               min: 100000001,
               max: 300000000,
-              label: "1亿-3亿",
-              color: "rgba(24,66,161,0.9)",
+              label: '1亿-3亿',
+              color: 'rgba(24,66,161,0.9)',
             },
-            { min: 300000001, label: "3亿以上", color: "rgba(0,34,110,0.9)" },
+            { min: 300000001, label: '3亿以上', color: 'rgba(0,34,110,0.9)' },
           ],
           textStyle: {
-            color: "#fff",
+            color: this.getThemeTitleColor(),
             fontSize: 12,
           },
-          left: "0",
-          bottom: "left",
+          left: '0',
+          bottom: 'left',
           itemWidth: 20,
           itemHeight: 20,
           itemGap: 6,
         },
         series: [
           {
-            type: "map",
-            map: "china",
-            roam: true,
+            type: 'map',
+            map: 'china',
+            roam: false, // 禁用鼠标拖拽和缩放
             zoom: 1.5,
             center: [104.195397, 35.86166],
             label: {
               show: true,
-              color: "#fff",
+              color: '#fff',
               fontSize: 11,
-              fontWeight: "normal",
+              fontWeight: 'normal',
             },
             itemStyle: {
               areaColor: {
-                type: "linear",
+                type: 'linear',
                 x: 0,
                 y: 0,
                 x2: 0,
@@ -235,24 +280,24 @@ export default {
                 colorStops: [
                   {
                     offset: 0,
-                    color: "rgba(78,156,239,0.3)",
+                    color: 'rgba(78,156,239,0.3)',
                   },
                   {
                     offset: 1,
-                    color: "rgba(38,92,224,0.4)",
+                    color: 'rgba(38,92,224,0.4)',
                   },
                 ],
               },
-              borderColor: "rgba(40,110,202,0.8)",
+              borderColor: 'rgba(40,110,202,0.8)',
               borderWidth: 1,
             },
             emphasis: {
               label: {
                 show: true,
-                color: "#FFDD33",
+                color: '#FFDD33',
                 fontSize: 14,
-                fontWeight: "bold",
-                backgroundColor: "rgba(0,0,0,0.7)",
+                fontWeight: 'bold',
+                backgroundColor: 'rgba(0,0,0,0.7)',
                 padding: [3, 6],
                 borderRadius: 4,
               },
@@ -272,77 +317,67 @@ export default {
                 //   }]
                 // },
                 areaColor: null,
-                borderColor: "#FFB600",
+                borderColor: '#FFB600',
                 borderWidth: 3,
-                shadowColor: "rgba(255,221,51,0.5)",
+                shadowColor: 'rgba(255,221,51,0.5)',
                 shadowBlur: 10,
               },
             },
-            data: fullData,
+            data: finalData,
           },
         ],
-      };
+      }
 
-      this.mainChart.setOption(mainOption);
-      this.bindChartEvents();
-      this.startHighlight();
-      this.addevent();
+      this.mainChart.setOption(mainOption)
+      this.bindChartEvents()
+      this.startHighlight()
+      this.addevent()
       setTimeout(() => {
         if (this.shadowChart) {
-          this.shadowChart.resize();
+          this.shadowChart.resize()
         }
         if (this.mainChart) {
-          this.mainChart.resize();
+          this.mainChart.resize()
         }
-      }, 0);
+      }, 0)
     },
     formatNumber(num) {
       if (num >= 100000000) {
-        return (num / 100000000).toFixed(1) + "亿";
+        return (num / 100000000).toFixed(1) + '亿'
       } else if (num >= 10000) {
-        return (num / 10000).toFixed(1) + "万";
+        return (num / 10000).toFixed(1) + '万'
       }
-      return num.toString();
+      return num.toString()
     },
     bindChartEvents() {
-      this.mainChart.on("mouseover", (params) => {
-        console.log("mouseover");
-          this.outId && clearTimeout(this.outId);
-        // this.isRotating = true
-        if (params.seriesType === "map") {
-          if (this.isRotating) {
-          
-            this.stopHighlight();
-          }
+      this.mainChart.on('mouseover', (params) => {
+        if (this.outId) clearTimeout(this.outId)
+        if (params.seriesType === 'map') {
+          this.stopHighlight()
         }
-      });
+      })
 
       // // 鼠标移出时恢复自动高亮
-      this.mainChart.on("mouseout", (params) => {
-        console.log("mouseout");
-        this.isRotating = false;
-         this.outId && clearTimeout(this.outId);
-        if (params.seriesType === "map") {
-          if (!this.isRotating) {
-           
-            this.outId = setTimeout(() => {
-              this.startHighlight();
-            }, 3000); // 延迟2秒后恢复轮播
-          }
+      this.mainChart.on('mouseout', (params) => {
+        if (this.outId) clearTimeout(this.outId)
+        if (params.seriesType === 'map') {
+          this.outId = setTimeout(() => {
+            this.startHighlight()
+          }, 3000) // 延迟3秒后恢复轮播
         }
-      });
+      })
 
       // // 点击省份时高亮该省份
-      this.mainChart.on("click", (params) => {
-        if (params.seriesType === "map") {
-          this.highlightSpecificProvince(params.name);
+      this.mainChart.on('click', (params) => {
+        if (params.seriesType === 'map') {
+          this.highlightSpecificProvince(params.name)
         }
-      });
+      })
 
       // 同步两个地图的视图
-      this.mainChart.on("georoam", (params) => {
-        const mainOption = this.mainChart.getOption();
-        const series = mainOption.series[0];
+      this.mainChart.on('georoam', (params) => {
+        const mainOption = this.mainChart.getOption()
+        const series = mainOption.series[0]
 
         if (series && series.zoom && series.center) {
           this.shadowChart.setOption({
@@ -352,85 +387,87 @@ export default {
                 center: series.center,
               },
             ],
-          });
+          })
         }
-      });
+      })
     },
     startHighlight() {
-      this.stopHighlight();
+      this.stopHighlight()
 
-      this.isRotating = true;
+      this.isRotating = true
       this.highlightTimer = setInterval(() => {
-        this.highlightNextProvince();
-      }, this.highlightInterval);
+        this.highlightNextProvince()
+      }, this.highlightInterval)
       // 立即高亮第一个省份
       if (this.highlightProvinces.length > 0) {
-        this.highlightSpecificProvince(this.highlightProvinces[0]);
+        this.highlightSpecificProvince(this.highlightProvinces[0])
       }
     },
     stopHighlight() {
       if (this.highlightTimer) {
-        clearInterval(this.highlightTimer);
-        this.highlightTimer = null;
+        clearInterval(this.highlightTimer)
+        this.highlightTimer = null
       }
-      this.isRotating = false;
+      this.isRotating = false
       // 清除当前高亮
-      this.clearCurrentHighlight();
+      this.clearCurrentHighlight()
     },
     highlightNextProvince() {
-      if (this.highlightProvinces.length === 0) return;
-
-      this.clearCurrentHighlight();
+      if (this.highlightProvinces.length === 0) return
 
       this.currentHighlightIndex =
-        (this.currentHighlightIndex + 1) % this.highlightProvinces.length;
-      const provinceName = this.highlightProvinces[this.currentHighlightIndex];
+        (this.currentHighlightIndex + 1) % this.highlightProvinces.length
+      const provinceName = this.highlightProvinces[this.currentHighlightIndex]
 
-      this.highlightSpecificProvince(provinceName);
+      this.highlightSpecificProvince(provinceName)
     },
     highlightSpecificProvince(provinceName) {
-      const mainChart = this.mainChart;
+      if (!this.mainChart) return
 
-      // 取消所有高亮
-      mainChart.dispatchAction({
-        type: "downplay",
-        seriesIndex: 0,
+      // 先清除之前所有可能的高亮（防止堆叠）
+      this.mainChart.dispatchAction({
+        type: 'downplay',
+        seriesIndex: 0
       });
 
-      // 高亮指定省份
-      mainChart.dispatchAction({
-        type: "highlight",
-        seriesIndex: 0,
-        name: provinceName,
-      });
+      // 获取当前省份在数据中的索引
+      const dataIndex = this.mainChart.getModel().getSeriesByIndex(0).getData().indexOfName(provinceName);
 
-      // 显示tooltip
+      if (dataIndex > -1) {
+        // 高亮
+        this.mainChart.dispatchAction({
+          type: 'highlight',
+          seriesIndex: 0,
+          dataIndex: dataIndex
+        });
 
-      mainChart.dispatchAction({
-        type: "showTip",
-        seriesIndex: 0,
-        name: provinceName,
-      });
+        // 显式触发 Tooltip
+        this.mainChart.dispatchAction({
+          type: 'showTip',
+          seriesIndex: 0,
+          dataIndex: dataIndex
+        });
+      }
     },
     clearCurrentHighlight() {
       this.mainChart.dispatchAction({
-        type: "downplay",
+        type: 'downplay',
         seriesIndex: 0,
-      });
+      })
     },
     handleResize() {
       if (this.shadowChart) {
-        this.shadowChart.resize();
+        this.shadowChart.resize()
       }
       if (this.mainChart) {
-        this.mainChart.resize();
+        this.mainChart.resize()
       }
     },
     addevent() {
-      window.addEventListener("resize", this.handleResize);
+      window.addEventListener('resize', this.handleResize)
     },
   },
-};
+}
 </script>
 <style scoped>
 .container {

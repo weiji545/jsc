@@ -11,13 +11,13 @@ const getInitialDarkMode = () => {
 }
 
 const state = {
-  isDarkMode: getInitialDarkMode()
+  isDarkMode: getInitialDarkMode(),
 }
 
 const mutations = {
   SET_DARK_MODE(state, val) {
     state.isDarkMode = !!val
-  }
+  },
 }
 
 const actions = {
@@ -28,13 +28,13 @@ const actions = {
     } catch (e) {
       // ignore
     }
-  }
+  },
 }
 
 const getters = {
   isDarkMode(state) {
     return !!state.isDarkMode
-  }
+  },
 }
 
 export default {
@@ -42,7 +42,7 @@ export default {
   state,
   mutations,
   actions,
-  getters
+  getters,
 }
 
 

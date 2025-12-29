@@ -10,16 +10,16 @@ export default {
   props: {
     data: {
       type: Array,
-      default: () => []
+      default: () => [],
     },
     height: {
       type: Number,
-      default: 70
+      default: 70,
     },
     color: {
       type: String,
-      default: '#00d4ff'
-    }
+      default: '#00d4ff',
+    },
   },
   data() {
     return { chart: null }
@@ -33,7 +33,7 @@ export default {
     window.removeEventListener('resize', this.resizeHandler)
   },
   watch: {
-    data: { handler() { this.updateChart() }, deep: true }
+    data: { handler() { this.updateChart() }, deep: true },
   },
   methods: {
     initChart() {
@@ -66,11 +66,11 @@ export default {
       const areaGradient = isNegativeColor
         ? new echarts.graphic.LinearGradient(0, 0, 0, 1, [
           { offset: 0, color: '#FF3A3A' },
-          { offset: 1, color: 'rgba(8,65,111,0)' }
+          { offset: 1, color: 'rgba(8,65,111,0)' },
         ])
         : new echarts.graphic.LinearGradient(0, 0, 0, 1, [
           { offset: 0, color: '#3AACFF' },
-          { offset: 1, color: 'rgba(0,152,250,0)' }
+          { offset: 1, color: 'rgba(0,152,250,0)' },
         ])
 
       const option = {
@@ -85,22 +85,24 @@ export default {
             smooth: true,
             symbol: 'none',
             lineStyle: { color: lineColor, width: 2 },
-            areaStyle: { color: areaGradient }
-          }
-        ]
+            areaStyle: { color: areaGradient },
+          },
+        ],
       }
       try {
         this.chart.setOption(option, true)
       } catch (e) {
         console.warn('EChartSparkline setOption failed', e)
       }
-    }
-  }
+    },
+  },
 }
 </script>
 
 <style scoped>
-div { width: 100% }
+div {
+  width: 100%
+}
 </style>
 
 

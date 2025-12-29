@@ -7,22 +7,22 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    redirect: '/dashboard'
+    redirect: '/dashboard',
   },
   {
     path: '/dashboard',
     name: 'Dashboard',
-    component: Dashboard
+    component: Dashboard,
   },
   {
     path: '*',
-    redirect: '/dashboard'
-  }
+    redirect: '/dashboard',
+  },
 ]
 
 const router = new VueRouter({
   mode: 'hash', // 使用 hash 避免刷新 404
-  routes
+  routes,
 })
 
 export default router

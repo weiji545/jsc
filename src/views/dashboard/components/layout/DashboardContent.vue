@@ -4,7 +4,7 @@
     <div class="content-left">
       <CardPanel style="height: 318px;" :title="getPanelTitle('left',0)" :unit="getPanelUnit('left',0)" :showBottomCorner="getPanelShowBottomCorner('left',0)" :contentPadding="getPanelContentPadding('left',0)" class="content-item">
         <template #title>
-          <span>{{ getPanelTitle('left',0) }}</span>
+          <span>{{ getPanelTitle('left', 0) }}</span>
         </template>
         <div class="panel-content">
           <!-- 左侧上方内容插槽 -->
@@ -14,7 +14,7 @@
 
       <CardPanel :title="getPanelTitle('left',1)" :unit="getPanelUnit('left',1)" :showBottomCorner="getPanelShowBottomCorner('left',1)" :contentPadding="getPanelContentPadding('left',1)" class="content-item">
         <template #title>
-          <span>{{ getPanelTitle('left',1) }}</span>
+          <span>{{ getPanelTitle('left', 1) }}</span>
         </template>
         <div class="panel-content">
           <!-- 左侧中间内容插槽 -->
@@ -24,7 +24,7 @@
 
       <CardPanel :title="getPanelTitle('left',2)" :unit="getPanelUnit('left',2)" :showBottomCorner="getPanelShowBottomCorner('left',2)" :contentPadding="getPanelContentPadding('left',2)" class="content-item">
         <template #title>
-          <span>{{ getPanelTitle('left',2) }}</span>
+          <span>{{ getPanelTitle('left', 2) }}</span>
         </template>
         <div class="panel-content">
           <!-- 左侧下方内容插槽 -->
@@ -64,12 +64,16 @@
           <template #title-tabs>
             <div class="title-tabs-wrapper">
               <div class="period-switch">
-                <label><input type="radio" name="centerPeriod" value="day" v-model="centerPeriodComputed" />天</label>
-                <label><input type="radio" name="centerPeriod" value="month" v-model="centerPeriodComputed" />月</label>
+                <label><input type="radio" name="centerPeriod" value="day" v-model="centerPeriodComputed"/>天</label>
+                <label><input type="radio" name="centerPeriod" value="month" v-model="centerPeriodComputed"/>月</label>
               </div>
               <div class="text-toggle">
-                <button type="button" :class="['text-btn', { selected: centerBottomModeComputed === 'a' }]" @click="centerBottomModeComputed = 'a'">资金交易趋势</button>
-                <button type="button" :class="['text-btn', { selected: centerBottomModeComputed === 'b' }]" @click="centerBottomModeComputed = 'b'">大额支付</button>
+                <button type="button" :class="['text-btn', { selected: centerBottomModeComputed === 'a' }]" @click="centerBottomModeComputed = 'a'">
+                  资金交易趋势
+                </button>
+                <button type="button" :class="['text-btn', { selected: centerBottomModeComputed === 'b' }]" @click="centerBottomModeComputed = 'b'">
+                  大额支付
+                </button>
               </div>
             </div>
           </template>
@@ -85,7 +89,7 @@
     <div class="content-right">
       <CardPanel style="height: 318px;" :title="getPanelTitle('right',0)" :unit="getPanelUnit('right',0)" :showBottomCorner="getPanelShowBottomCorner('right',0)" :contentPadding="getPanelContentPadding('right',0)" class="content-item">
         <template #title>
-          <span>{{ getPanelTitle('right',0) }}</span>
+          <span>{{ getPanelTitle('right', 0) }}</span>
         </template>
         <div class="panel-content">
           <!-- 右侧上方内容插槽 -->
@@ -95,7 +99,7 @@
 
       <CardPanel :title="getPanelTitle('right',1)" :unit="getPanelUnit('right',1)" :showBottomCorner="getPanelShowBottomCorner('right',1)" :contentPadding="getPanelContentPadding('right',1)" class="content-item">
         <template #title>
-          <span>{{ getPanelTitle('right',1) }}</span>
+          <span>{{ getPanelTitle('right', 1) }}</span>
         </template>
         <div class="panel-content">
           <!-- 右侧中间内容插槽 -->
@@ -105,7 +109,7 @@
 
       <CardPanel :title="getPanelTitle('right',2)" :unit="getPanelUnit('right',2)" :showBottomCorner="getPanelShowBottomCorner('right',2)" :contentPadding="getPanelContentPadding('right',2)" class="content-item">
         <template #title>
-          <span>{{ getPanelTitle('right',2) }}</span>
+          <span>{{ getPanelTitle('right', 2) }}</span>
         </template>
         <div class="panel-content">
           <!-- 右侧下方内容插槽 -->
@@ -123,7 +127,7 @@ import { formatNumber } from '../../../../utils/utils.js'
 export default {
   name: 'DashboardContent',
   components: {
-    CardPanel
+    CardPanel,
   },
   data() {
     // 中间下方面板的局部状态（周/月 与 文字按钮切换）
@@ -139,22 +143,22 @@ export default {
       default: () => [
         { label: '', value: 0 },
         { label: '', value: 0 },
-      ]
+      ],
     },
     // allow parent to control centerBottomMode via .sync (if provided)
     centerBottomMode: {
       type: String,
-      default: null
+      default: null,
     },
     centerPeriod: {
       type: String,
-      default: null
+      default: null,
     },
     // panelsConfig: 可配置左右侧三个 panel 的 title/unit
     panelsConfig: {
       type: Object,
-      default: () => ({})
-    }
+      default: () => ({}),
+    },
   },
   computed: {
     centerPeriodComputed: {
@@ -167,7 +171,7 @@ export default {
         } else {
           this.centerPeriodInternal = val
         }
-      }
+      },
     },
     // proxy for centerBottomMode: prefer parent-controlled prop, otherwise use internal state
     centerBottomModeComputed: {
@@ -181,22 +185,24 @@ export default {
         } else {
           this.centerBottomModeInternal = val
         }
-      }
-    }
+      },
+    },
   },
   methods: {
     formatNumber,
     // 安全读取 panelsConfig 中的 title 与 unit，若缺失返回空字符串
     getPanelTitle(side, idx) {
       try {
-        return (this.panelsConfig && this.panelsConfig[side] && this.panelsConfig[side][idx] && this.panelsConfig[side][idx].title) || ''
+        return (this.panelsConfig && this.panelsConfig[side] && this.panelsConfig[side][idx] &&
+          this.panelsConfig[side][idx].title) || ''
       } catch (e) {
         return ''
       }
     },
     getPanelUnit(side, idx) {
       try {
-        return (this.panelsConfig && this.panelsConfig[side] && this.panelsConfig[side][idx] && this.panelsConfig[side][idx].unit) || ''
+        return (this.panelsConfig && this.panelsConfig[side] && this.panelsConfig[side][idx] &&
+          this.panelsConfig[side][idx].unit) || ''
       } catch (e) {
         return ''
       }
@@ -205,7 +211,8 @@ export default {
     // 从 panelsConfig 中读取是否显示底部边角装饰，未配置时默认 false
     getPanelShowBottomCorner(side, idx) {
       try {
-        return !!(this.panelsConfig && this.panelsConfig[side] && this.panelsConfig[side][idx] && this.panelsConfig[side][idx].showBottomCorner)
+        return !!(this.panelsConfig && this.panelsConfig[side] && this.panelsConfig[side][idx] &&
+          this.panelsConfig[side][idx].showBottomCorner)
       } catch (e) {
         return false
       }
@@ -225,8 +232,8 @@ export default {
       } catch (e) {
         return {}
       }
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -262,8 +269,10 @@ export default {
 }
 
 .period-switch {
+  cursor: not-allowed;
+
   label, input {
-    cursor: pointer;
+    pointer-events: none;
   }
 }
 
@@ -315,6 +324,7 @@ export default {
   &:nth-child(3) .data-number {
     color: #24D9B5;
   }
+
   /* 浅色模式下统一使用变量 */
   .is-light-mode & .data-number {
     color: var(--color-title-light, #181818) !important;
@@ -350,6 +360,7 @@ export default {
 /* 趋势标题颜色 */
 .trend-title {
   color: #FFFFFF;
+
   .is-light-mode & {
     color: var(--color-title-light, #181818);
   }

@@ -48,11 +48,27 @@ export default {
       },
       deep: true,
     },
+    '$store.getters.isDarkMode': {
+      handler() {
+        this.setOption()
+      }
+    }
   },
   methods: {
     initChart() {
       this.chart = echarts.init(this.$refs.chart)
       this.setOption()
+    },
+    getThemeTitleColor() {
+      try {
+        const isLight = !this.$store.getters.isDarkMode
+        const rootStyle = getComputedStyle(document.documentElement)
+        const titleLight = rootStyle.getPropertyValue('--color-title-light').trim() || '#181818'
+        const titleDark = rootStyle.getPropertyValue('--color-title-dark').trim() || '#FFFFFF'
+        return isLight ? titleLight : titleDark
+      } catch (e) {
+        return '#FFFFFF'
+      }
     },
     setOption() {
       const value = Math.round(this.value)
@@ -71,16 +87,10 @@ export default {
       ]
 
       const rich = {
-        white: {
-          fontSize: 24,
-          color: '#fff',
-          fontWeight: '500',
-          padding: [-20, 0, 0, 0],
-        },
-        bule: {
+        num: {
           fontSize: 24,
           fontFamily: 'DINBold',
-          color: '#fff',
+          color: this.getThemeTitleColor(),
           fontWeight: '700',
           padding: [-10, 0, 0, 0],
         },
@@ -110,10 +120,9 @@ export default {
               formatter: function (val) {
                 const num = Math.round(val)
                 return (
-                  '{bule|' +
-                  num +
-                  '}{white|%}' +
-                  '{size|' +
+                  '{num|' +
+                  num + 
+                  '%}{size|' +
                   '}\n{text|支付资金占比}'
                 )
               },

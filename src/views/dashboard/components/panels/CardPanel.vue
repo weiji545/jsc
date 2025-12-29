@@ -4,7 +4,7 @@
       <div class="card-title-main">
         <slot name="title">{{ title }}</slot>
         <span class="currency-indicator">
-          <img src="../../img/warning-currency.png" alt="" class="currency-icon" />
+          <img src="../../img/warning-currency.png" alt="" class="currency-icon"/>
           <span class="currency-text">{{ currencyText }}</span>
         </span>
       </div>

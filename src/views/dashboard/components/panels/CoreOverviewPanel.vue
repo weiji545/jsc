@@ -1,6 +1,6 @@
 <template>
   <div class="core-panel">
-    <Globe3D v-if="scope === 'global'" />
+    <Globe3D v-if="scope === 'global'"/>
     <ChinaMap v-else-if="scope === 'domestic'"/>
     <WorldMap v-else-if="scope === 'overseas'"/>
   </div>
@@ -17,9 +17,9 @@ export default {
   props: {
     scope: {
       type: String,
-      default: 'global'
+      default: 'global',
     },
-  }
+  },
 }
 </script>
 

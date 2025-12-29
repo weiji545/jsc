@@ -40,7 +40,7 @@ export default {
     return {
       chart: null,
       _themePoll: null,
-      _lastTheme: null
+      _lastTheme: null,
     }
   },
   mounted() {
@@ -70,8 +70,8 @@ export default {
     '$store.getters.isDarkMode': {
       handler() {
         this.updateChart()
-      }
-    }
+      },
+    },
   },
   methods: {
     initChart() {
@@ -189,7 +189,7 @@ export default {
           option.series[0] = Object.assign(
             {},
             option.series[0],
-            this.options.series[0]
+            this.options.series[0],
           )
         }
         // 合并顶层配置：对 tooltip 与 legend 做合并以保留默认 formatter/formatter 函数
@@ -242,7 +242,7 @@ export default {
               show: false,
             })
           console.warn(
-            'EChartPieRing: variant="donut" requires label config in options.series[0].label to display labels'
+            'EChartPieRing: variant="donut" requires label config in options.series[0].label to display labels',
           )
         }
       }

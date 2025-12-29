@@ -9,7 +9,7 @@
         />
 
         <!-- 根据当前模块显示对应的页面 -->
-        <component :is="currentModuleComponent" />
+        <component :is="currentModuleComponent" :key="currency" />
       </div>
     </div>
   </div>

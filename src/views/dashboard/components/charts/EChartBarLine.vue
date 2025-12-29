@@ -1,5 +1,5 @@
 <template>
-  <div :style="{ width: '100%', height: height + 'px' }" ref="chartRoot"></div>
+  <div :style="{ width: width ? width + 'px' : '100%', height: height + 'px' }" ref="chartRoot"></div>
 </template>
 
 <script>
@@ -10,82 +10,105 @@ export default {
   props: {
     categories: {
       type: Array,
-      default: () => []
+      default: () => [],
     },
     barData: {
       type: Array,
-      default: () => []
+      default: () => [],
     },
     lineData: {
       type: Array,
-      default: () => []
+      default: () => [],
+    },
+    width: {
+      type: Number,
+      default: 0,
     },
     height: {
       type: Number,
-      default: 260
+      default: 260,
     },
     // 可配置显示哪条 y 轴，支持 'bar' | 'line' | 'both' | ['bar','line']（默认仅显示折线的 y 轴）
     visibleY: {
       type: [String, Array],
-      default: () => 'line'
+      default: () => 'line',
     },
     // 是否显示 y 轴名称（提示文字），默认不显示
     showYAxisName: {
       type: Boolean,
-      default: false
+      default: false,
     },
     options: {
       type: Object,
-      default: () => ({})
+      default: () => ({}),
     }
     ,
     // 可直接通过该 prop 指定折线颜色（优先于内部默认颜色）
     lineColor: {
       type: String,
-      default: null
+      default: null,
     }
     ,
     // tooltip 显示的单位，父组件可通过 panelsConfig 传入
     unit: {
       type: String,
-      default: ''
+      default: '',
+    }
+    ,
+    // 第二个序列（通常是折线）的单位，例如 '笔'
+    lineUnit: {
+      type: String,
+      default: '',
     }
     ,
     // 可选：覆盖第一个 y 轴的名称（例如境外模式下显示 '汇率'）
     yAxisName: {
       type: String,
-      default: null
+      default: null,
     }
     ,
     // 可选：第二序列（折线）显示名称，父组件可通过 options.series2Name 覆盖
     series2Name: {
       type: String,
-      default: '交易笔数'
+      default: '交易笔数',
     }
     ,
     // 可选：图例 / 第一个序列显示名称（例如 '金额'），由父组件传入
     legendName: {
       type: String,
-      default: '账户余额'
-    }
+      default: '账户余额',
+    },
   },
   data() {
     return {
       chart: null,
       op: {
         tooltip: { trigger: 'axis' },
-        legend: { data: [{
-            name: this.legendName || '账户余额',
-            textStyle: { color: '#9E9E9E' }
-          },{
-            name: this.series2Name || '交易笔数',
-            textStyle: { color: '#9E9E9E' }
-          }] },
-        grid: { left: 30, right: 30, top: 25, bottom: 20 ,borderColor:'#636363'},
+        legend: {
+          data: [
+            {
+              name: this.legendName || '账户余额',
+              textStyle: { color: '#9E9E9E' },
+            }, {
+              name: this.series2Name || '交易笔数',
+              textStyle: { color: '#9E9E9E' },
+            }],
+        },
+        grid: { left: 30, right: 30, top: 25, bottom: 20, borderColor: '#636363' },
         xAxis: { type: 'category', data: this.categories || [], axisLabel: { color: '#9E9E9E' } },
         yAxis: [
-          { type: 'value', name: this.legendName || '账户余额', axisLabel: { color: '#636363' }, axisLine: {show: false} },
-          { type: 'value', name: this.series2Name || '交易笔数', axisLabel: { color: '#636363' }, axisLine: {show: false}}
+          {
+            type: 'value',
+            name: this.legendName || '账户余额',
+            axisLabel: { color: '#636363' },
+            axisLine: { show: false },
+          },
+          {
+            type: 'value',
+            name: this.series2Name || '交易笔数',
+            axisLabel: { color: '#636363' },
+            axisLine: { show: false },
+          },
         ],
         series: [
           {
@@ -95,10 +118,10 @@ export default {
             itemStyle: {
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                 { offset: 0, color: '#00d4ff' },
-                { offset: 1, color: '#5b8def' }
-              ])
+                { offset: 1, color: '#5b8def' },
+              ]),
             },
-            barMaxWidth: 26
+            barMaxWidth: 26,
           },
           {
             name: this.series2Name || '交易笔数',
@@ -113,14 +136,14 @@ export default {
             areaStyle: {
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                 { offset: 0, color: 'rgba(255, 209, 102, 0.3)' },
-                { offset: 1, color: 'rgba(255, 209, 102, 0.05)' }
-              ])
-            }
-          }
-      ]
+                { offset: 1, color: 'rgba(255, 209, 102, 0.05)' },
+              ]),
+            },
+          },
+        ],
       },
       _lastAxisLabelColor: null,
-      _themePoll: null
+      _themePoll: null,
     }
   },
   mounted() {
@@ -154,7 +177,7 @@ export default {
     categories() { this.updateChart() },
     barData: { handler() { this.updateChart() }, deep: true },
     lineData: { handler() { this.updateChart() }, deep: true },
-    options: { handler() { this.updateChart() }, deep: true }
+    options: { handler() { this.updateChart() }, deep: true },
   },
   methods: {
     initChart() {
@@ -236,8 +259,8 @@ export default {
         axisLine: { show: false },
         splitLine: {
           show: true,
-          lineStyle: { color: '#636363' }
-        }
+          lineStyle: { color: '#636363' },
+        },
       })
       yAxisArray.push({
         type: 'value',
@@ -248,8 +271,8 @@ export default {
         axisLine: { show: false },
         splitLine: {
           show: !showBarAxis, // 仅当左侧轴隐藏时显示
-          lineStyle: { color: '#636363' }
-        }
+          lineStyle: { color: '#636363' },
+        },
       })
 
       const option = Object.assign({
@@ -257,7 +280,7 @@ export default {
           trigger: 'axis',
           backgroundColor: 'rgba(0,0,0,0.7)',
           borderColor: '#00d4ff',
-          textStyle: { color: '#fff' }
+          textStyle: { color: '#fff' },
         },
         legend: {
           textStyle: { color: '#9E9E9E' },
@@ -269,14 +292,14 @@ export default {
               arr.push(effectiveSeries2Name)
             }
             return arr
-          }.bind(this))()
+          }.bind(this))(),
         },
         grid: {
           left: '50px',
           right: '30px',
           top: '18%',
           bottom: '15%',
-          containLabel: false
+          containLabel: false,
         },
         xAxis: {
           type: 'category',
@@ -284,9 +307,9 @@ export default {
           axisLabel: { color: '#9E9E9E' },
           axisLine: {
             show: true,
-            lineStyle: { color: '#636363' }
+            lineStyle: { color: '#636363' },
           },
-          boundaryGap: true
+          boundaryGap: true,
         },
         yAxis: yAxisArray,
         series: [
@@ -298,25 +321,26 @@ export default {
             itemStyle: {
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                 { offset: 0, color: '#3FB4F0' },
-                { offset: 1, color: '#086ED9' }
-              ])
+                { offset: 1, color: '#086ED9' },
+              ]),
             },
             barMaxWidth: 26,
-            z: 2
+            z: 2,
           },
           // 只有当有折线数据时才添加折线系列
-          ...((this.lineData && this.lineData.length > 0) ? [{
-            name: effectiveSeries2Name,
-            type: 'line',
-            yAxisIndex: 1,
-            data: this.lineData || [],
-            symbol: 'circle',
-            symbolSize: 6,
-            itemStyle: { color: '#FAC858' },
-            lineStyle: { color: '#FAC858', width: 2 },
-            z: 3
-          }] : [])
-        ]
+          ...((this.lineData && this.lineData.length > 0) ? [
+            {
+              name: effectiveSeries2Name,
+              type: 'line',
+              yAxisIndex: 1,
+              data: this.lineData || [],
+              symbol: 'circle',
+              symbolSize: 6,
+              itemStyle: { color: '#FAC858' },
+              lineStyle: { color: '#FAC858', width: 2 },
+              z: 3,
+            }] : []),
+        ],
       }, this.options)
 
       // Apply lineColor prop if provided (must happen after options merge)
@@ -343,7 +367,9 @@ export default {
       // Tooltip Formatter
       try {
         const effectiveUnit = this.unit || (this.options && this.options.unit) || ''
+        const effectiveLineUnit = this.lineUnit || (this.options && this.options.lineUnit) || ''
         const unitSuffix = effectiveUnit ? ' ' + effectiveUnit : ''
+        const lineUnitSuffix = effectiveLineUnit ? ' ' + effectiveLineUnit : ''
         option.tooltip.formatter = function (params) {
           try {
             const axis = params && params[0] && params[0].axisValue ? params[0].axisValue : ''
@@ -351,11 +377,13 @@ export default {
             ;(params || []).forEach((p) => {
               if (!p) return
               p.marker = p.marker.replace('[object Object]', '#509AE2')
-              const name = p.seriesName === effectiveLegendName ? tooltipBarLabel : p.seriesName
+              const isBar = p.seriesName === effectiveLegendName
+              const name = isBar ? tooltipBarLabel : p.seriesName
+              const suffix = isBar ? unitSuffix : lineUnitSuffix
               const val = (typeof p.value !== 'undefined' ? p.value : (p.data && p.data.value)) || 0
               lines += `<div style="display:flex;justify-content:space-between;align-items:center;">
                 <span>${p.marker} ${name}:</span>
-                <span style="margin-left:12px;font-weight:bold;">${val}${unitSuffix}</span>
+                <span style="margin-left:12px;font-weight:bold;">${val}${suffix}</span>
               </div>`
             })
             return lines
@@ -368,13 +396,15 @@ export default {
       } catch (e) {
         console.warn('EChartBarLine setOption failed', e)
       }
-    }
-  }
+    },
+  },
 }
 </script>
 
 <style scoped>
-div { width: 100% }
+div {
+  width: 100%
+}
 </style>
 
 

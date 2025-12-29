@@ -1,9 +1,11 @@
 <template>
   <div class="region-analysis">
     <div class="region_top">
-      <div class="region_top_left">金额</div>
-      <div class="region_top_right">
+      <div class="region_top_left">
         账户数量
+      </div>
+      <div class="region_top_right">
+        金额
         <div class="triangle_group" @click="toggleOrder">
           <div :class="orderByAsc ? 'triangle-up-on' : 'triangle-up-off'"></div>
           <div :class="orderByAsc ? 'triangle-down-off' : 'triangle-down-on'"></div>
@@ -39,10 +41,15 @@
                   </div>
                   <span class="region-value">{{ formatNumber(item.value) }}</span>
                 </div>
+                <!-- 进度条由两部分组成：账户数量权重50%（蓝色），金额权重50%（绿色） -->
                 <div class="region_item_line">
                   <div
-                    class="regin_item_gropress"
-                    :style="{ width: progressWidth(item.value) }"
+                    class="progress-segment count-bar"
+                    :style="{ width: countProgressWidth(item.count) }"
+                  ></div>
+                  <div
+                    class="progress-segment amount-bar"
+                    :style="{ width: amountProgressWidth(item.value) }"
                   ></div>
                 </div>
               </div>
@@ -67,29 +74,40 @@ export default {
   props: {
     data: {
       type: Array,
-      default: () => []
+      default: () => [],
     },
     orderByAsc: {
       type: Boolean,
-      default: true
-    }
+      default: false,
+    },
   },
   data() {
     return {
-      rankingIcons: [ranking1, ranking2, ranking3]
+      rankingIcons: [ranking1, ranking2, ranking3],
     }
   },
   methods: {
     formatNumber,
     toggleOrder() {
-      this.$emit('update:orderByAsc', !this.orderByAsc)
+      const newVal = !this.orderByAsc
+      this.$emit('update:orderByAsc', newVal)
+      this.$emit('change-order', newVal)
     },
-    progressWidth(value) {
+    amountProgressWidth(value) {
       if (!this.data || !this.data.length) return '0%'
-      const max = this.data[0].value || 1
-      return Math.min(100, (value / max) * 100) + '%'
-    }
-  }
+      // 找出金额最大值
+      const max = Math.max(...this.data.map(it => it.value)) || 1
+      // 权重50%
+      return ((value / max) * 50).toFixed(2) + '%'
+    },
+    countProgressWidth(count) {
+      if (!this.data || !this.data.length) return '0%'
+      // 找出账户数量最大值
+      const max = Math.max(...this.data.map(it => it.count)) || 1
+      // 权重50%
+      return ((count / max) * 50).toFixed(2) + '%'
+    },
+  },
 }
 </script>
 
@@ -214,16 +232,24 @@ export default {
 }
 
 .region_item_line {
+  display: flex;
   width: 100%;
   height: 8px;
-  background: #0cd9b5;
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
+  overflow: hidden;
 }
 
-.regin_item_gropress {
-  height: 8px;
+.progress-segment {
+  height: 100%;
+}
+
+.amount-bar {
+  background: #0cd9b5;
+}
+
+.count-bar {
   background: #0098fa;
-  border-radius: 4px;
 }
 
 .region-row {
