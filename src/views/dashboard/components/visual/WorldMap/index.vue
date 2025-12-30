@@ -15,6 +15,12 @@ export default {
       chart: null,
       flowData: [],
       accountDataMap: {},
+      highlightCountries: [],
+      currentHighlightIndex: 0,
+      highlightInterval: 30000,
+      isRotating: false,
+      highlightTimer: null,
+      outId: null,
     }
   },
   mounted() {
@@ -24,6 +30,8 @@ export default {
   },
   beforeDestroy() {
     window.removeEventListener('resize', this.handleResize)
+    if (this.highlightTimer) clearInterval(this.highlightTimer)
+    if (this.outId) clearTimeout(this.outId)
     if (this.chart) {
       this.chart.dispose()
     }
@@ -37,10 +45,23 @@ export default {
         ])
 
         if (flowRes.code === 200) {
-          this.flowData = flowRes.data
+          this.flowData = flowRes.data || []
         }
         if (accountRes.code === 200) {
-          this.accountDataMap = accountRes.data
+          this.accountDataMap = accountRes.data || {}
+        }
+
+        // 将accountRes有数据的国家添加到flowData中
+        if (this.flowData && this.accountDataMap) {
+          const existingCenters = new Set(this.flowData.map(item => item.center))
+          Object.keys(this.accountDataMap).forEach(countryName => {
+            if (!existingCenters.has(countryName)) {
+              this.flowData.push({
+                center: countryName,
+                flows: []
+              })
+            }
+          })
         }
 
         this.updateChart()
@@ -59,17 +80,117 @@ export default {
 
       const option = this.getChartOption()
       chart.setOption(option)
+      this.bindChartEvents()
     },
     updateChart() {
       if (this.chart) {
+        // 计算balance最高的前三名国家
+        this.highlightCountries = Object.entries(this.accountDataMap)
+          .slice()
+          .sort((a, b) => b[1].balance - a[1].balance)
+          .slice(0, 3)
+          .map(item => item[0])
         const option = this.getChartOption()
         this.chart.setOption(option)
+
+        // 启动轮播
+        this.startHighlight()
       }
     },
     handleResize() {
       if (this.chart) {
         this.chart.resize()
       }
+    },
+    startHighlight() {
+      this.stopHighlight()
+
+      this.isRotating = true
+      this.highlightTimer = setInterval(() => {
+        this.highlightNextCountry()
+      }, this.highlightInterval)
+      // 立即高亮第一个国家
+      if (this.highlightCountries.length > 0) {
+        this.highlightSpecificCountry(this.highlightCountries[0])
+      }
+    },
+    stopHighlight() {
+      if (this.highlightTimer) {
+        clearInterval(this.highlightTimer)
+        this.highlightTimer = null
+      }
+      this.isRotating = false
+      // 清除当前高亮
+      this.clearCurrentHighlight()
+    },
+    highlightNextCountry() {
+      if (this.highlightCountries.length === 0) return
+
+      this.currentHighlightIndex =
+        (this.currentHighlightIndex + 1) % this.highlightCountries.length
+      const countryName = this.highlightCountries[this.currentHighlightIndex]
+
+      this.highlightSpecificCountry(countryName)
+    },
+    highlightSpecificCountry(countryName) {
+      if (!this.chart) return
+
+      // 先清除之前所有可能的高亮（防止堆叠）
+      this.chart.dispatchAction({
+        type: 'downplay',
+        seriesIndex: 0
+      })
+
+      // 获取当前国家在数据中的索引
+      const dataIndex = this.chart.getModel().getSeriesByIndex(0).getData().indexOfName(countryName)
+
+      if (dataIndex > -1) {
+        // 高亮
+        this.chart.dispatchAction({
+          type: 'highlight',
+          seriesIndex: 0,
+          dataIndex: dataIndex
+        })
+
+        // 显式触发 Tooltip
+        this.chart.dispatchAction({
+          type: 'showTip',
+          seriesIndex: 0,
+          dataIndex: dataIndex
+        })
+      }
+    },
+    clearCurrentHighlight() {
+      this.chart.dispatchAction({
+        type: 'downplay',
+        seriesIndex: 0
+      })
+    },
+    bindChartEvents() {
+      this.chart.on('mouseover', (params) => {
+        if (this.outId) clearTimeout(this.outId)
+        if (params.seriesType === 'map') {
+          this.stopHighlight()
+          // 手动触发高亮显示背景色
+          this.chart.dispatchAction({
+            type: 'highlight',
+            seriesIndex: 0,
+            dataIndex: params.dataIndex
+          })
+        }
+      })
+
+      // 鼠标移出时恢复自动高亮
+      this.chart.on('mouseout', (params) => {
+        if (this.outId) clearTimeout(this.outId)
+        if (params.seriesType === 'map') {
+          // 先清除当前高亮
+          this.clearCurrentHighlight()
+          this.outId = setTimeout(() => {
+            this.startHighlight()
+          }, 3000) // 延迟3秒后恢复轮播
+        }
+      })
     },
     getChartOption() {
       const colorList = [
@@ -81,15 +202,11 @@ export default {
       const flowCenters = this.flowData || []
       const accountDataMap = this.accountDataMap || {}
 
-      // 收集所有已经有标签的国家名称，避免 hover 时重复显示
-      const labeledCountries = new Set()
+      // 收集所有center国家的名称，这些国家有蓝底白字的标签
+      // hover和自动循环时不显示黑底白字的emphasis标签，避免重叠
+      const centerCountries = new Set()
       flowCenters.forEach(center => {
-        labeledCountries.add(center.center)
-        if (center.flows) {
-          center.flows.forEach(flow => {
-            labeledCountries.add(flow[0].name)
-          })
-        }
+        centerCountries.add(center.center)
       })
 
       const convertData = function (data) {
@@ -148,12 +265,12 @@ export default {
         },
         zoom: 1.05,
         map: 'world',
-        // 为已有标签的国家单独禁用 hover 时的默认标签
-        data: Array.from(labeledCountries).map(name => ({
+        // 为center国家禁用hover时的默认标签，避免与蓝底白字标签重叠
+        data: Array.from(centerCountries).map(name => ({
           name: name,
           label: {
             emphasis: {
-              show: false,
+              show: false, // 禁用center国家的黑底白字标签
             },
           },
         })),

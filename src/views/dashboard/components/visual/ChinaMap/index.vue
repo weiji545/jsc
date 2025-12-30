@@ -21,7 +21,7 @@ export default {
       mainChart: null,
       highlightProvinces: [],
       currentHighlightIndex: 0,
-      highlightInterval: 3000,
+      highlightInterval: 30000,
       isRotating: false,
       highlightTimer: null,
       outId: null,
@@ -354,23 +354,24 @@ export default {
         if (this.outId) clearTimeout(this.outId)
         if (params.seriesType === 'map') {
           this.stopHighlight()
+          // 手动触发高亮显示变化
+          this.mainChart.dispatchAction({
+            type: 'highlight',
+            seriesIndex: 0,
+            dataIndex: params.dataIndex
+          })
         }
       })
 
-      // // 鼠标移出时恢复自动高亮
+      // 鼠标移出时恢复自动高亮
       this.mainChart.on('mouseout', (params) => {
         if (this.outId) clearTimeout(this.outId)
         if (params.seriesType === 'map') {
+          // 先清除当前高亮
+          this.clearCurrentHighlight()
           this.outId = setTimeout(() => {
             this.startHighlight()
           }, 3000) // 延迟3秒后恢复轮播
-        }
-      })
-
-      // // 点击省份时高亮该省份
-      this.mainChart.on('click', (params) => {
-        if (params.seriesType === 'map') {
-          this.highlightSpecificProvince(params.name)
         }
       })
 

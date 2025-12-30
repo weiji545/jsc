@@ -44,6 +44,24 @@ export const getWorldMapFlowData = () => {
         // [{ name: "埃及", value: 4000 }, { name: "俄罗斯" }]
       ],
     },
+    {
+      center: '美国',
+      flows: [
+      ],
+    },
+    {
+      center: '墨西哥',
+      flows: [
+      ],
+    },{
+      center: '法国',
+      flows: [
+      ],
+    },{
+      center: '哈萨克斯坦',
+      flows: [
+      ],
+    },
   ]
   return mockApi(data)
 }
@@ -53,18 +71,18 @@ export const getWorldMapFlowData = () => {
  */
 export const getWorldAccountData = () => {
   const accountDataMap = {
-    '尼日利亚': { count: 120, balance: '1,250,000.00' },
-    '美国洛杉矶': { count: 85, balance: '2,340,000.00' },
-    '香港邦泰': { count: 320, balance: '5,670,000.00' },
-    '美国芝加哥': { count: 64, balance: '1,890,000.00' },
-    '加纳库马西': { count: 45, balance: '980,000.00' },
-    '英国曼彻斯特': { count: 110, balance: '3,120,000.00' },
-    '德国汉堡': { count: 92, balance: '2,750,000.00' },
-    '哈萨克斯坦阿拉木图': { count: 38, balance: '1,150,000.00' },
-    '墨西哥': { count: 156, balance: '4,230,000.00' },
-    '加拿大温哥华': { count: 78, balance: '2,100,000.00' },
-    '中国': { count: 500, balance: '12,000,000.00' },
-    '俄罗斯': { count: 300, balance: '8,000,000.00' },
+    '尼日利亚': { count: 120, balance: 1250000 },
+    '美国': { count: 85, balance: 2340000 },
+    '法国': { count: 320, balance: 5670000 },
+    '美国芝加哥': { count: 64, balance: 1890000 },
+    '加纳库马西': { count: 45, balance: 980000 },
+    '英国曼彻斯特': { count: 110, balance: 3120000 },
+    '德国汉堡': { count: 92, balance: 2750000 },
+    '哈萨克斯坦': { count: 38, balance: 1150000 },
+    '墨西哥': { count: 156, balance: 4230000 },
+    '加拿大温哥华': { count: 78, balance: 2100000 },
+    '中国': { count: 500, balance: 12000000 },
+    '俄罗斯': { count: 300, balance: 8000000 },
   }
   return mockApi(accountDataMap)
 }

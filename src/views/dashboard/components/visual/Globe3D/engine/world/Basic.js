@@ -44,7 +44,7 @@ export class Basic {
     this.controls.autoRotateSpeed = 3
     this.controls.enableDamping = true
     this.controls.dampingFactor = 0.05
-    this.controls.enableZoom = true
+    this.controls.enableZoom = false // 禁用鼠标滚轮缩放
     this.controls.minDistance = 100
     this.controls.maxDistance = 300
     this.controls.enablePan = false

@@ -368,7 +368,7 @@ export default {
 
 .center-top-content {
   flex: 1;
-  overflow: auto;
+  overflow: hidden;
   min-height: 0;
   margin-top: 0; // 移除之前的 margin，因为 data-display 已经定位了
 }

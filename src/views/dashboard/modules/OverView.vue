@@ -231,7 +231,7 @@ export default {
       previousBalanceScope: 'domestic',
       balanceTime: ['day', '7'],
       trendTab: 'large',
-      centerBottomMode: 'b',
+      centerBottomMode: 'a',
       trendSort: { prop: '', order: '' },
       leftTopOrderByAsc: false,
 
