@@ -71,7 +71,7 @@ export const getWorldMapFlowData = () => {
  */
 export const getWorldAccountData = () => {
   const accountDataMap = {
-    '尼日利亚': { count: 120, balance: 1250000 },
+    '尼日利亚': { count: 120, balance: 1253000 },
     '美国': { count: 85, balance: 2340000 },
     '法国': { count: 320, balance: 5670000 },
     '美国芝加哥': { count: 64, balance: 1890000 },
