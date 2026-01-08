@@ -11,10 +11,14 @@
 <script>
 import * as echarts from 'echarts'
 import chinaJson from './china.json'
-import { getChinaMapData } from '../../../../api/dashboard'
-
 export default {
   name: 'ChinaMap',
+  props: {
+    mapData: {
+      type: Array,
+      default: () => [],
+    },
+  },
   data() {
     return {
       highlightProvinces: [],
@@ -24,11 +28,13 @@ export default {
       highlightTimer: null,
       outId: null,
       geojsonData: null,
-      mapData: [],
+      // mapData: [], // Removed as it is now a prop
     }
   },
   mounted() {
-    this.fetchData()
+    if (this.mapData && this.mapData.length) {
+      this.initMaps()
+    }
     window.addEventListener('resize', this.handleResize)
   },
   beforeDestroy() {
@@ -57,6 +63,14 @@ export default {
         this.updateThemeColors()
       },
     },
+    mapData: {
+      handler(val) {
+        if (val && val.length) {
+          this.initMaps()
+        }
+      },
+      deep: true,
+    },
   },
   methods: {
     getThemeTitleColor() {
@@ -81,17 +95,7 @@ export default {
         })
       }
     },
-    async fetchData() {
-      try {
-        const res = await getChinaMapData()
-        if (res.code === 200) {
-          this.mapData = res.data
-          this.initMaps()
-        }
-      } catch (error) {
-        console.error('Failed to fetch China map data:', error)
-      }
-    },
+    // fetchData() removed as data is now provided via props
     async initMaps() {
       // 注册地图数据
       echarts.registerMap('china', chinaJson)

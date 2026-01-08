@@ -49,6 +49,16 @@ import { flyArc } from '../utils/arc'
 export default class Earth {
   constructor(options) {
     this.options = options
+    
+    // 如果是数组结构，转换为以 name (中文名) 为 key 的对象 map，方便后续高效匹配
+    if (Array.isArray(this.options.globeCountryData)) {
+      this.dataMap = this.options.globeCountryData.reduce((acc, item) => {
+        if (item.name) acc[item.name] = item
+        return acc
+      }, {})
+    } else {
+      this.dataMap = this.options.globeCountryData || {}
+    }
 
     this.group = new Group()
     this.group.name = 'group'
@@ -276,17 +286,11 @@ export default class Earth {
 
   // 判断区域是否应该渲染（有数据或开关允许渲染空数据）
   shouldRenderRegion(region) {
-    const { globeCountryData, renderEmptyCountry = false } = this.options || {}
-    if (!globeCountryData || !region || !region.name) return false
+    const { renderEmptyCountry = false } = this.options || {}
+    if (!this.dataMap || !region || !region.name) return false
 
-    // 通过 chineseName 匹配
-    let payload = null
-    for (const key in globeCountryData) {
-      if (globeCountryData[key].chineseName === region.name) {
-        payload = globeCountryData[key]
-        break
-      }
-    }
+    // 通过 name (中文名) 匹配
+    const payload = this.dataMap[region.name]
 
     if (!payload) return false
 
@@ -786,17 +790,11 @@ export default class Earth {
   }
 
   getRegionPayload(region) {
-    const { globeCountryData, renderEmptyCountry = false } = this.options || {}
-    if (!globeCountryData || !region || !region.name) return null
+    const { renderEmptyCountry = false } = this.options || {}
+    if (!this.dataMap || !region || !region.name) return null
 
-    // 通过 chineseName 匹配（region.name 是中文名）
-    let payload = null
-    for (const key in globeCountryData) {
-      if (globeCountryData[key].chineseName === region.name) {
-        payload = globeCountryData[key]
-        break
-      }
-    }
+    // 通过 name (中文名) 匹配
+    const payload = this.dataMap[region.name]
 
     if (!payload) return null
 
@@ -826,7 +824,7 @@ export default class Earth {
         <div style="color: #a0d8ef;">账户数量</div>
         <div style="color: #fff; font-weight: 600; text-align: right;">${countText}</div>
         <div style="color: #a0d8ef;">账户余额</div>
-        <div style="color: #fff; font-weight: 600; text-align: right;">${balanceText}</div>
+        <div style="color: #fff; font-weight: 600; text-align: right;">${balanceText}万</div>
       </div>
     `
   }

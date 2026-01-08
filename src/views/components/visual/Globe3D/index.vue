@@ -22,33 +22,35 @@
 
 <script>
 import { World } from './engine'
-import { getOverviewData } from '../../../../api/dashboard'
 
 export default {
   name: 'Globe3D',
+  props: {
+    globeCountryData: {
+      type: [Object, Array],
+      default: () => ({}),
+    },
+  },
   data() {
     return {
       renderEmptyCountry: false,
-      globeCountryData: {},
       isDestroyed: false,
     }
   },
-  mounted() {
-    this.fetchData()
+  watch: {
+    globeCountryData: {
+      handler(val) {
+        if (val && !this.world) {
+          const hasData = Array.isArray(val) ? val.length > 0 : Object.keys(val).length > 0
+          if (hasData) {
+            this.initWorld()
+          }
+        }
+      },
+      immediate: true,
+    },
   },
   methods: {
-    async fetchData() {
-      try {
-        const res = await getOverviewData()
-        if (this.isDestroyed) return
-        if (res.code === 200) {
-          this.globeCountryData = res.data.globeCountryData
-          this.initWorld()
-        }
-      } catch (error) {
-        console.error('Failed to fetch globe data:', error)
-      }
-    },
     initWorld() {
       this.$nextTick(() => {
         if (this.isDestroyed) return

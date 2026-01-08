@@ -122,10 +122,10 @@ export default {
       })
     },
     updateScale() {
-      const vw = window.innerWidth
-      const vh = window.innerHeight
-      // 优先保证宽度占满屏幕，允许垂直滚动
-      const scale = vw / this.baseWidth
+      // 获取当前组件根元素的宽度，以适应可能的嵌套环境
+      const containerWidth = this.$el ? this.$el.clientWidth : window.innerWidth
+      // 优先保证宽度占满容器，允许垂直滚动
+      const scale = containerWidth / this.baseWidth
       this.scale = Number(scale.toFixed(4))
       // 水平方向不需要偏移，垂直方向贴近顶部，避免下方空白
       this.offsetX = 0
@@ -141,8 +141,8 @@ export default {
 
 <style lang="scss" scoped>
 .dashboard-outer {
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
   //background: linear-gradient( 90deg, #08194E 0%, #083391 51%, #000F35 100%), #FFFFFF;

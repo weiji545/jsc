@@ -6,10 +6,18 @@
 import * as echarts from 'echarts'
 import worldJson from './world.json'
 import { geoCoordMap } from './geo-coords.js'
-import { getWorldMapFlowData, getWorldAccountData } from '../../../../api/dashboard'
-
 export default {
   name: 'WorldMap',
+  props: {
+    flowDataProp: {
+      type: Array,
+      default: () => [],
+    },
+    accountDataProp: {
+      type: Object,
+      default: () => ({}),
+    },
+  },
   data() {
     return {
       flowData: [],
@@ -24,7 +32,7 @@ export default {
   },
   mounted() {
     this.initChart()
-    this.fetchData()
+    this.processData()
     window.addEventListener('resize', this.handleResize)
   },
   beforeDestroy() {
@@ -36,39 +44,41 @@ export default {
       this.chart = null
     }
   },
-  methods: {
-    async fetchData() {
-      try {
-        const [flowRes, accountRes] = await Promise.all([
-          getWorldMapFlowData(),
-          getWorldAccountData(),
-        ])
-
-        if (flowRes.code === 200) {
-          this.flowData = flowRes.data || []
-        }
-        if (accountRes.code === 200) {
-          this.accountDataMap = accountRes.data || {}
-        }
-
-        // 将accountRes有数据的国家添加到flowData中
-        if (this.flowData && this.accountDataMap) {
-          const existingCenters = new Set(this.flowData.map(item => item.center))
-          Object.keys(this.accountDataMap).forEach(countryName => {
-            if (!existingCenters.has(countryName)) {
-              this.flowData.push({
-                center: countryName,
-                flows: []
-              })
-            }
-          })
-        }
-
-        this.updateChart()
-      } catch (error) {
-        console.error('Failed to fetch world map data:', error)
-      }
+  watch: {
+    flowDataProp: {
+      handler() {
+        this.processData()
+      },
+      deep: true,
     },
+    accountDataProp: {
+      handler() {
+        this.processData()
+      },
+      deep: true,
+    },
+  },
+  methods: {
+    processData() {
+      this.flowData = this.flowDataProp || []
+      this.accountDataMap = this.accountDataProp || {}
+
+      // 将accountRes有数据的国家添加到flowData中
+      if (this.flowData && this.accountDataMap) {
+        const existingCenters = new Set(this.flowData.map((item) => item.center))
+        Object.keys(this.accountDataMap).forEach((countryName) => {
+          if (!existingCenters.has(countryName)) {
+            this.flowData.push({
+              center: countryName,
+              flows: [],
+            })
+          }
+        })
+      }
+
+      this.updateChart()
+    },
+    // fetchData removed
     initChart() {
       if (!this.$refs.chartContainer) return
 
@@ -397,7 +407,7 @@ export default {
                 <div style="font-size: 15px; font-weight: bold; margin-bottom: 6px; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px;">${name}</div>
                 <div style="line-height: 22px;">
                   <span style="color: #2AB8FF;">账户数量:</span> <span style="float: right; margin-left: 20px;">${data.count}</span><br/>
-                  <span style="color: #2AB8FF;">账户余额:</span> <span style="float: right; margin-left: 20px;">￥${data.balance}</span>
+                  <span style="color: #2AB8FF;">账户余额:</span> <span style="float: right; margin-left: 20px;">${data.balance}</span>
                 </div>
               `
             }

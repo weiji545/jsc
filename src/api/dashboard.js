@@ -165,68 +165,58 @@ export const getOverviewData = () => {
       { name: '泰铢', value: 45 },
     ],
     // 地球3D国家数据
-    globeCountryData: {
-      China: {
-        name: 'China',
-        chineseName: '中国',
+    globeCountryData: [
+      {
+        name: '中国',
         accounts: 12500,
         balance: 125680.5,
       },
-      'United States of America': {
-        name: 'United States of America',
-        chineseName: '美国',
+      {
+        name: '美国',
         accounts: 15230,
         balance: 234567.8,
       },
-      Russia: {
-        name: 'Russia',
-        chineseName: '俄罗斯',
+      {
+        name: '俄罗斯',
         accounts: 5670,
         balance: 34567.9,
       },
-      Canada: {
-        name: 'Canada',
-        chineseName: '加拿大',
+      {
+        name: '加拿大',
         accounts: 4120,
         balance: 28765.4,
       },
-      'United Kingdom': {
-        name: 'United Kingdom',
-        chineseName: '英国',
+      {
+        name: '英国',
         accounts: 3890,
         balance: 19876.3,
       },
-      France: {
-        name: 'France',
-        chineseName: '法国',
+      {
+        name: '法国',
         accounts: 3450,
         balance: 18765.2,
       },
-      Germany: {
-        name: 'Germany',
-        chineseName: '德国',
+      {
+        name: '德国',
         accounts: 4320,
         balance: 23456.9,
       },
-      Japan: {
-        name: 'Japan',
-        chineseName: '日本',
+      {
+        name: '日本',
         accounts: 5670,
         balance: 45678.1,
       },
-      'South Korea': {
-        name: 'South Korea',
-        chineseName: '韩国',
+      {
+        name: '韩国',
         accounts: 2890,
         balance: 23456.7,
       },
-      India: {
-        name: 'India',
-        chineseName: '印度',
+      {
+        name: '印度',
         accounts: 6780,
         balance: 34567.8,
       },
-    },
+    ],
   }
   return mockApi(overviewData)
 }

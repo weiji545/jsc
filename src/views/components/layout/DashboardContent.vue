@@ -244,7 +244,7 @@ export default {
   gap: 15px;
   padding: 15px;
   overflow: hidden;
-  height: calc(100vh - 80px);
+  height: calc(100% - 80px);
 }
 
 // 左侧区域：固定宽度 455px
@@ -283,7 +283,11 @@ export default {
   position: relative;
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.05);
+  background-color: rgba(255, 255, 255, 0.05);
+  background-image: url("../../img/earth-bg.png");
+  background-size: 100% 237px;
+  background-position-y: bottom;
+  background-repeat: no-repeat;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   padding: 20px;

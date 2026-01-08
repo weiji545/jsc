@@ -45,7 +45,13 @@
     <template #center-top>
       <div class="core-top">
 
-        <CoreOverviewPanel :scope="balanceScope" :time="balanceTime"/>
+        <CoreOverviewPanel
+          :scope="balanceScope"
+          :globe-country-data="overview.globeCountryData"
+          :china-map-data="chinaMapData"
+          :world-map-flow-data="worldMapFlowData"
+          :world-account-data="worldAccountData"
+        />
         <FilterTabs
           :scope="balanceScope"
           :scope-options="balanceScopes"
@@ -153,6 +159,9 @@ import {
   getRegionList,
   getExchangeRates,
   getTrendData,
+  getChinaMapData,
+  getWorldMapFlowData,
+  getWorldAccountData,
 } from '../../api/dashboard'
 import { formatNumber } from '../../utils/utils.js'
 
@@ -197,9 +206,13 @@ export default {
         rightTopLines: [],
         rightMiddle: { categories: [], bar: [], line: [] },
         balanceRing: [],
+        globeCountryData: [],
       },
       regionList: [],
       exchangeRates: [],
+      chinaMapData: [],
+      worldMapFlowData: [],
+      worldAccountData: {},
       trendData: {
         trade: { categories: [], bar: [], line: [] },
         large: { categories: [], bar: [], line: [] },
@@ -489,12 +502,15 @@ export default {
     },
     async fetchData() {
       try {
-        const [overviewRes, baseRes, regionRes, exchangeRes, trendRes] = await Promise.all([
+        const [overviewRes, baseRes, regionRes, exchangeRes, trendRes, chinaRes, flowRes, accountRes] = await Promise.all([
           getOverviewData(),
           getBaseDataList(),
           getRegionList(this.leftTopOrderByAsc),
           getExchangeRates(),
           getTrendData(this.trendSort),
+          getChinaMapData(),
+          getWorldMapFlowData(),
+          getWorldAccountData(),
         ])
 
         if (overviewRes.code === 200) this.overview = overviewRes.data
@@ -502,6 +518,9 @@ export default {
         if (regionRes.code === 200) this.regionList = regionRes.data
         if (exchangeRes.code === 200) this.exchangeRates = exchangeRes.data
         if (trendRes.code === 200) this.trendData = trendRes.data
+        if (chinaRes.code === 200) this.chinaMapData = chinaRes.data
+        if (flowRes.code === 200) this.worldMapFlowData = flowRes.data
+        if (accountRes.code === 200) this.worldAccountData = accountRes.data
       } catch (error) {
         console.error('Failed to fetch overview data:', error)
       }
