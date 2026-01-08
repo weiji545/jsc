@@ -294,12 +294,12 @@ export default class Earth {
 
     if (!payload) return false
 
-    // 如果 accounts 或 balance 有一个为空，根据开关决定是否渲染
-    const hasAccounts = payload.accounts !== null && payload.accounts !== undefined
+    // 如果 count 或 balance 有一个为空，根据开关决定是否渲染
+    const hasCount = payload.count !== null && payload.count !== undefined
     const hasBalance = payload.balance !== null && payload.balance !== undefined
 
     // 两个值都有值，或者开关允许渲染空数据
-    return (hasAccounts && hasBalance) || renderEmptyCountry
+    return (hasCount && hasBalance) || renderEmptyCountry
   }
 
   async createMarkupPoint() {
@@ -798,11 +798,11 @@ export default class Earth {
 
     if (!payload) return null
 
-    // 如果 accounts 或 balance 有一个为空，根据开关决定是否返回
-    const hasAccounts = payload.accounts !== null && payload.accounts !== undefined
+    // 如果 count 或 balance 有一个为空，根据开关决定是否返回
+    const hasCount = payload.count !== null && payload.count !== undefined
     const hasBalance = payload.balance !== null && payload.balance !== undefined
 
-    if ((!hasAccounts || !hasBalance) && !renderEmptyCountry) {
+    if ((!hasCount || !hasBalance) && !renderEmptyCountry) {
       return null
     }
 
@@ -813,7 +813,7 @@ export default class Earth {
     const payload = this.getRegionPayload(region)
     if (!payload) return ''
 
-    const accountCount = payload.accountCount ?? payload.accounts
+    const accountCount = payload.accountCount ?? payload.count
     const accountBalance = payload.accountBalance ?? payload.balance
 
     const countText = this.formatNumber(accountCount)

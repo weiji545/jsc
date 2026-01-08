@@ -1,18 +1,18 @@
 <template>
   <div class="core-panel">
     <transition name="fade" mode="out-in">
-      <Globe3D 
-        v-if="scope === 'global'" 
+      <Globe3D
+        v-if="scope === 'global'"
         key="globe-3d"
         :globe-country-data="globeCountryData"
       />
-      <ChinaMap 
-        v-else-if="scope === 'domestic'" 
+      <ChinaMap
+        v-else-if="scope === 'domestic'"
         key="china-map"
         :map-data="chinaMapData"
       />
-      <WorldMap 
-        v-else-if="scope === 'overseas'" 
+      <WorldMap
+        v-else-if="scope === 'overseas'"
         key="world-map"
         :flow-data-prop="worldMapFlowData"
         :account-data-prop="worldAccountData"
@@ -47,8 +47,8 @@ export default {
       default: () => [],
     },
     worldAccountData: {
-      type: Object,
-      default: () => ({}),
+      type: Array,
+      default: () => [],
     },
   },
 }

@@ -19,7 +19,7 @@
         <el-table :data="tableData" size="small" style="width:100%" max-height="170px" @sort-change="handleSortChange">
           <el-table-column align="center" header-align="center" prop="index" label="序号" width="78" :formatter="formatIndex"></el-table-column>
           <el-table-column align="center" header-align="center" prop="payer" label="付款账户" sortable="custom"></el-table-column>
-          <el-table-column align="center" header-align="center" prop="payee" label="收款帐户" sortable="custom"></el-table-column>
+          <el-table-column align="center" header-align="center" prop="payee" label="收款账户" sortable="custom"></el-table-column>
           <el-table-column align="center" header-align="center" prop="amount" label="付款金额(万元)" :formatter="formatTableAmount" sortable="custom"></el-table-column>
           <el-table-column align="center" header-align="center" prop="date" label="支付日期" sortable="custom"></el-table-column>
         </el-table>

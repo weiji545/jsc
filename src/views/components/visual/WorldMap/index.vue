@@ -60,10 +60,19 @@ export default {
   },
   methods: {
     processData() {
-      this.flowData = this.flowDataProp || []
-      this.accountDataMap = this.accountDataProp || {}
+      this.flowData = JSON.parse(JSON.stringify(this.flowDataProp || []))
+      
+      // 如果 accountDataProp 是数组，转换为以 name 为 key 的对象 Map，方便后续展示和匹配
+      if (Array.isArray(this.accountDataProp)) {
+        this.accountDataMap = this.accountDataProp.reduce((acc, item) => {
+          if (item.name) acc[item.name] = item
+          return acc
+        }, {})
+      } else {
+        this.accountDataMap = this.accountDataProp || {}
+      }
 
-      // 将accountRes有数据的国家添加到flowData中
+      // 将 accountDataMap 有数据的国家添加到 flowData 中，确保地图上有蓝点和标签
       if (this.flowData && this.accountDataMap) {
         const existingCenters = new Set(this.flowData.map((item) => item.center))
         Object.keys(this.accountDataMap).forEach((countryName) => {
@@ -407,7 +416,7 @@ export default {
                 <div style="font-size: 15px; font-weight: bold; margin-bottom: 6px; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px;">${name}</div>
                 <div style="line-height: 22px;">
                   <span style="color: #2AB8FF;">账户数量:</span> <span style="float: right; margin-left: 20px;">${data.count}</span><br/>
-                  <span style="color: #2AB8FF;">账户余额:</span> <span style="float: right; margin-left: 20px;">${data.balance}</span>
+                  <span style="color: #2AB8FF;">账户余额:</span> <span style="float: right; margin-left: 20px;">${data.balance}万</span>
                 </div>
               `
             }

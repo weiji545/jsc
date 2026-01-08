@@ -41,7 +41,7 @@ export default {
     window.removeEventListener('resize', this.handleResize)
     if (this.highlightTimer) clearInterval(this.highlightTimer)
     if (this.outId) clearTimeout(this.outId)
-    
+
     // Dispose ECharts instances to prevent memory leaks
     if (this.shadowChart) {
       this.shadowChart.dispose()
@@ -110,9 +110,9 @@ export default {
 
       // 将 API 数据与所有省份对齐，增加模糊匹配鲁棒性
       const finalData = allProvinces.map(name => {
-        const item = (this.mapData || []).find(d => 
-          name === d.name || 
-          name.startsWith(d.name) || 
+        const item = (this.mapData || []).find(d =>
+          name === d.name ||
+          name.startsWith(d.name) ||
           d.name.startsWith(name)
         )
         // 保持 name 为 GeoJSON 中的标准名称，合并业务数据
@@ -337,7 +337,7 @@ export default {
                 // },
                 areaColor: null,
                 borderColor: '#FFB600',
-                borderWidth: 3,
+                borderWidth: 1.5,
                 shadowColor: 'rgba(255,221,51,0.5)',
                 shadowBlur: 10,
               },
@@ -350,7 +350,7 @@ export default {
       this.mainChart.setOption(mainOption)
       this.bindChartEvents()
       this.startHighlight()
-      
+
       this.$nextTick(() => {
         if (this.shadowChart) {
           this.shadowChart.resize()

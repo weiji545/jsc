@@ -4,6 +4,7 @@
     :panelsConfig="panelsConfigComputed"
     :centerBottomMode.sync="centerBottomMode"
     :centerPeriod.sync="centerPeriodSync"
+    :scope="balanceScope"
   >
     <!-- 左上 账户数量统计 -->
     <template #left-top>
@@ -47,10 +48,10 @@
 
         <CoreOverviewPanel
           :scope="balanceScope"
-          :globe-country-data="overview.globeCountryData"
+          :globe-country-data="globeCountryData"
           :china-map-data="chinaMapData"
-          :world-map-flow-data="worldMapFlowData"
-          :world-account-data="worldAccountData"
+          :world-map-flow-data="[]"
+          :world-account-data="globeCountryData"
         />
         <FilterTabs
           :scope="balanceScope"
@@ -189,12 +190,6 @@ export default {
         startBsnDate: '',
         endBsnDate: '',
       },
-
-      // ========== 图片资源 ==========
-      ranking1: null,
-      ranking2: null,
-      ranking3: null,
-
       // ========== 基础数据 ==========
       baseDataList: [],
       overview: {
@@ -206,13 +201,11 @@ export default {
         rightTopLines: [],
         rightMiddle: { categories: [], bar: [], line: [] },
         balanceRing: [],
-        globeCountryData: [],
       },
+      globeCountryData: [],
       regionList: [],
       exchangeRates: [],
       chinaMapData: [],
-      worldMapFlowData: [],
-      worldAccountData: {},
       trendData: {
         trade: { categories: [], bar: [], line: [] },
         large: { categories: [], bar: [], line: [] },
@@ -409,7 +402,7 @@ export default {
       return raw.map((v, idx) => ({
         index: idx + 1,
         payer: `付款账户${idx + 1}`,
-        payee: `收款帐户${idx + 1}`,
+        payee: `收款账户${idx + 1}`,
         amount: Number((v || 0).toFixed(2)),
         date: '2025-12-24',
       }))
@@ -457,6 +450,57 @@ export default {
         }
       },
     },
+    // 计算标准的时间范围返回值
+    standardizedTimeRange() {
+      const now = new Date()
+      // 辅助函数：格式化日期
+      const format = (date) => {
+        const y = date.getFullYear()
+        const m = String(date.getMonth() + 1).padStart(2, '0')
+        const d = String(date.getDate()).padStart(2, '0')
+        return `${y}-${m}-${d}`
+      }
+      // 辅助函数：获取上个月的第一天和最后一天
+      const getLastMonthRange = (baseDate) => {
+        const firstDay = new Date(baseDate.getFullYear(), baseDate.getMonth() - 1, 1)
+        const lastDay = new Date(baseDate.getFullYear(), baseDate.getMonth(), 0)
+        return { startDate: format(firstDay), endDate: format(lastDay) }
+      }
+
+      const mode = this.balanceTime[0]
+      const subType = this.balanceTime[1]
+
+      if (mode === 'day') {
+        // 当按'天'时, 不论选择的是哪天,startDate和endDate分别为当前(new Date())上个月的第一天 and 最后一天
+        return getLastMonthRange(now)
+      } else if (mode === 'month') {
+        if (subType === 'month') {
+          // 选择'近一月'startDate和endDate 分别为当前(new Date())上个月的第一天和最后一天
+          return getLastMonthRange(now)
+        } else if (subType === 'year') {
+          // 选择'近一年'时 为当年第一天 和 当天
+          const firstDay = new Date(now.getFullYear(), 0, 1)
+          return { startDate: format(firstDay), endDate: format(now) }
+        } else if (subType === 'customizedMonth') {
+          // 选择'自定义月'时, 为结束月份 的第一天和最后一天(如果是当月 则选择当天 不能超过当天)
+          if (!this.customTimeRange || !this.customTimeRange.endBsnDate) {
+            return { startDate: '', endDate: '' }
+          }
+          const endBsnDate = new Date(this.customTimeRange.endBsnDate)
+          const firstDay = new Date(endBsnDate.getFullYear(), endBsnDate.getMonth(), 1)
+          let lastDay
+          if (endBsnDate.getFullYear() === now.getFullYear() && endBsnDate.getMonth() === now.getMonth()) {
+            // 如果是当月 则选择当天
+            lastDay = now
+          } else {
+            // 结束月份 的最后一天
+            lastDay = new Date(endBsnDate.getFullYear(), endBsnDate.getMonth() + 1, 0)
+          }
+          return { startDate: format(firstDay), endDate: format(lastDay) }
+        }
+      }
+      return { startDate: '', endDate: '' }
+    },
   },
   watch: {
     // 监听统计范围的变化
@@ -471,6 +515,12 @@ export default {
         this.updateData(this.balanceScope)
       },
       deep: true,
+    },
+    // 监听币种切换
+    '$store.state.currency.selectedCurrency': {
+      handler(val) {
+        console.log('[Currency Change] 币种已切换为:', val)
+      },
     },
   },
   mounted() {
@@ -488,13 +538,13 @@ export default {
      */
     async updateData(scope) {
       console.log(`[UpdateData] Scope: ${scope}, Time:`, this.balanceTime)
-      
+
       // 此处可以根据 scope 或 time 执行特定的前置逻辑
       // 比如在特定模式下才开启某些实时推送，或预处理某些参数
-      
+
       // 调用通用的数据获取接口
       await this.fetchData()
-      
+
       // 如果有仅在特定范围（如境内）才需要调用的额外接口，可以在下面判断
       if (scope === 'domestic') {
         // await this.fetchSpecificDomesticData()
@@ -502,25 +552,25 @@ export default {
     },
     async fetchData() {
       try {
-        const [overviewRes, baseRes, regionRes, exchangeRes, trendRes, chinaRes, flowRes, accountRes] = await Promise.all([
+        const [overviewRes, baseRes, regionRes, exchangeRes, trendRes, chinaRes] = await Promise.all([
           getOverviewData(),
           getBaseDataList(),
           getRegionList(this.leftTopOrderByAsc),
           getExchangeRates(),
           getTrendData(this.trendSort),
           getChinaMapData(),
-          getWorldMapFlowData(),
-          getWorldAccountData(),
         ])
 
-        if (overviewRes.code === 200) this.overview = overviewRes.data
+        if (overviewRes.code === 200) {
+          const { globeCountryData, ...rest } = overviewRes.data
+          this.overview = rest
+          this.globeCountryData = globeCountryData || []
+        }
         if (baseRes.code === 200) this.baseDataList = baseRes.data
         if (regionRes.code === 200) this.regionList = regionRes.data
         if (exchangeRes.code === 200) this.exchangeRates = exchangeRes.data
         if (trendRes.code === 200) this.trendData = trendRes.data
         if (chinaRes.code === 200) this.chinaMapData = chinaRes.data
-        if (flowRes.code === 200) this.worldMapFlowData = flowRes.data
-        if (accountRes.code === 200) this.worldAccountData = accountRes.data
       } catch (error) {
         console.error('Failed to fetch overview data:', error)
       }

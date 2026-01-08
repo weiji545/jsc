@@ -89,6 +89,10 @@ export default {
           }
         },
         disabledDate: (time) => {
+          // 不能选超过当天的日期
+          if (time.getTime() > Date.now()) {
+            return true
+          }
           if (!this.choiceDate) return false
           const choice = new Date(this.choiceDate)
           return (
@@ -105,6 +109,11 @@ export default {
           }
         },
         disabledDate: (time) => {
+          const now = new Date()
+          // 不能选择超过当前月
+          if (time.getFullYear() > now.getFullYear() || (time.getFullYear() === now.getFullYear() && time.getMonth() > now.getMonth())) {
+            return true
+          }
           if (!this.choiceDate) return false
           const choice = new Date(this.choiceDate)
           return time.getFullYear() !== choice.getFullYear()
@@ -142,17 +151,15 @@ export default {
         const now = new Date()
         if (lastId === 'month') {
           const first = new Date(now.getFullYear(), now.getMonth(), 1)
-          const last = new Date(now.getFullYear(), now.getMonth() + 1, 0)
           this.$emit('change-custom-time', {
             startBsnDate: this.formatDate(first),
-            endBsnDate: this.formatDate(last),
+            endBsnDate: this.formatDate(now),
           })
         } else if (lastId === 'year') {
           const first = new Date(now.getFullYear(), 0, 1)
-          const last = new Date(now.getFullYear(), 11, 31)
           this.$emit('change-custom-time', {
             startBsnDate: this.formatDate(first),
-            endBsnDate: this.formatDate(last),
+            endBsnDate: this.formatDate(now),
           })
         } else if (lastId === '7') {
           const start = new Date()
@@ -170,8 +177,16 @@ export default {
         let start = val[0]
         let end = val[1]
         if (this.showTimeRangeType === 2) {
-          // 月份模式，结束日期取当月最后一天
-          end = this.getLastDayOfMonth(end)
+          // 月份模式
+          const endDate = new Date(end)
+          const now = new Date()
+          if (endDate.getFullYear() === now.getFullYear() && endDate.getMonth() === now.getMonth()) {
+            // 选择当前月的时候 endBsnDate返回的应该是当天
+            end = this.formatDate(now)
+          } else {
+            // 否则取当月最后一天
+            end = this.getLastDayOfMonth(end)
+          }
         }
         const payload = {
           startBsnDate: start,

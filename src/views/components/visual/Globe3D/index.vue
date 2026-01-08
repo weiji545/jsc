@@ -57,13 +57,14 @@ export default {
         const dom = this.$refs.earthCanvas
         if (!dom) {
           return
+
         }
         this.world = new World({
           dom,
           globeCountryData: this.globeCountryData,
           renderEmptyCountry: this.renderEmptyCountry,
         })
-        
+
         // Hide loading after initialization
         this.$nextTick(() => {
           if (this.$refs.loading) {

@@ -36,7 +36,7 @@
     <!-- 中间区域：50% -->
     <div class="content-center">
       <!-- 核心区域（上方） -->
-      <div class="center-top">
+      <div :class="['center-top', { 'has-global-bg': scope === 'global' || scope === 'overseas' }]">
         <!-- 数据展示区域 -->
         <div class="data-display">
           <div class="data-item" v-for="(item, index) in dataList" :key="index">
@@ -64,8 +64,11 @@
           <template #title-tabs>
             <div class="title-tabs-wrapper">
               <div class="period-switch">
-                <label><input type="radio" name="centerPeriod" value="day" v-model="centerPeriodComputed"/>天</label>
-                <label><input type="radio" name="centerPeriod" value="month" v-model="centerPeriodComputed"/>月</label>
+                <span style="opacity: 0.7">时间维度:</span>
+                <span v-show="centerPeriodComputed === 'day'">天</span>
+                <span v-show="centerPeriodComputed === 'month'">月</span>
+<!--                <label><input type="radio" name="centerPeriod" value="day" v-model="centerPeriodComputed"/>天</label>-->
+<!--                <label><input type="radio" name="centerPeriod" value="month" v-model="centerPeriodComputed"/>月</label>-->
               </div>
               <div class="text-toggle">
                 <button type="button" :class="['text-btn', { selected: centerBottomModeComputed === 'a' }]" @click="centerBottomModeComputed = 'a'">
@@ -158,6 +161,11 @@ export default {
     panelsConfig: {
       type: Object,
       default: () => ({}),
+    },
+    // scope: 当前统计维度 (global/domestic/overseas)
+    scope: {
+      type: String,
+      default: 'global',
     },
   },
   computed: {
@@ -269,11 +277,14 @@ export default {
 }
 
 .period-switch {
-  cursor: not-allowed;
-
-  label, input {
-    pointer-events: none;
+  span {
+    font-size: 14px;
   }
+  //cursor: not-allowed;
+  //
+  //label, input {
+  //  pointer-events: none;
+  //}
 }
 
 // 核心区域（上方）
@@ -284,15 +295,18 @@ export default {
   display: flex;
   flex-direction: column;
   background-color: rgba(255, 255, 255, 0.05);
-  background-image: url("../../img/earth-bg.png");
-  background-size: 100% 237px;
-  background-position-y: bottom;
-  background-repeat: no-repeat;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   padding: 20px;
   overflow: hidden;
   backdrop-filter: blur(10px);
+
+  &.has-global-bg {
+    background-image: url("../../img/earth-bg.png");
+    background-size: 100% 237px;
+    background-position-y: calc(100% - 20px);
+    background-repeat: no-repeat;
+  }
 }
 
 // 数据展示区域

@@ -168,52 +168,52 @@ export const getOverviewData = () => {
     globeCountryData: [
       {
         name: '中国',
-        accounts: 12500,
+        count: 12500,
         balance: 125680.5,
       },
       {
         name: '美国',
-        accounts: 15230,
+        count: 15230,
         balance: 234567.8,
       },
       {
         name: '俄罗斯',
-        accounts: 5670,
+        count: 5670,
         balance: 34567.9,
       },
       {
         name: '加拿大',
-        accounts: 4120,
+        count: 4120,
         balance: 28765.4,
       },
       {
         name: '英国',
-        accounts: 3890,
+        count: 3890,
         balance: 19876.3,
       },
       {
         name: '法国',
-        accounts: 3450,
+        count: 3450,
         balance: 18765.2,
       },
       {
         name: '德国',
-        accounts: 4320,
+        count: 4320,
         balance: 23456.9,
       },
       {
         name: '日本',
-        accounts: 5670,
+        count: 5670,
         balance: 45678.1,
       },
       {
         name: '韩国',
-        accounts: 2890,
+        count: 2890,
         balance: 23456.7,
       },
       {
         name: '印度',
-        accounts: 6780,
+        count: 6780,
         balance: 34567.8,
       },
     ],
