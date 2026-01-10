@@ -10,7 +10,7 @@
         <span class="core-label">{{ opt.label }}</span>
       </div>
     </div>
-    <div class="core-options">
+    <div class="core-options" :style="{flex: showTimeRangeType > 0 ? 2.5 : 1}">
       <el-cascader
         v-model="innerTime"
         class="accent-select"
@@ -116,7 +116,11 @@ export default {
           }
           if (!this.choiceDate) return false
           const choice = new Date(this.choiceDate)
-          return time.getFullYear() !== choice.getFullYear()
+          // 必须在同一年内，且不允许选择相同的月份（必须跨月）
+          return (
+            time.getFullYear() !== choice.getFullYear() ||
+            time.getMonth() === choice.getMonth()
+          )
         },
       },
     }
@@ -129,7 +133,7 @@ export default {
   computed: {
     // 根据当前选中货币返回用于展示的 dataList
     showTimeRangeType() {
-      const lastId = this.innerTime.at(-1)
+      const lastId = this.innerTime[this.innerTime.length - 1]
       return ['customizedDay', 'customizedMonth'].indexOf(lastId) + 1
     },
   },
@@ -150,10 +154,11 @@ export default {
         const lastId = value[1]
         const now = new Date()
         if (lastId === 'month') {
-          const first = new Date(now.getFullYear(), now.getMonth(), 1)
+          const first = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+          const last = new Date(now.getFullYear(), now.getMonth(), 0)
           this.$emit('change-custom-time', {
             startBsnDate: this.formatDate(first),
-            endBsnDate: this.formatDate(now),
+            endBsnDate: this.formatDate(last),
           })
         } else if (lastId === 'year') {
           const first = new Date(now.getFullYear(), 0, 1)
@@ -223,7 +228,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 100px;
+  padding: 0 60px;
 
   ::v-deep .el-cascader {
     width: 150px;
@@ -232,7 +237,8 @@ export default {
 
 .core-radios {
   display: flex;
-  gap: 100px;
+  flex: 2;
+  justify-content: space-evenly;
 }
 
 .core-radio {
@@ -242,6 +248,7 @@ export default {
   cursor: pointer;
   color: #9EC7F0; // Default dark unselected
   font-size: 14px;
+  justify-content: space-between;
 
   .is-light-mode & {
     color: var(--color-label-light, #666666); // Light unselected
@@ -285,7 +292,8 @@ export default {
 
 .core-options {
   display: flex;
-  gap: 20px;
+  justify-content: space-evenly;
+  flex: 1;
 
   ::v-deep .el-date-editor.el-input {
     width: 173px;

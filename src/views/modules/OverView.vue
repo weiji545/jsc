@@ -253,6 +253,7 @@ export default {
           label: '按天',
           children: [
             { value: '7', label: '近7天' },
+            { value: 'month', label: '近一月' },
             { value: 'customizedDay', label: '自定义天' },
           ],
         },
@@ -260,7 +261,6 @@ export default {
           value: 'month',
           label: '按月',
           children: [
-            { value: 'month', label: '近一月' },
             { value: 'year', label: '近一年' },
             { value: 'customizedMonth', label: '自定义月' },
           ],
@@ -517,10 +517,9 @@ export default {
       deep: true,
     },
     // 监听币种切换
-    '$store.state.currency.selectedCurrency': {
-      handler(val) {
-        console.log('[Currency Change] 币种已切换为:', val)
-      },
+    '$store.state.currency.selectedCurrency'(val) {
+      console.log('[Currency Change] 币种已切换为:', val)
+      // 可以在此处添加逻辑，比如手动刷新某些非响应式数据
     },
   },
   mounted() {
@@ -618,6 +617,10 @@ export default {
       } catch (e) {
         console.error('Failed to fetch sorted region list:', e)
       }
+    },
+    handleResize() {
+      // 用于手动触发图表 resize (如果需要)
+      // 子组件通常已通过 ResizeObserver 处理
     },
   },
 }

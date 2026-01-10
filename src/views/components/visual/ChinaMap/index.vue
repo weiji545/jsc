@@ -27,6 +27,7 @@ export default {
       isRotating: false,
       highlightTimer: null,
       outId: null,
+      initTimerId: null,
       geojsonData: null,
       // mapData: [], // Removed as it is now a prop
     }
@@ -41,6 +42,7 @@ export default {
     window.removeEventListener('resize', this.handleResize)
     if (this.highlightTimer) clearInterval(this.highlightTimer)
     if (this.outId) clearTimeout(this.outId)
+    if (this.initTimerId) clearTimeout(this.initTimerId)
 
     // Dispose ECharts instances to prevent memory leaks
     if (this.shadowChart) {
@@ -119,12 +121,14 @@ export default {
         return item ? { ...item, name } : { name, value: 0 }
       })
 
-      // 提取前三名作为轮播重点
+      // 提取前三名作为轮播重点（只轮播有余额的城市）
       this.highlightProvinces = finalData
-        .slice()
+        .filter(item => item.value > 0)
         .sort((a, b) => b.value - a.value)
         .slice(0, 3)
         .map(item => item.name);
+
+      this.currentHighlightIndex = 0;
 
       // ========== 初始化阴影地图 ==========
       const shadowDom = this.$refs.shadowMap
@@ -349,7 +353,6 @@ export default {
 
       this.mainChart.setOption(mainOption)
       this.bindChartEvents()
-      this.startHighlight()
 
       this.$nextTick(() => {
         if (this.shadowChart) {
@@ -358,15 +361,22 @@ export default {
         if (this.mainChart) {
           this.mainChart.resize()
         }
+        
+        // 延迟启动轮播，确保地图完全渲染完成
+        if (this.initTimerId) clearTimeout(this.initTimerId)
+        this.initTimerId = setTimeout(() => {
+          this.startHighlight()
+          this.initTimerId = null
+        }, 500)
       })
     },
     formatNumber(num) {
-      if (num >= 100000000) {
-        return (num / 100000000).toFixed(1) + '亿'
-      } else if (num >= 10000) {
-        return (num / 10000).toFixed(1) + '万'
-      }
-      return num.toString()
+      // if (num >= 100000000) {
+      //   return (num / 100000000).toFixed(1) + '亿'
+      // } else if (num >= 10000) {
+      //   return (num / 10000).toFixed(1) + '万'
+      // }
+      return num.toString().toFixed(2) + '万'
     },
     bindChartEvents() {
       this.mainChart.on('mouseover', (params) => {
@@ -414,6 +424,9 @@ export default {
     startHighlight() {
       this.stopHighlight()
 
+      // 确保从第一个省份开始
+      this.currentHighlightIndex = 0
+      
       this.isRotating = true
       this.highlightTimer = setInterval(() => {
         this.highlightNextProvince()
@@ -429,8 +442,6 @@ export default {
         this.highlightTimer = null
       }
       this.isRotating = false
-      // 清除当前高亮
-      this.clearCurrentHighlight()
     },
     highlightNextProvince() {
       if (this.highlightProvinces.length === 0) return
@@ -443,6 +454,12 @@ export default {
     },
     highlightSpecificProvince(provinceName) {
       if (!this.mainChart) return
+      
+      // 验证省份是否在轮播列表中
+      if (!this.highlightProvinces.includes(provinceName)) {
+        console.warn('[ChinaMap] Province not in highlight list:', provinceName)
+        return
+      }
 
       // 先清除之前所有可能的高亮（防止堆叠）
       this.mainChart.dispatchAction({
@@ -467,12 +484,20 @@ export default {
           seriesIndex: 0,
           dataIndex: dataIndex
         });
+      } else {
+        console.warn('[ChinaMap] Province not found in map data:', provinceName)
       }
     },
     clearCurrentHighlight() {
+      if (!this.mainChart) return
+      
       this.mainChart.dispatchAction({
         type: 'downplay',
         seriesIndex: 0,
+      })
+      
+      this.mainChart.dispatchAction({
+        type: 'hideTip'
       })
     },
     handleResize() {

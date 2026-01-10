@@ -1,5 +1,8 @@
 <template>
-  <div :style="{ width: width ? width + 'px' : '100%', height: height + 'px' }" ref="chartRoot"></div>
+  <div class="echart-bar-line-wrapper" :style="{ width: width ? width + 'px' : '100%', height: height + 'px' }">
+    <div ref="chartRoot" style="width: 100%; height: 100%;"></div>
+    <div v-if="isDataEmpty" class="no-data-text" :style="{ color: axisLabelColor }">暂无数据</div>
+  </div>
 </template>
 
 <script>
@@ -145,6 +148,16 @@ export default {
       _themePoll: null,
     }
   },
+  computed: {
+    isDataEmpty() {
+      const barEmpty = !this.barData || this.barData.length === 0
+      const lineEmpty = !this.lineData || this.lineData.length === 0
+      return barEmpty && lineEmpty
+    },
+    axisLabelColor() {
+      return this._lastAxisLabelColor || '#9E9E9E'
+    },
+  },
   mounted() {
     this.$nextTick(() => {
       this.initChart()
@@ -244,6 +257,10 @@ export default {
     },
     updateChart() {
       if (!this.chart) return
+      if (this.isDataEmpty) {
+        this.chart.clear()
+        return
+      }
       const effectiveLegendName = (this.options && this.options.legendName) || this.legendName || '账户余额'
       const effectiveSeries2Name = (this.options && this.options.series2Name) || this.series2Name || '交易笔数'
 
@@ -329,7 +346,15 @@ export default {
         xAxis: {
           type: 'category',
           data: this.categories || [],
-          axisLabel: { color: '#9E9E9E' },
+          axisLabel: {
+            color: '#9E9E9E',
+            formatter: function (value) {
+              if (value && value.length > 3) {
+                return value.substring(0, 3) + '...'
+              }
+              return value
+            },
+          },
           axisLine: {
             show: true,
             lineStyle: { color: '#636363' },
@@ -427,8 +452,16 @@ export default {
 </script>
 
 <style scoped>
-div {
-  width: 100%
+.echart-bar-line-wrapper {
+  position: relative;
+}
+.no-data-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 14px;
+  font-weight: bold;
 }
 </style>
 

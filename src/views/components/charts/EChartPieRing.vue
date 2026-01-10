@@ -152,20 +152,47 @@ export default {
       // 为 legend/tooltip 格式化使用当前 data 的值，通过闭包传入 dataList
       const dataList = this.data || []
       const unit = this.unit || ''
+      
+      // 统一判定“空”数据的辅助函数
+      const isEmpty = (v) => v === null || v === undefined || v === ''
+
+      let totalValue = 0
+      dataList.forEach(d => {
+        if (!isEmpty(d.value)) {
+          totalValue += Number(d.value)
+        }
+      })
+
       const legendFormatter = function (name) {
         const it = dataList.find((d) => d.name === name)
-        return it ? `${name} ${it.value}` : name
+        if (!it) return name
+        const displayValue = isEmpty(it.value) ? '-' : it.value
+        
+        // ECharts 4.8.0 不支持 overflow: 'truncate'，在此处手动处理截断
+        let displayName = name
+        // 阈值设为 6，大约对应原本设置的 width: 50
+        if (displayName && displayName.length > 3) {
+          displayName = displayName.substring(0, 3) + '..'
+        }
+        
+        // 使用 rich 文本标记，配合 legend.textStyle.rich 进行对齐
+        return `{name|${displayName}} {value|${displayValue}}`
       }
       const defaultOption = {
         tooltip: {
           trigger: 'item',
           formatter: function (params) {
             // params: 单点数据对象
-            const value = params.data && typeof params.data.value !== 'undefined' ? params.data.value : params.value
+            // 获取原始数值以便判定是否显示 '-'
+            const rawValue = params.data && Object.prototype.hasOwnProperty.call(params.data, 'originalValue') 
+              ? params.data.originalValue 
+              : params.value
+            
+            const displayValue = isEmpty(rawValue) ? '-' : rawValue
             const unitStr = unit ? ' ' + unit : ''
             const str = `
               ${params.name}</br>
-              数量: ${value}${unitStr}</br>
+              数量: ${displayValue}${unitStr}</br>
               占比: ${params.percent}%
               `
             // ${params.marker}
@@ -177,14 +204,44 @@ export default {
           show: true,
           type: 'scroll',
           orient: 'vertical',
-          left: '76%',
+          left: '74%',
           align: 'left',
           top: 'middle',
+          itemWidth: 14,
+          itemHeight: 14,
           formatter: legendFormatter,
           textStyle: {
             color: this.getThemeColors(),
+            fontSize: 12,
+            rich: {
+              name: {
+                width: 36,
+              },
+              value: {
+                width: 36,
+              },
+            },
           },
-          height: 180,
+          // 开启 legend tooltip，方便用户看到被截断的完整文字
+          tooltip: {
+            show: true,
+            formatter: function (params) {
+              const name = params.name
+              const it = dataList.find((d) => d.name === name)
+              if (!it) return name
+              const displayValue = isEmpty(it.value) ? '-' : it.value
+              const unitStr = unit ? ' ' + unit : ''
+
+              let percentStr = '0.00%'
+              const valNum = !isEmpty(it.value) ? Number(it.value) : 0
+              if (totalValue > 0) {
+                percentStr = ((valNum / totalValue) * 100).toFixed(2) + '%'
+              }
+
+              return `${name}<br/>数量: ${displayValue}${unitStr}<br/>占比: ${percentStr}`
+            },
+          },
+          height: '85%', // 增加纵向可用高度
           pageButtonItemGap: 5,
           pageButtonGap: 10,
           pageIconColor: '#29F1FA',
@@ -201,10 +258,15 @@ export default {
             type: 'pie',
             radius: isDonut ? ['38%', '63%'] : ['0%', '63%'],
             center: ['38%', '53%'],
-            avoidLabelOverlap: false,
+            avoidLabelOverlap: true,
             label: {
               show: true,
-              formatter: '{b}: {d}%',
+              formatter: (params) => {
+                const rawValue = params.data && Object.prototype.hasOwnProperty.call(params.data, 'originalValue')
+                  ? params.data.originalValue
+                  : params.value
+                return isEmpty(rawValue) ? `${params.name}: -` : `${params.name}: ${params.percent}%`
+              },
               color: this.getThemeColors(),
             },
             labelLine: {
@@ -219,7 +281,11 @@ export default {
               '#93BEFF',
               '#283E81',
             ],
-            data: this.data,
+            data: dataList.map(it => ({
+              ...it,
+              originalValue: it.value,
+              value: isEmpty(it.value) ? 0 : it.value
+            })),
           },
         ],
       }

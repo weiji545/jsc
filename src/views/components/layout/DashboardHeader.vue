@@ -102,8 +102,7 @@ export default {
       } catch (e) {
         return true
       }
-    }
-    ,
+    },
     // 货币使用 Vuex 全局状态，computed 双向绑定以便 v-model 使用
     currency: {
       get() {

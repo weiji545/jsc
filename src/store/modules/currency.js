@@ -40,6 +40,9 @@ const getters = {
   },
   // 返回一个函数用于将 baseAmount 转换为当前选中货币
   convert: (state) => (baseAmount) => {
+    if (baseAmount === null || baseAmount === undefined || baseAmount === '') {
+      return baseAmount
+    }
     const rate = state.rates[state.selectedCurrency] || 1
     return Number(baseAmount) * rate
   },
