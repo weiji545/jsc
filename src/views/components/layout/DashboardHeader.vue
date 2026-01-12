@@ -50,7 +50,7 @@
         style="width: 100px; margin: 0 10px;"
       >
         <el-option label="RMB" value="RMB"></el-option>
-        <el-option label="DOLLAR" value="DOLLAR"></el-option>
+        <el-option label="USD" value="USD" disabled></el-option>
       </el-select>
 
       <!-- 深色模式切换 -->

@@ -44,7 +44,17 @@ export default {
       this.chart = null
     }
   },
+  computed: {
+    isDarkMode() {
+      return this.$store.getters['theme/isDarkMode']
+    }
+  },
   watch: {
+    isDarkMode: {
+      handler() {
+        this.updateThemeColors()
+      },
+    },
     flowDataProp: {
       handler() {
         this.processData()
@@ -59,6 +69,28 @@ export default {
     },
   },
   methods: {
+    getThemeTitleColor() {
+      try {
+        const isLight = !this.$store.getters['theme/isDarkMode']
+        const rootStyle = getComputedStyle(document.documentElement)
+        const titleLight = rootStyle.getPropertyValue('--color-title-light').trim() || '#181818'
+        const titleDark = rootStyle.getPropertyValue('--color-title-dark').trim() || '#FFFFFF'
+        return isLight ? titleLight : titleDark
+      } catch (e) {
+        return '#FFFFFF'
+      }
+    },
+    updateThemeColors() {
+      if (this.chart) {
+        this.chart.setOption({
+          visualMap: {
+            textStyle: {
+              color: this.getThemeTitleColor(),
+            },
+          },
+        })
+      }
+    },
     processData() {
       this.flowData = JSON.parse(JSON.stringify(this.flowDataProp || []))
       
@@ -248,6 +280,18 @@ export default {
 
       let series = []
 
+      // 准备地图数据 - 包含所有有账户数据的国家及其余额
+      const mapData = Object.entries(accountDataMap).map(([name, data]) => ({
+        name: name,
+        value: data.balance || 0,
+        count: data.count || 0,
+        label: {
+          emphasis: {
+            show: false, // 禁用center国家的黑底白字标签
+          },
+        },
+      }))
+
       // 添加底图系列
       series.push({
         type: 'map',
@@ -279,20 +323,16 @@ export default {
             padding: [2, 4],
             borderRadius: 2,
           },
-          areaColor: 'rgb(46,229,206)',
-          borderWidth: 0.1,
+          areaColor: null, // 使用visualMap的颜色
+          borderWidth: 1.5,
+          borderColor: '#FFB600',
+          shadowColor: 'rgba(255,221,51,0.5)',
+          shadowBlur: 10,
         },
         zoom: 1.05,
         map: 'world',
-        // 为center国家禁用hover时的默认标签，避免与蓝底白字标签重叠
-        data: Array.from(centerCountries).map(name => ({
-          name: name,
-          label: {
-            emphasis: {
-              show: false, // 禁用center国家的黑底白字标签
-            },
-          },
-        })),
+        // 为所有国家设置数据，包含余额信息
+        data: mapData,
       })
 
       flowCenters.forEach((item) => {
@@ -398,6 +438,40 @@ export default {
 
       return {
         backgroundColor: 'transparent',
+        visualMap: {
+          show: true,
+          type: 'piecewise',
+          pieces: [
+            {
+              min: 0,
+              max: 50000000,
+              label: '0-5000万',
+              color: 'rgba(78,156,239,0.9)',
+            },
+            {
+              min: 50000001,
+              max: 100000000,
+              label: '5000万-1亿',
+              color: 'rgba(38,92,224,0.9)',
+            },
+            {
+              min: 100000001,
+              max: 300000000,
+              label: '1亿-3亿',
+              color: 'rgba(24,66,161,0.9)',
+            },
+            { min: 300000001, label: '3亿以上', color: 'rgba(0,34,110,0.9)' },
+          ],
+          textStyle: {
+            color: this.getThemeTitleColor(),
+            fontSize: 12,
+          },
+          left: '0',
+          bottom: 'left',
+          itemWidth: 20,
+          itemHeight: 20,
+          itemGap: 6,
+        },
         tooltip: {
           trigger: 'item',
           backgroundColor: 'rgba(0, 0, 0, 0.7)',
@@ -416,7 +490,7 @@ export default {
                 <div style="font-size: 15px; font-weight: bold; margin-bottom: 6px; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px;">${name}</div>
                 <div style="line-height: 22px;">
                   <span style="color: #2AB8FF;">账户数量:</span> <span style="float: right; margin-left: 20px;">${data.count}</span><br/>
-                  <span style="color: #2AB8FF;">账户余额:</span> <span style="float: right; margin-left: 20px;">${data.balance}万</span>
+                  <span style="color: #2AB8FF;">账户余额:</span> <span style="float: right; margin-left: 20px;">${(data.balance / 10000).toFixed(2)} 万元</span>
                 </div>
               `
             }

@@ -23,6 +23,7 @@
     <!-- 左中 账户区域统计（列表展示） -->
     <template #left-middle>
       <RegionRankList
+        :key="`region-${balanceScope}-${fakeUpdateKey}`"
         :data="convertedRegionPie"
         :order-by-asc.sync="leftTopOrderByAsc"
         @change-order="handleRegionSortChange"
@@ -240,6 +241,7 @@ export default {
       centerBottomMode: 'a',
       trendSort: { prop: '', order: '' },
       leftTopOrderByAsc: false,
+      fakeUpdateKey: Date.now(), // 用于强制重新渲染区域统计
 
       // ========== 选项配置 ==========
       balanceScopes: [
@@ -581,6 +583,8 @@ export default {
         this.previousBalanceScope = val
       }
       this.balanceScope = val
+      // 更新 fakeUpdateKey 以强制重新渲染区域统计组件
+      this.fakeUpdateKey = Date.now()
     },
     handleCustomTimeChange(payload) {
       this.customTimeRange = payload
