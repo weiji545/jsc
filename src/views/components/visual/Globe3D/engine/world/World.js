@@ -62,7 +62,7 @@ export default class World {
       textures: this.resources.textures,
       earth: {
         radius: 50,
-        rotateSpeed: 0.001, // 自转速度
+        rotateSpeed: 0.002, // 自转速度
         isRotation: true
       },
       satellite: {

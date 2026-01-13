@@ -35,6 +35,8 @@ export class Basic {
     this.renderer.domElement.style.display = 'block'
     this.renderer.domElement.style.width = '100%'
     this.renderer.domElement.style.height = '100%'
+    this.renderer.domElement.style.position = 'relative'
+    this.renderer.domElement.style.zIndex = '1'
     this.dom.appendChild(this.renderer.domElement)
   }
 

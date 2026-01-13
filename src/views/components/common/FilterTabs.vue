@@ -12,6 +12,7 @@
     </div>
     <div class="core-options" :style="{flex: showTimeRangeType > 0 ? 2.5 : 1}">
       <el-cascader
+        :key="`cascader-${isDarkMode}`"
         v-model="innerTime"
         class="accent-select"
         :options="timeOptions"
@@ -23,6 +24,7 @@
       <template v-if="showTimeRangeType > 0">
         <div v-if="showTimeRangeType === 1">
           <el-date-picker
+            :key="`daterange-${isDarkMode}`"
             v-model="timeValue"
             class="accent-select"
             value-format="yyyy-MM-dd"
@@ -33,12 +35,14 @@
             end-placeholder="结束日期"
             :picker-options="pickerOptionsDate"
             :popper-class="isDarkMode ? 'filter-date-popper dark-mode' : 'filter-date-popper'"
-            @focus="choiceDate = null"
+            @focus="onDatePickerFocus"
+            @blur="onDatePickerBlur"
             @change="onRangeChange">
           </el-date-picker>
         </div>
         <div v-if="showTimeRangeType === 2">
           <el-date-picker
+            :key="`monthrange-${isDarkMode}`"
             v-model="timeValue"
             class="accent-select"
             value-format="yyyy-MM-dd"
@@ -47,9 +51,11 @@
             range-separator="-"
             start-placeholder="开始月份"
             end-placeholder="结束月份"
+            :default-value="defaultMonthRangeValue"
             :picker-options="pickerOptionsMonth"
             :popper-class="isDarkMode ? 'filter-date-popper dark-mode' : 'filter-date-popper'"
-            @focus="choiceDate = null"
+            @focus="onDatePickerFocus"
+            @blur="onDatePickerBlur"
             @change="onRangeChange">
           </el-date-picker>
         </div>
@@ -86,6 +92,7 @@ export default {
       innerTime: this.time,
       timeValue: '',
       choiceDate: null,
+      pickerBackdrop: null,
       pickerOptionsDate: {
         onPick: ({ maxDate, minDate }) => {
           this.choiceDate = minDate ? minDate.getTime() : null
@@ -115,10 +122,27 @@ export default {
         },
         disabledDate: (time) => {
           const now = new Date()
+          const currentYear = now.getFullYear()
+          const currentMonth = now.getMonth() // 0-11
+          
           // 不能选择超过当前月
-          if (time.getFullYear() > now.getFullYear() || (time.getFullYear() === now.getFullYear() && time.getMonth() > now.getMonth())) {
+          if (time.getFullYear() > currentYear || (time.getFullYear() === currentYear && time.getMonth() > currentMonth)) {
             return true
           }
+          
+          // 不能选择当月
+          if (time.getFullYear() === currentYear && time.getMonth() === currentMonth) {
+            return true
+          }
+          
+          // 如果当前是1月或2月（3月之前），禁止选择当年的1月和2月
+          // 此时选择时间应从上一年开始
+          if (currentMonth < 2) { // 0=1月, 1=2月
+            if (time.getFullYear() === currentYear && time.getMonth() < 2) {
+              return true
+            }
+          }
+          
           if (!this.choiceDate) return false
           const choice = new Date(this.choiceDate)
           // 必须在同一年内，且不允许选择相同的月份（必须跨月）
@@ -135,6 +159,9 @@ export default {
       this.innerTime = val
     },
   },
+  beforeDestroy() {
+    this.removePickerBackdrop()
+  },
   computed: {
     isDarkMode() {
       try {
@@ -148,8 +175,66 @@ export default {
       const lastId = this.innerTime[this.innerTime.length - 1]
       return ['customizedDay', 'customizedMonth'].indexOf(lastId) + 1
     },
+    // 月份范围选择器的默认显示值：左侧显示去年，右侧显示今年
+    defaultMonthRangeValue() {
+      const now = new Date()
+      const currentYear = now.getFullYear()
+      // 左侧面板显示去年1月，右侧面板显示今年1月
+      return [new Date(currentYear - 1, 0, 1), new Date(currentYear, 0, 1)]
+    },
   },
   methods: {
+    // 日期选择器获得焦点时创建遮罩层
+    onDatePickerFocus() {
+      this.choiceDate = null
+      this.createPickerBackdrop()
+    },
+    // 日期选择器失去焦点时移除遮罩层
+    onDatePickerBlur() {
+      this.removePickerBackdrop()
+    },
+    // 创建遮罩层以捕获点击事件
+    createPickerBackdrop() {
+      if (this.pickerBackdrop) return
+      
+      this.pickerBackdrop = document.createElement('div')
+      this.pickerBackdrop.className = 'date-picker-backdrop'
+      this.pickerBackdrop.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 10000;
+        background: transparent;
+        pointer-events: auto;
+      `
+      
+      // 点击遮罩层时关闭弹窗
+      this.pickerBackdrop.addEventListener('click', this.handleBackdropClick)
+      
+      document.body.appendChild(this.pickerBackdrop)
+    },
+    // 移除遮罩层
+    removePickerBackdrop() {
+      if (this.pickerBackdrop) {
+        this.pickerBackdrop.removeEventListener('click', this.handleBackdropClick)
+        if (this.pickerBackdrop.parentNode) {
+          this.pickerBackdrop.parentNode.removeChild(this.pickerBackdrop)
+        }
+        this.pickerBackdrop = null
+      }
+    },
+    // 处理遮罩层点击
+    handleBackdropClick(e) {
+      // 检查点击是否在弹窗内部
+      const popper = document.querySelector('.filter-date-popper')
+      if (popper && !popper.contains(e.target)) {
+        // 触发 blur 事件以关闭弹窗
+        const inputs = document.querySelectorAll('.core-filter-bar .el-date-editor input')
+        inputs.forEach(input => input.blur())
+      }
+    },
     // 切换范围
     onScopeClick(value) {
       console.log('change-scope', value)
@@ -394,7 +479,7 @@ export default {
 <style lang="scss">
 // Cascader 下拉框样式
 .filter-cascader-popper {
-  z-index: 20000 !important;
+  z-index: 99999 !important;
 }
 
 // 深色模式下的 Cascader 下拉框
@@ -433,7 +518,7 @@ export default {
 
 // Date Picker 下拉框样式
 .filter-date-popper {
-  z-index: 20000 !important;
+  z-index: 99999 !important;
 }
 
 // 深色模式下的 Date Picker 下拉框

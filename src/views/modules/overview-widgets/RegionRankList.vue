@@ -226,6 +226,10 @@ export default {
   font-weight: 600;
 }
 
+.region-paged ::v-deep .el-carousel__item {
+  align-items: flex-start;
+}
+
 .region-paged ::v-deep .slide-row {
   flex-direction: column;
   gap: 2px;

@@ -31,7 +31,7 @@ export default {
     },
     interval: {
       type: Number,
-      default: 3000,
+      default: 30000,
     },
     loop: {
       type: Boolean,

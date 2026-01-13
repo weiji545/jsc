@@ -275,7 +275,7 @@ export default {
             fontSize: 12,
           },
           left: '0',
-          bottom: 'left',
+          bottom: '70px',
           itemWidth: 20,
           itemHeight: 20,
           itemGap: 6,

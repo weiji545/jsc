@@ -102,6 +102,8 @@ export default {
 .earth-canvas {
   width: 100%;
   height: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 .css3d-wapper {
