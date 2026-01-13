@@ -46,7 +46,7 @@
         v-model="currency"
         size="small"
         :popper-append-to-body="true"
-        popper-class="jsc-highest-popper"
+        :popper-class="isDarkMode ? 'jsc-highest-popper dark-mode' : 'jsc-highest-popper'"
         style="width: 100px; margin: 0 10px;"
       >
         <el-option label="RMB" value="RMB"></el-option>
@@ -406,28 +406,80 @@ export default {
   }
 }
 
-.accent-select {
+// 深色模式下的下拉框样式
+.is-dark .accent-select {
   ::v-deep .el-input__inner {
-    background: #142765; // rgba(0, 152, 250, 0.45);
+    background: #142765;
     border: 1px solid #0098FA;
     color: #BCDEFF;
     font-size: 14px;
-    //background: linear-gradient(135deg, rgba(0, 212, 255, 0.25), rgba(91, 141, 239, 0.25));
-    //color: #fff;
-    //border-color: rgba(0, 212, 255, 0.5);
   }
 
   ::v-deep .el-input__suffix {
     color: #fff;
   }
 }
+
+// 浅色模式下的下拉框样式（使用默认样式）
+.is-light .accent-select {
+  ::v-deep .el-input__inner {
+    font-size: 14px;
+  }
+}
 </style>
 
 <style lang="scss">
+// 所有下拉框的基础样式
 .jsc-highest-popper,
 .jsc-highest-popper.el-popper,
 .jsc-highest-popper.el-select-dropdown {
   z-index: 20000 !important;
+}
+
+// 深色模式下的下拉框样式
+.jsc-highest-popper.dark-mode,
+.jsc-highest-popper.dark-mode.el-popper,
+.jsc-highest-popper.dark-mode.el-select-dropdown {
+  background: #142765 !important;
+  border: 1px solid #0098FA !important;
+
+  .popper__arrow {
+    border-bottom-color: #0098FA;
+    
+    &::after {
+      border-bottom-color: #142765 !important;
+    }
+  }
+
+  .el-select-dropdown__item {
+    color: #BCDEFF !important;
+    background: transparent !important;
+
+    &:hover {
+      background: rgba(0, 152, 250, 0.2) !important;
+      color: #FFFFFF !important;
+    }
+
+    &.selected {
+      color: #FFFFFF !important;
+      font-weight: bold;
+      background: rgba(0, 152, 250, 0.3) !important;
+    }
+
+    &.is-disabled {
+      color: rgba(188, 222, 255, 0.4) !important;
+      cursor: not-allowed;
+      background: transparent !important;
+    }
+  }
+
+  .el-select-dropdown__wrap {
+    background: transparent !important;
+  }
+
+  .el-scrollbar__view {
+    background: transparent !important;
+  }
 }
 </style>
 

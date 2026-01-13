@@ -1,5 +1,5 @@
 <template>
-  <div class="core-filter-bar">
+  <div class="core-filter-bar" :class="{ 'is-dark': isDarkMode, 'is-light': !isDarkMode }">
     <div class="core-radios">
       <div
         v-for="opt in scopeOptions"
@@ -16,6 +16,7 @@
         class="accent-select"
         :options="timeOptions"
         :props="{ expandTrigger: 'hover' }"
+        :popper-class="isDarkMode ? 'filter-cascader-popper dark-mode' : 'filter-cascader-popper'"
         @change="onTimeChange">
       </el-cascader>
 
@@ -23,6 +24,7 @@
         <div v-if="showTimeRangeType === 1">
           <el-date-picker
             v-model="timeValue"
+            class="accent-select"
             value-format="yyyy-MM-dd"
             :clearable="false"
             type="daterange"
@@ -30,6 +32,7 @@
             start-placeholder="开始日期"
             end-placeholder="结束日期"
             :picker-options="pickerOptionsDate"
+            :popper-class="isDarkMode ? 'filter-date-popper dark-mode' : 'filter-date-popper'"
             @focus="choiceDate = null"
             @change="onRangeChange">
           </el-date-picker>
@@ -37,6 +40,7 @@
         <div v-if="showTimeRangeType === 2">
           <el-date-picker
             v-model="timeValue"
+            class="accent-select"
             value-format="yyyy-MM-dd"
             type="monthrange"
             :clearable="false"
@@ -44,6 +48,7 @@
             start-placeholder="开始月份"
             end-placeholder="结束月份"
             :picker-options="pickerOptionsMonth"
+            :popper-class="isDarkMode ? 'filter-date-popper dark-mode' : 'filter-date-popper'"
             @focus="choiceDate = null"
             @change="onRangeChange">
           </el-date-picker>
@@ -131,6 +136,13 @@ export default {
     },
   },
   computed: {
+    isDarkMode() {
+      try {
+        return !!(this.$store && this.$store.getters['theme/isDarkMode'])
+      } catch (e) {
+        return true
+      }
+    },
     // 根据当前选中货币返回用于展示的 dataList
     showTimeRangeType() {
       const lastId = this.innerTime[this.innerTime.length - 1]
@@ -299,36 +311,342 @@ export default {
     width: 173px;
   }
 
-
-  ::v-deep .el-input__inner {
-    background: #142765; // rgba(0, 152, 250, 0.45);
-    border: 1px solid #0098FA;
-    color: #BCDEFF;
-    font-size: 14px;
-    padding-right: 10px;
-    max-width: 220px;
-
-    .el-range-separator {
+  // 深色模式下的输入框样式
+  .is-dark & {
+    ::v-deep .el-input__inner {
+      background: #142765;
+      border: 1px solid #0098FA;
       color: #BCDEFF;
-      padding: 0;
+      font-size: 14px;
+      padding-right: 10px;
+      max-width: 220px;
+
+      .el-range-separator {
+        color: #BCDEFF;
+        padding: 0;
+      }
+
+      .el-range__close-icon {
+        width: 0;
+      }
     }
 
-    .el-range__close-icon {
-      width: 0;
+    ::v-deep .el-date-editor .el-range-input {
+      background: #142765;
+      color: #BCDEFF;
+      font-size: 14px;
+    }
+
+    ::v-deep .el-input__suffix {
+      color: #fff;
     }
   }
 
-  ::v-deep .el-date-editor .el-range-input {
-    background: #142765; // rgba(0, 152, 250, 0.45);
-    color: #BCDEFF;
-    font-size: 14px;
-  }
+  // 浅色模式下的输入框样式（使用默认样式）
+  .is-light & {
+    ::v-deep .el-input__inner {
+      font-size: 14px;
+      padding-right: 10px;
+      max-width: 220px;
+    }
 
-  ::v-deep .el-input__suffix {
-    color: #fff;
+    ::v-deep .el-date-editor .el-range-input {
+      font-size: 14px;
+    }
+  }
+}
+
+// 深色模式下的 accent-select 样式
+.core-filter-bar.is-dark {
+  .accent-select {
+    ::v-deep .el-input__inner {
+      background: #142765 !important;
+      border: 1px solid #0098FA !important;
+      color: #BCDEFF !important;
+    }
+
+    ::v-deep .el-input__suffix {
+      color: #fff !important;
+    }
+
+    ::v-deep .el-date-editor .el-range-input {
+      background: #142765 !important;
+      color: #BCDEFF !important;
+    }
+
+    ::v-deep .el-range-separator {
+      color: #BCDEFF !important;
+    }
+  }
+}
+
+// 浅色模式下的 accent-select 样式（使用默认样式）
+.core-filter-bar.is-light {
+  .accent-select {
+    ::v-deep .el-input__inner {
+      font-size: 14px;
+    }
   }
 }
 
 </style>
 
+<style lang="scss">
+// Cascader 下拉框样式
+.filter-cascader-popper {
+  z-index: 20000 !important;
+}
 
+// 深色模式下的 Cascader 下拉框
+.filter-cascader-popper.dark-mode {
+  background: #142765 !important;
+  border: 1px solid #0098FA !important;
+
+  .el-cascader-menu {
+    background: transparent !important;
+    border-right: 1px solid rgba(0, 152, 250, 0.3) !important;
+  }
+
+  .el-cascader-node {
+    color: #BCDEFF !important;
+
+    &:hover {
+      background: rgba(0, 152, 250, 0.2) !important;
+    }
+
+    &.in-active-path,
+    &.is-active {
+      color: #FFFFFF !important;
+      font-weight: bold;
+    }
+
+    &.is-disabled {
+      color: rgba(188, 222, 255, 0.4) !important;
+      cursor: not-allowed;
+    }
+  }
+
+  .el-cascader-menu__wrap {
+    background: transparent !important;
+  }
+}
+
+// Date Picker 下拉框样式
+.filter-date-popper {
+  z-index: 20000 !important;
+}
+
+// 深色模式下的 Date Picker 下拉框
+.filter-date-popper.dark-mode {
+  background: #142765 !important;
+  border: 1px solid #0098FA !important;
+
+  .el-picker-panel__body-wrapper {
+    background: transparent !important;
+  }
+
+  .el-date-range-picker__content {
+    background: transparent !important;
+  }
+
+  .el-picker-panel__content {
+    background: transparent !important;
+  }
+
+  // 头部（年月选择）
+  .el-date-range-picker__header,
+  .el-picker-panel__icon-btn {
+    color: #BCDEFF !important;
+  }
+
+  .el-date-picker__header-label {
+    color: #BCDEFF !important;
+
+    &:hover {
+      color: #FFFFFF !important;
+    }
+  }
+
+  // 星期标题
+  .el-date-table th {
+    color: #BCDEFF !important;
+    border-bottom: 1px solid rgba(0, 152, 250, 0.3) !important;
+  }
+
+  // 日期单元格
+  .el-date-table td {
+    color: #BCDEFF !important;
+
+    &.available:hover {
+      color: #FFFFFF !important;
+      background: rgba(0, 152, 250, 0.2) !important;
+    }
+
+    &.today span {
+      color: #00d4ff !important;
+      font-weight: bold;
+    }
+
+    &.current:not(.disabled) span {
+      background: rgba(0, 152, 250, 0.5) !important;
+      color: #FFFFFF !important;
+    }
+
+    &.start-date span,
+    &.end-date span {
+      background: rgba(0, 152, 250, 0.5) !important;
+      color: #FFFFFF !important;
+    }
+
+    &.in-range div,
+    &.in-range div:hover {
+      background: rgba(0, 152, 250, 0.2) !important;
+    }
+
+    &.disabled {
+      color: rgba(188, 222, 255, 0.3) !important;
+      background: transparent !important;
+
+      span {
+        background: transparent !important;
+        color: rgba(188, 222, 255, 0.3) !important;
+      }
+
+      div {
+        background: transparent !important;
+        color: rgba(188, 222, 255, 0.3) !important;
+      }
+
+      &:hover {
+        background: transparent !important;
+        color: rgba(188, 222, 255, 0.3) !important;
+      }
+    }
+
+    &.prev-month,
+    &.next-month {
+      color: rgba(188, 222, 255, 0.4) !important;
+    }
+  }
+
+  // 月份选择器
+  .el-month-table td {
+    color: #BCDEFF !important;
+
+    .cell {
+      color: #BCDEFF !important;
+
+      &:hover {
+        color: #FFFFFF !important;
+        background: rgba(0, 152, 250, 0.2) !important;
+      }
+    }
+
+    &.today .cell {
+      color: #00d4ff !important;
+      font-weight: bold;
+    }
+
+    &.current:not(.disabled) .cell {
+      background: rgba(0, 152, 250, 0.5) !important;
+      color: #FFFFFF !important;
+    }
+
+    &.start-date .cell,
+    &.end-date .cell {
+      background: rgba(0, 152, 250, 0.5) !important;
+      color: #FFFFFF !important;
+    }
+
+    &.in-range .cell,
+    &.in-range .cell:hover {
+      background: rgba(0, 152, 250, 0.2) !important;
+      color: #FFFFFF !important;
+    }
+
+    &.in-range div,
+    &.in-range div:hover {
+      background: rgba(0, 152, 250, 0.2) !important;
+    }
+
+    &.disabled .cell {
+      color: rgba(188, 222, 255, 0.3) !important;
+      background: transparent !important;
+
+      &:hover {
+        background: transparent !important;
+        color: rgba(188, 222, 255, 0.3) !important;
+      }
+    }
+
+    &.disabled {
+      &:hover {
+        background: transparent !important;
+      }
+    }
+  }
+
+  // 年份选择器
+  .el-year-table td {
+    color: #BCDEFF !important;
+
+    .cell {
+      color: #BCDEFF !important;
+
+      &:hover {
+        color: #FFFFFF !important;
+        background: rgba(0, 152, 250, 0.2) !important;
+      }
+    }
+
+    &.today .cell {
+      color: #00d4ff !important;
+      font-weight: bold;
+    }
+
+    &.current:not(.disabled) .cell {
+      background: rgba(0, 152, 250, 0.5) !important;
+      color: #FFFFFF !important;
+    }
+
+    &.disabled .cell {
+      color: rgba(188, 222, 255, 0.3) !important;
+      background: transparent !important;
+
+      &:hover {
+        background: transparent !important;
+        color: rgba(188, 222, 255, 0.3) !important;
+      }
+    }
+
+    &.disabled {
+      &:hover {
+        background: transparent !important;
+      }
+    }
+  }
+
+  // 时间选择器
+  .el-time-panel {
+    background: transparent !important;
+    border: none !important;
+  }
+
+  .el-time-spinner__item {
+    color: #BCDEFF !important;
+
+    &:hover:not(.disabled):not(.active) {
+      background: rgba(0, 152, 250, 0.2) !important;
+    }
+
+    &.active:not(.disabled) {
+      color: #FFFFFF !important;
+      font-weight: bold;
+    }
+
+    &.disabled {
+      color: rgba(188, 222, 255, 0.3) !important;
+    }
+  }
+}
+</style>
