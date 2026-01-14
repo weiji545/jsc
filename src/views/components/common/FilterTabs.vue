@@ -25,6 +25,7 @@
         <div v-if="showTimeRangeType === 1">
           <el-date-picker
             :key="`daterange-${isDarkMode}`"
+            ref="daterange"
             v-model="timeValue"
             class="accent-select"
             value-format="yyyy-MM-dd"
@@ -43,6 +44,7 @@
         <div v-if="showTimeRangeType === 2">
           <el-date-picker
             :key="`monthrange-${isDarkMode}`"
+            ref="monthrange"
             v-model="timeValue"
             class="accent-select"
             value-format="yyyy-MM-dd"
@@ -186,7 +188,12 @@ export default {
   methods: {
     // 日期选择器获得焦点时创建遮罩层
     onDatePickerFocus() {
-      this.choiceDate = null
+      // 只有在弹窗未显示时（即新开启时）才重置 choiceDate
+      // 避免在选择中途切换窗口或在输入框间切换导致 choiceDate 被重置
+      const picker = this.$refs.monthrange || this.$refs.daterange
+      if (!picker || !picker.pickerVisible) {
+        this.choiceDate = null
+      }
       this.createPickerBackdrop()
     },
     // 日期选择器失去焦点时移除遮罩层
@@ -246,6 +253,7 @@ export default {
       this.$emit('change-time', value)
       // 切换类型时清空自定义选择的值
       this.timeValue = ''
+      this.choiceDate = null
 
       if (value && value.length === 2) {
         const lastId = value[1]

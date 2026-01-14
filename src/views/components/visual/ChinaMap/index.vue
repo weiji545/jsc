@@ -11,6 +11,7 @@
 <script>
 import * as echarts from 'echarts'
 import chinaJson from './china.json'
+import { formatNumber } from '@/utils/utils.js'
 export default {
   name: 'ChinaMap',
   props: {
@@ -233,11 +234,11 @@ export default {
                 </div>
                 <div style="margin: 8px 0; color: rgba(255,255,255,0.8); font-size: 14px; display: flex; justify-content: space-between;">
                   <span>账户数量:</span>
-                  <span style="color: #00D4FF; font-weight: bold;">${count}</span>
+                  <span style="color: #00D4FF; font-weight: bold;">${formatNumber(count, 0)}</span>
                 </div>
                 <div style="margin: 8px 0; color: rgba(255,255,255,0.8); font-size: 14px; display: flex; justify-content: space-between;">
                   <span>账户余额:</span>
-                  <span style="color: #FFDD33; font-weight: bold;">${(val / 10000).toFixed(2)} 万元</span>
+                  <span style="color: #FFDD33; font-weight: bold;">${formatNumber(val / 10000, 2)} 万元</span>
                 </div>
               </div>`
           },
@@ -249,6 +250,7 @@ export default {
         visualMap: {
           show: true,
           type: 'piecewise',
+          inverse: true,
           pieces: [
             {
               min: 0,
@@ -370,14 +372,7 @@ export default {
         }, 500)
       })
     },
-    formatNumber(num) {
-      // if (num >= 100000000) {
-      //   return (num / 100000000).toFixed(1) + '亿'
-      // } else if (num >= 10000) {
-      //   return (num / 10000).toFixed(1) + '万'
-      // }
-      return num.toString().toFixed(2) + '万'
-    },
+
     bindChartEvents() {
       this.mainChart.on('mouseover', (params) => {
         if (this.outId) clearTimeout(this.outId)

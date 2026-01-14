@@ -4,6 +4,7 @@
 
 <script>
 import * as echarts from 'echarts'
+import { formatNumber } from '@/utils/utils.js'
 
 export default {
   name: 'EChartPieRing',
@@ -166,17 +167,18 @@ export default {
       const legendFormatter = function (name) {
         const it = dataList.find((d) => d.name === name)
         if (!it) return name
-        const displayValue = isEmpty(it.value) ? '-' : it.value
+        // const displayValue = isEmpty(it.value) ? '-' : formatNumber(it.value)
         
         // ECharts 4.8.0 不支持 overflow: 'truncate'，在此处手动处理截断
         let displayName = name
         // 阈值设为 6，大约对应原本设置的 width: 50
-        if (displayName && displayName.length > 3) {
-          displayName = displayName.substring(0, 3) + '..'
+        if (displayName && displayName.length > 5) {
+          displayName = displayName.substring(0, 5) + '..'
         }
         
         // 使用 rich 文本标记，配合 legend.textStyle.rich 进行对齐
-        return `{name|${displayName}} {value|${displayValue}}`
+        // return `{name|${displayName}} {value|${displayValue}}`
+        return `{name|${displayName}}`
       }
       const defaultOption = {
         tooltip: {
@@ -188,7 +190,7 @@ export default {
               ? params.data.originalValue 
               : params.value
             
-            const displayValue = isEmpty(rawValue) ? '-' : rawValue
+            const displayValue = isEmpty(rawValue) ? '-' : formatNumber(rawValue)
             const unitStr = unit ? ' ' + unit : ''
             const str = `
               ${params.name}</br>
@@ -204,7 +206,7 @@ export default {
           show: true,
           type: 'scroll',
           orient: 'vertical',
-          left: '74%',
+          left: '80%',
           align: 'left',
           top: 'middle',
           itemWidth: 14,
@@ -229,7 +231,7 @@ export default {
               const name = params.name
               const it = dataList.find((d) => d.name === name)
               if (!it) return name
-              const displayValue = isEmpty(it.value) ? '-' : it.value
+              const displayValue = isEmpty(it.value) ? '-' : formatNumber(it.value)
               const unitStr = unit ? ' ' + unit : ''
 
               let percentStr = '0.00%'

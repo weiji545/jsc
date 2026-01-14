@@ -7,6 +7,7 @@
 
 <script>
 import * as echarts from 'echarts'
+import { formatNumber } from '@/utils/utils.js'
 
 export default {
   name: 'EChartBarLine',
@@ -431,9 +432,12 @@ export default {
               const name = isBar ? tooltipBarLabel : p.seriesName
               const suffix = isBar ? unitSuffix : lineUnitSuffix
               const val = (typeof p.value !== 'undefined' ? p.value : (p.data && p.data.value)) || 0
+              // Determine decimal places based on whether it's a bar (usually larger numbers) or line
+              const decimals = isBar ? 2 : 0
+              const formattedVal = formatNumber(val, decimals)
               lines += `<div style="display:flex;justify-content:space-between;align-items:center;">
                 <span>${p.marker} ${name}:</span>
-                <span style="margin-left:12px;font-weight:bold;">${val}${suffix}</span>
+                <span style="margin-left:12px;font-weight:bold;">${formattedVal}${suffix}</span>
               </div>`
             })
             return lines

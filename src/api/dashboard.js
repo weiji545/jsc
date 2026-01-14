@@ -121,18 +121,18 @@ export const getOverviewData = () => {
     ],
     // 账户币种统计
     currencyPie: [
-      { name: '人民币', value: 240 },
-      { name: '美元', value: 190 },
-      { name: '欧元', value: 150 },
-      { name: '日元', value: 180 },
-      { name: '英镑', value: 120 },
-      { name: '加元', value: 95 },
-      { name: '澳元', value: 85 },
-      { name: '港币', value: 110 },
-      { name: '新加坡元', value: 75 },
-      { name: '瑞士法郎', value: 65 },
-      { name: '韩元', value: 55 },
-      { name: '泰铢', value: 45 },
+      { name: '人民币', value: 2400 },
+      { name: '美元', value: 1900 },
+      { name: '欧元', value: 1500 },
+      { name: '日元', value: 1800 },
+      { name: '英镑', value: 1200 },
+      { name: '加元', value: 950 },
+      { name: '澳元', value: 850 },
+      { name: '港币', value: 1100 },
+      { name: '新加坡元', value: 705 },
+      { name: '瑞士法郎', value: 605 },
+      { name: '韩元', value: 550 },
+      { name: '泰铢', value: 450 },
     ],
     // 右上折线（4块）
     rightTopLines: [
@@ -151,18 +151,18 @@ export const getOverviewData = () => {
     },
     // 右下环形
     balanceRing: [
-      { name: '人民币', value: 240 },
-      { name: '美元', value: 190 },
-      { name: '欧元', value: 150 },
-      { name: '日元', value: 180 },
-      { name: '英镑', value: 120 },
-      { name: '加元', value: 95 },
-      { name: '澳元', value: 85 },
-      { name: '港币', value: 110 },
-      { name: '新加坡元', value: 75 },
-      { name: '瑞士法郎', value: 65 },
-      { name: '韩元', value: 55 },
-      { name: '泰铢', value: 45 },
+      { name: '人民币', value: 2400 },
+      { name: '美元', value: 1900 },
+      { name: '欧元', value: 1500 },
+      { name: '日元', value: 1800 },
+      { name: '英镑', value: 1200 },
+      { name: '加元', value: 950 },
+      { name: '澳元', value: 850 },
+      { name: '港币', value: 1100 },
+      { name: '新加坡元', value: 705 },
+      { name: '瑞士法郎', value: 605 },
+      { name: '韩元', value: 550 },
+      { name: '泰铢', value: 450 },
     ],
     // 地球3D国家数据
     globeCountryData: [
@@ -303,12 +303,12 @@ export const getTrendData = (params = {}) => {
   const trendData = {
     trade: {
       categories: ['一月份', '二月份', '三月份同期', '四月份', '五月份计划', '六月份', '七月份重点', '八月份', '九月份预警', '十月份', '十一月份', '十二月份高峰'],
-      bar: [320, 280, 360, 420, 390, 450, 480, 510, 550, 600, 580, 630],
+      bar: [3320, 2280, 3603, 4210, 3940, 4550, 4806, 5107, 55340, 64500, 5830, 6230],
       line: [12, 8, 15, 18, 10, 16, 14, 20, 22, 25, 21, 28],
     },
     large: {
       categories: ['一月份', '二月份', '三月份同期', '四月份', '五月份计划', '六月份', '七月份重点', '八月份', '九月份预警', '十月份', '十一月份', '十二月份高峰'],
-      bar: [180, 210, 160, 240, 260, 230, 280, 300, 320, 350, 330, 380],
+      bar: [1800, 2100, 1600, 2400, 2600, 2300, 2800, 3000, 3200, 3500, 3300, 3800],
       line: [5, 9, -3, 12, 8, -5, 10, 14, 16, 18, 15, 20],
       // 增加具体的大额支付列表数据以支持模拟排序
       list: [

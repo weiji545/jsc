@@ -6,6 +6,7 @@
 import * as echarts from 'echarts'
 import worldJson from './world.json'
 import { geoCoordMap } from './geo-coords.js'
+import { formatNumber } from '@/utils/utils.js'
 export default {
   name: 'WorldMap',
   props: {
@@ -441,6 +442,7 @@ export default {
         visualMap: {
           show: true,
           type: 'piecewise',
+          inverse: true,
           pieces: [
             {
               min: 0,
@@ -489,8 +491,8 @@ export default {
               return `
                 <div style="font-size: 15px; font-weight: bold; margin-bottom: 6px; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px;">${name}</div>
                 <div style="line-height: 22px;">
-                  <span style="color: #2AB8FF;">账户数量:</span> <span style="float: right; margin-left: 20px;">${data.count}</span><br/>
-                  <span style="color: #2AB8FF;">账户余额:</span> <span style="float: right; margin-left: 20px;">${(data.balance / 10000).toFixed(2)} 万元</span>
+                  <span style="color: #2AB8FF;">账户数量:</span> <span style="float: right; margin-left: 20px;">${formatNumber(data.count, 0)}</span><br/>
+                  <span style="color: #2AB8FF;">账户余额:</span> <span style="float: right; margin-left: 20px;">${formatNumber(data.balance / 10000, 2)} 万元</span>
                 </div>
               `
             }
