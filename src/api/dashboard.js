@@ -24,44 +24,18 @@ export const getWorldMapFlowData = () => {
     {
       center: '中国',
       flows: [
-        // [{ name: "尼日利亚", value: 9100 }, { name: "济南" }],
-        // [{ name: "美国洛杉矶", value: 2370 }, { name: "济南" }],
-        // [{ name: "香港邦泰", value: 3130 }, { name: "济南" }],
-        // [{ name: "美国芝加哥", value: 2350 }, { name: "济南" }],
-        // [{ name: "加纳库马西", value: 5120 }, { name: "济南" }],
-        // [{ name: "英国曼彻斯特", value: 3110 }, { name: "济南" }],
-        // [{ name: "德国汉堡", value: 6280 }, { name: "济南" }],
-        // [{ name: "哈萨克斯坦阿拉木图", value: 7255 }, { name: "济南" }],
-        // [{ name: "墨西哥", value: 3590 }, { name: "济南" }],
-        // [{ name: "加拿大温哥华", value: 3590 }, { name: "济南" }]
+        [{ name: "尼日利亚", value: 9100, date: '2025-01-15', balance: 1253000, inflow: 9100, count: 5 }, { name: "中国" }],
+        [{ name: "美国", value: 2370, date: '2025-01-14', balance: 2340000, inflow: 2370, count: 12 }, { name: "中国" }],
+        [{ name: "英国", value: 3110, date: '2025-01-13', balance: 3120000, inflow: 3110, count: 8 }, { name: "中国" }],
+        [{ name: "德国", value: 6280, date: '2025-01-12', balance: 2750000, inflow: 6280, count: 15 }, { name: "中国" }],
+        [{ name: "哈萨克斯坦", value: 7255, date: '2025-01-11', balance: 1150000, inflow: 7255, count: 4 }, { name: "中国" }],
+        [{ name: "墨西哥", value: 3590, date: '2025-01-10', balance: 4230000, inflow: 3590, count: 7 }, { name: "中国" }],
+        [{ name: "加拿大", value: 3590, date: '2025-01-09', balance: 2100000, inflow: 3590, count: 6 }, { name: "中国" }],
+        [{ name: "法国", value: 4500, date: '2025-01-08', balance: 5670000, inflow: 4500, count: 9 }, { name: "中国" }],
+        [{ name: "俄罗斯", value: 8000, date: '2025-01-07', balance: 8000000, inflow: 8000, count: 11 }, { name: "中国" }],
+        [{ name: "巴西", value: 5000, date: '2025-01-06', balance: 950000, inflow: 5000, count: 3 }, { name: "中国" }]
       ],
-    },
-    {
-      center: '俄罗斯',
-      flows: [
-        // [{ name: "俄罗斯", value: 8000 }, { name: "俄罗斯" }],
-        // [{ name: "巴西", value: 5000 }, { name: "俄罗斯" }],
-        // [{ name: "埃及", value: 4000 }, { name: "俄罗斯" }]
-      ],
-    },
-    {
-      center: '美国',
-      flows: [
-      ],
-    },
-    {
-      center: '墨西哥',
-      flows: [
-      ],
-    },{
-      center: '法国',
-      flows: [
-      ],
-    },{
-      center: '哈萨克斯坦',
-      flows: [
-      ],
-    },
+    }
   ]
   return mockApi(data)
 }

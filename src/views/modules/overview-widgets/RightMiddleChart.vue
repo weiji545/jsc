@@ -18,6 +18,7 @@
           :unit="unit"
           :options="domesticOptions"
           line-unit="笔"
+          :xAxisMaxLength="4"
         />
       </template>
     </PagedCarousel>

@@ -273,6 +273,10 @@ export default {
               toName: dataItem[1].name,
               coords: [fromCoord, toCoord],
               value: dataItem[0].value,
+              date: dataItem[0].date,
+              balance: dataItem[0].balance,
+              inflow: dataItem[0].inflow,
+              count: dataItem[0].count
             })
           }
         }
@@ -353,8 +357,7 @@ export default {
               symbolSize: 7,
             },
             lineStyle: {
-              color: (p) => colorList[p.dataIndex] || '#' +
-                ('00000' + ((Math.random() * 16777215 + 0.5) >> 0).toString(16)).slice(-6),
+              color: '#FFFF00',
               width: 1,
               opacity: 1,
               curveness: 0.3,
@@ -397,8 +400,7 @@ export default {
             symbol: 'circle',
             symbolSize: (val) => 4 + (val[2] || 0) / 1000,
             itemStyle: {
-              color: (p) => colorList[p.dataIndex] || '#' +
-                ('00000' + ((Math.random() * 16777215 + 0.5) >> 0).toString(16)).slice(-6),
+              color: '#FFFF00',
             },
             data: flows.map((dataItem) => {
               const coord = geoCoordMap[dataItem[0].name]
@@ -442,6 +444,7 @@ export default {
         visualMap: {
           show: true,
           type: 'piecewise',
+          seriesIndex: [0],
           inverse: true,
           pieces: [
             {
@@ -497,7 +500,17 @@ export default {
               `
             }
             if (params.seriesType == 'lines') {
-              return params.data.fromName + ' -> ' + params.data.toName + '<br />' + params.data.value
+              const d = params.data
+              return `
+                <div style="font-size: 15px; font-weight: bold; margin-bottom: 6px; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px;">资金流向详情</div>
+                <div style="line-height: 22px;">
+                  <span style="color: #2AB8FF;">日期:</span> <span style="float: right; margin-left: 20px;">${d.date || '-'}</span><br/>
+                  <span style="color: #2AB8FF;">流向:</span> <span style="float: right; margin-left: 20px;">${d.fromName} -> ${d.toName}</span><br/>
+                  <span style="color: #2AB8FF;">账户余额:</span> <span style="float: right; margin-left: 20px;">${formatNumber(d.balance)}</span><br/>
+                  <span style="color: #2AB8FF;">资金流入:</span> <span style="float: right; margin-left: 20px;">${formatNumber(d.inflow)}</span><br/>
+                  <span style="color: #2AB8FF;">流入笔数:</span> <span style="float: right; margin-left: 20px;">${d.count}</span>
+                </div>
+              `
             }
             return name
           },

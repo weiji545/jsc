@@ -31,7 +31,7 @@
 import DashboardContent from '../components/layout/DashboardContent.vue'
 
 export default {
-  name: 'Module2',
+  name: 'AccountManagement',
   components: {
     DashboardContent,
   },

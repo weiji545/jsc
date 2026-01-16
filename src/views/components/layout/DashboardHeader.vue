@@ -90,7 +90,7 @@ export default {
       // 模块配置
       modules: [
         { label: '总览', value: 'overView', disabled: false },
-        { label: '账户管理', value: 'module2', disabled: true },
+        { label: '账户管理', value: 'AccountManagement', disabled: false },
         { label: '资金管理', value: 'module3', disabled: true }
       ]
     }
@@ -184,7 +184,7 @@ export default {
           // 进入全屏逻辑：查找到本项目的外层容器
           // 优先使用 document.querySelector 确保在非 iframe 环境下准确获取
           const targetElement = document.querySelector('.dashboard-outer') || doc.documentElement
-          
+
           const requestFS = targetElement.requestFullscreen ||
                            targetElement.webkitRequestFullscreen ||
                            targetElement.mozRequestFullScreen ||
@@ -445,7 +445,7 @@ export default {
 
   .popper__arrow {
     border-bottom-color: #0098FA;
-    
+
     &::after {
       border-bottom-color: #142765 !important;
     }

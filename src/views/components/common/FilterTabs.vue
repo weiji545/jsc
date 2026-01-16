@@ -126,17 +126,17 @@ export default {
           const now = new Date()
           const currentYear = now.getFullYear()
           const currentMonth = now.getMonth() // 0-11
-          
+
           // 不能选择超过当前月
           if (time.getFullYear() > currentYear || (time.getFullYear() === currentYear && time.getMonth() > currentMonth)) {
             return true
           }
-          
+
           // 不能选择当月
           if (time.getFullYear() === currentYear && time.getMonth() === currentMonth) {
             return true
           }
-          
+
           // 如果当前是1月或2月（3月之前），禁止选择当年的1月和2月
           // 此时选择时间应从上一年开始
           if (currentMonth < 2) { // 0=1月, 1=2月
@@ -144,7 +144,7 @@ export default {
               return true
             }
           }
-          
+
           if (!this.choiceDate) return false
           const choice = new Date(this.choiceDate)
           // 必须在同一年内，且不允许选择相同的月份（必须跨月）
@@ -203,7 +203,7 @@ export default {
     // 创建遮罩层以捕获点击事件
     createPickerBackdrop() {
       if (this.pickerBackdrop) return
-      
+
       this.pickerBackdrop = document.createElement('div')
       this.pickerBackdrop.className = 'date-picker-backdrop'
       this.pickerBackdrop.style.cssText = `
@@ -216,10 +216,10 @@ export default {
         background: transparent;
         pointer-events: auto;
       `
-      
+
       // 点击遮罩层时关闭弹窗
       this.pickerBackdrop.addEventListener('click', this.handleBackdropClick)
-      
+
       document.body.appendChild(this.pickerBackdrop)
     },
     // 移除遮罩层
@@ -502,6 +502,7 @@ export default {
 
   .el-cascader-node {
     color: #BCDEFF !important;
+    background: transparent;
 
     &:hover {
       background: rgba(0, 152, 250, 0.2) !important;
@@ -511,6 +512,7 @@ export default {
     &.is-active {
       color: #FFFFFF !important;
       font-weight: bold;
+      background: transparent;
     }
 
     &.is-disabled {

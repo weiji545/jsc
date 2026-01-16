@@ -5,6 +5,10 @@
     :centerBottomMode.sync="centerBottomMode"
     :centerPeriod.sync="centerPeriodSync"
     :scope="balanceScope"
+    v-loading="isLoading"
+    element-loading-text="加载中..."
+    element-loading-spinner="el-icon-loading"
+    element-loading-background="rgba(0, 0, 0, 0.7)"
   >
     <!-- 左上 账户数量统计 -->
     <template #left-top>
@@ -51,7 +55,7 @@
           :scope="balanceScope"
           :globe-country-data="globeCountryData"
           :china-map-data="chinaMapData"
-          :world-map-flow-data="[]"
+          :world-map-flow-data="worldMapFlowData"
           :world-account-data="globeCountryData"
         />
         <FilterTabs
@@ -186,6 +190,7 @@ export default {
   },
   data() {
     return {
+      isLoading: false,
       // ========== 时间范围 ==========
       customTimeRange: {
         startBsnDate: '',
@@ -207,6 +212,7 @@ export default {
       regionList: [],
       exchangeRates: [],
       chinaMapData: [],
+      worldMapFlowData: [],
       trendData: {
         trade: { categories: [], bar: [], line: [] },
         large: { categories: [], bar: [], line: [] },
@@ -551,15 +557,31 @@ export default {
         // await this.fetchSpecificDomesticData()
       }
     },
+    getQueryData() {
+      this.isLoading = true
+      const params = {
+        scope: this.balanceScope,
+        time: this.balanceTime,
+      }
+      http.get('/api/query', params).then((res) => {
+        this.dataList = res.data.map(i => ({name: i.name}))
+      }).finally(() => {
+        this.isLoading = false
+      })
+    },
     async fetchData() {
+      this.isLoading = true
+ 
+
       try {
-        const [overviewRes, baseRes, regionRes, exchangeRes, trendRes, chinaRes] = await Promise.all([
+        const [overviewRes, baseRes, regionRes, exchangeRes, trendRes, chinaRes, flowRes] = await Promise.all([
           getOverviewData(),
           getBaseDataList(),
           getRegionList(this.leftTopOrderByAsc),
           getExchangeRates(),
           getTrendData(this.trendSort),
           getChinaMapData(),
+          getWorldMapFlowData(),
         ])
 
         if (overviewRes.code === 200) {
@@ -572,8 +594,11 @@ export default {
         if (exchangeRes.code === 200) this.exchangeRates = exchangeRes.data
         if (trendRes.code === 200) this.trendData = trendRes.data
         if (chinaRes.code === 200) this.chinaMapData = chinaRes.data
+        if (flowRes.code === 200) this.worldMapFlowData = flowRes.data
       } catch (error) {
         console.error('Failed to fetch overview data:', error)
+      } finally {
+        this.isLoading = false
       }
     },
     formatNumber,

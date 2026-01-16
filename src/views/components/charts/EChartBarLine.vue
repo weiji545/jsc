@@ -82,6 +82,10 @@ export default {
       type: String,
       default: '账户余额',
     },
+    xAxisMaxLength: {
+      type: Number,
+      default: 100,
+    }
   },
   data() {
     return {
@@ -349,9 +353,9 @@ export default {
           data: this.categories || [],
           axisLabel: {
             color: '#9E9E9E',
-            formatter: function (value) {
-              if (value && value.length > 3) {
-                return value.substring(0, 3) + '...'
+            formatter: (value) => {
+              if (value && value.length > this.xAxisMaxLength) {
+                return value.substring(0, this.xAxisMaxLength - 1) + '..'
               }
               return value
             },
