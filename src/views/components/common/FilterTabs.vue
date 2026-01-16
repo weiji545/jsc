@@ -1,24 +1,61 @@
 <template>
   <div class="core-filter-bar" :class="{ 'is-dark': isDarkMode, 'is-light': !isDarkMode }">
     <div class="core-radios">
-      <div
-        v-for="opt in scopeOptions"
-        :key="opt.value"
-        :class="['core-radio', { active: scope === opt.value }]"
-        @click="onScopeClick(opt.value)"
-      >
-        <span class="core-label">{{ opt.label }}</span>
-      </div>
+      <template v-if="showFundFlowOption" >
+        <div :class="['core-radio', { active: scope === 'global' }]" @click="onScopeClick('global')">
+          <span class="core-label" style="width: 120px; text-align: center;">全局</span>
+        </div>
+
+        <el-cascader
+          ref="cascaderDomestic"
+          placeholder="境内"
+          v-model="fundFlowDomestic"
+          class="accent-select"
+          :options="fundFlowOptions"
+          :props="{ expandTrigger: 'hover' }"
+          :popper-class="isDarkMode ? 'filter-cascader-popper dark-mode' : 'filter-cascader-popper'"
+          @change="onFundFlowChange('domestic')"
+          @visible-change="onCascaderVisibleChange"
+          filterable>
+        </el-cascader>
+
+        <el-cascader
+          ref="cascaderOverseas"
+          placeholder="境外"
+          v-model="fundFlowOverseas"
+          class="accent-select"
+          :options="fundFlowOptions"
+          :props="{ expandTrigger: 'hover' }"
+          :popper-class="isDarkMode ? 'filter-cascader-popper dark-mode' : 'filter-cascader-popper'"
+          @change="onFundFlowChange('')"
+          @visible-change="onCascaderVisibleChange"
+          filterable>
+        </el-cascader>
+      </template>
+
+      <template v-else>
+        <div
+          v-for="opt in scopeOptions"
+          :key="opt.value"
+          :class="['core-radio', { active: scope === opt.value }]"
+          @click="onScopeClick(opt.value)"
+        >
+          <span class="core-label">{{ opt.label }}</span>
+        </div>
+      </template>
+
     </div>
     <div class="core-options" :style="{flex: showTimeRangeType > 0 ? 2.5 : 1}">
       <el-cascader
         :key="`cascader-${isDarkMode}`"
+        ref="cascaderTime"
         v-model="innerTime"
         class="accent-select"
         :options="timeOptions"
         :props="{ expandTrigger: 'hover' }"
         :popper-class="isDarkMode ? 'filter-cascader-popper dark-mode' : 'filter-cascader-popper'"
-        @change="onTimeChange">
+        @change="onTimeChange"
+        @visible-change="onCascaderVisibleChange">
       </el-cascader>
 
       <template v-if="showTimeRangeType > 0">
@@ -70,13 +107,21 @@
 export default {
   name: 'FilterTabs',
   props: {
+    showFundFlowOption: {
+      type: Boolean,
+      default: false,
+    },
     scope: {
       type: String,
       default: 'global',
     },
     scopeOptions: {
       type: Array,
-      default: () => [],
+      default: () => [
+        { label: '全局', value: 'global' },
+        { label: '境内', value: 'domestic' },
+        { label: '境外', value: 'overseas' },
+      ],
     },
     time: {
       type: Array,
@@ -86,11 +131,53 @@ export default {
     },
     timeOptions: {
       type: Array,
-      default: () => [],
+      default: () => [
+        {
+          value: 'day',
+          label: '按天',
+          children: [
+            { value: '7', label: '近7天' },
+            { value: 'month', label: '近一月' },
+            { value: 'customizedDay', label: '自定义天' },
+          ],
+        },
+        {
+          value: 'month',
+          label: '按月',
+          children: [
+            { value: 'year', label: '近一年' },
+            { value: 'customizedMonth', label: '自定义月' },
+          ],
+        },
+      ],
     },
   },
   data() {
     return {
+      fundFlowDomestic: [],
+      fundFlowOverseas: [],
+      fundFlowOptions: [{
+          label: '资金流入',
+          value: 'inflow',
+          children: [{
+            label: '美国',
+            value: 'USA',
+          }, {
+            label: '中国',
+            value: 'China'
+          }]
+        },
+        {
+          label: '资金流出',
+          value: 'outflow',
+          children: [{
+            label: '北京',
+            value: 'beijing',
+          }, {
+            label: '上海',
+            value: 'shanghai'
+          }]
+        }],
       innerTime: this.time,
       timeValue: '',
       choiceDate: null,
@@ -186,6 +273,21 @@ export default {
     },
   },
   methods: {
+    onFundFlowChange(from) {
+      if (from === 'domestic') {
+        console.log()
+      } else if (from === 'overseas') {
+        console.log()
+      }
+      console.log('fundFlowDomestic: ', this.fundFlowDomestic)
+    },
+    onCascaderVisibleChange(visible) {
+      if (visible) {
+        this.createPickerBackdrop()
+      } else {
+        this.removePickerBackdrop()
+      }
+    },
     // 日期选择器获得焦点时创建遮罩层
     onDatePickerFocus() {
       // 只有在弹窗未显示时（即新开启时）才重置 choiceDate
@@ -234,12 +336,33 @@ export default {
     },
     // 处理遮罩层点击
     handleBackdropClick(e) {
-      // 检查点击是否在弹窗内部
-      const popper = document.querySelector('.filter-date-popper')
-      if (popper && !popper.contains(e.target)) {
-        // 触发 blur 事件以关闭弹窗
+      // 检查点击是否在日期弹窗内部
+      const datePopper = document.querySelector('.filter-date-popper')
+      // 检查点击是否在级联弹窗内部
+      const cascaderPopper = document.querySelector('.filter-cascader-popper')
+
+      const inDatePopper = datePopper && datePopper.contains(e.target)
+      const inCascaderPopper = cascaderPopper && cascaderPopper.contains(e.target)
+
+      // 如果点击不在任何一个弹窗内，则关闭所有
+      if (!inDatePopper && !inCascaderPopper) {
+        // 关闭日期选择器
         const inputs = document.querySelectorAll('.core-filter-bar .el-date-editor input')
         inputs.forEach(input => input.blur())
+
+        // 关闭级联选择器 (模拟点击遮罩层已经触发了 clickoutside，但为了保险，尝试手动关闭)
+        // 注意：因为遮罩层 z-index 为 10000，且 pointer-events: auto，且位于 3D canvas 上方
+        // 点击遮罩层本身就会产生一个在普通 DOM 上的点击事件，这通常足以触发 ElementUI 的 clickoutside 指令。
+        // 如果需要强制关闭，可以访问 ref
+        this.closeCascaderPanel('cascaderTime')
+        this.closeCascaderPanel('cascaderDomestic')
+        this.closeCascaderPanel('cascaderOverseas')
+      }
+    },
+    closeCascaderPanel(refName) {
+      const ref = this.$refs[refName]
+      if (ref && typeof ref.toggleDropDownVisible === 'function') {
+        ref.toggleDropDownVisible(false)
       }
     },
     // 切换范围
@@ -327,13 +450,12 @@ export default {
 .core-filter-bar {
   position: absolute;
   bottom: 20px;
-  left: 20px;
-  right: 20px;
+  left: 0;
+  right: 0;
   z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 60px;
 
   ::v-deep .el-cascader {
     width: 150px;
@@ -344,6 +466,8 @@ export default {
   display: flex;
   flex: 2;
   justify-content: space-evenly;
+  align-items: center;
+  gap: 20px;
 }
 
 .core-radio {
@@ -456,6 +580,7 @@ export default {
       background: #142765 !important;
       border: 1px solid #0098FA !important;
       color: #BCDEFF !important;
+      //font-weight: bold !important;
     }
 
     ::v-deep .el-input__suffix {

@@ -80,7 +80,7 @@ export const getOverviewData = () => {
       { label: '指标五', value: 452, percent: 27 },
       { label: '指标六', value: -189, percent: -8 },
     ],
-    // 资金统计示例数据（用于“资金金额统计”面板）
+    // 资金统计示例数据（用于"资金金额统计"面板）
     transactionAmount: {
       domestic: 452340.56,
       overseas: 123456.78,
@@ -216,6 +216,30 @@ export const getChinaMapData = () => {
     { name: '辽宁省', value: 40000000, count: 80 },
     { name: '陕西省', value: 30000000, count: 60 },
     { name: '江西省', value: 20000000, count: 40 },
+  ]
+  return mockApi(data)
+}
+
+/**
+ * 获取中国地图飞线数据（境内资金流入）
+ */
+export const getChinaMapFlowData = () => {
+  const data = [
+    {
+      center: '北京',
+      flows: [
+        [{ name: '上海', value: 8500, date: '2025-01-15', balance: 2340000, inflow: 8500, count: 15 }, { name: '北京' }],
+        [{ name: '广州', value: 6200, date: '2025-01-14', balance: 1890000, inflow: 6200, count: 12 }, { name: '北京' }],
+        [{ name: '深圳', value: 5800, date: '2025-01-13', balance: 2120000, inflow: 5800, count: 18 }, { name: '北京' }],
+        [{ name: '杭州', value: 4500, date: '2025-01-12', balance: 1560000, inflow: 4500, count: 10 }, { name: '北京' }],
+        [{ name: '成都', value: 3900, date: '2025-01-11', balance: 1280000, inflow: 3900, count: 8 }, { name: '北京' }],
+        [{ name: '武汉', value: 3200, date: '2025-01-10', balance: 980000, inflow: 3200, count: 7 }, { name: '北京' }],
+        [{ name: '西安', value: 2800, date: '2025-01-09', balance: 850000, inflow: 2800, count: 6 }, { name: '北京' }],
+        [{ name: '南京', value: 4100, date: '2025-01-08', balance: 1450000, inflow: 4100, count: 11 }, { name: '北京' }],
+        [{ name: '重庆', value: 3500, date: '2025-01-07', balance: 1150000, inflow: 3500, count: 9 }, { name: '北京' }],
+        [{ name: '天津', value: 2600, date: '2025-01-06', balance: 760000, inflow: 2600, count: 5 }, { name: '北京' }],
+      ],
+    },
   ]
   return mockApi(data)
 }

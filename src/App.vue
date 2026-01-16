@@ -1,90 +1,91 @@
 <template>
   <div id="app">
+    <router-view />
     <!-- 模拟生产环境的外部容器 -->
-    <div class="production-portal">
-      <!-- 模拟侧边栏 -->
-      <aside class="portal-sidebar">
-        <div class="portal-logo">
-          <div class="logo-box">
-            <i class="el-icon-platform-eleme"></i>
-          </div>
-          <span class="logo-text">企业统一门户</span>
-        </div>
-        <div class="portal-menu">
-          <div class="menu-group">核心业务</div>
-          <div class="menu-item">
-            <i class="el-icon-monitor"></i>
-            <span>首页看板</span>
-          </div>
-          <div class="menu-item active">
-            <i class="el-icon-data-line"></i>
-            <span>决策看板</span>
-            <span class="badge">PROD</span>
-          </div>
-          <div class="menu-item">
-            <i class="el-icon-bank-card"></i>
-            <span>资金管理</span>
-          </div>
-          
-          <div class="menu-group" style="margin-top: 20px;">系统配置</div>
-          <div class="menu-item">
-            <i class="el-icon-user"></i>
-            <span>用户权限</span>
-          </div>
-          <div class="menu-item">
-            <i class="el-icon-setting"></i>
-            <span>全局设置</span>
-          </div>
-        </div>
-        <div class="sidebar-footer">
-          <i class="el-icon-info"></i>
-          <span>v2.4.0-stable</span>
-        </div>
-      </aside>
+<!--    <div class="production-portal">-->
+<!--      &lt;!&ndash; 模拟侧边栏 &ndash;&gt;-->
+<!--      <aside class="portal-sidebar">-->
+<!--        <div class="portal-logo">-->
+<!--          <div class="logo-box">-->
+<!--            <i class="el-icon-platform-eleme"></i>-->
+<!--          </div>-->
+<!--          <span class="logo-text">企业统一门户</span>-->
+<!--        </div>-->
+<!--        <div class="portal-menu">-->
+<!--          <div class="menu-group">核心业务</div>-->
+<!--          <div class="menu-item">-->
+<!--            <i class="el-icon-monitor"></i>-->
+<!--            <span>首页看板</span>-->
+<!--          </div>-->
+<!--          <div class="menu-item active">-->
+<!--            <i class="el-icon-data-line"></i>-->
+<!--            <span>决策看板</span>-->
+<!--            <span class="badge">PROD</span>-->
+<!--          </div>-->
+<!--          <div class="menu-item">-->
+<!--            <i class="el-icon-bank-card"></i>-->
+<!--            <span>资金管理</span>-->
+<!--          </div>-->
+<!--          -->
+<!--          <div class="menu-group" style="margin-top: 20px;">系统配置</div>-->
+<!--          <div class="menu-item">-->
+<!--            <i class="el-icon-user"></i>-->
+<!--            <span>用户权限</span>-->
+<!--          </div>-->
+<!--          <div class="menu-item">-->
+<!--            <i class="el-icon-setting"></i>-->
+<!--            <span>全局设置</span>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--        <div class="sidebar-footer">-->
+<!--          <i class="el-icon-info"></i>-->
+<!--          <span>v2.4.0-stable</span>-->
+<!--        </div>-->
+<!--      </aside>-->
 
-      <!-- 模拟主体区域 -->
-      <main class="portal-content">
-        <!-- 模拟顶栏 -->
-        <header class="portal-header">
-          <div class="header-left">
-            <div class="fold-btn">
-              <i class="el-icon-s-fold"></i>
-            </div>
-            <el-breadcrumb separator="/">
-              <el-breadcrumb-item>经营分析</el-breadcrumb-item>
-              <el-breadcrumb-item>驾驶舱看板</el-breadcrumb-item>
-              <el-breadcrumb-item><b>资金决策大屏</b></el-breadcrumb-item>
-            </el-breadcrumb>
-          </div>
-          <div class="header-right">
-            <div class="action-icons">
-              <i class="el-icon-search"></i>
-              <i class="el-icon-question"></i>
-              <el-badge :value="3" class="notice-badge">
-                <i class="el-icon-bell"></i>
-              </el-badge>
-            </div>
-            <div class="user-profile">
-              <div class="avatar">
-                <img src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" alt="">
-              </div>
-              <span class="user-name">超级管理员</span>
-              <i class="el-icon-caret-bottom"></i>
-            </div>
-          </div>
-        </header>
+<!--      &lt;!&ndash; 模拟主体区域 &ndash;&gt;-->
+<!--      <main class="portal-content">-->
+<!--        &lt;!&ndash; 模拟顶栏 &ndash;&gt;-->
+<!--        <header class="portal-header">-->
+<!--          <div class="header-left">-->
+<!--            <div class="fold-btn">-->
+<!--              <i class="el-icon-s-fold"></i>-->
+<!--            </div>-->
+<!--            <el-breadcrumb separator="/">-->
+<!--              <el-breadcrumb-item>经营分析</el-breadcrumb-item>-->
+<!--              <el-breadcrumb-item>驾驶舱看板</el-breadcrumb-item>-->
+<!--              <el-breadcrumb-item><b>资金决策大屏</b></el-breadcrumb-item>-->
+<!--            </el-breadcrumb>-->
+<!--          </div>-->
+<!--          <div class="header-right">-->
+<!--            <div class="action-icons">-->
+<!--              <i class="el-icon-search"></i>-->
+<!--              <i class="el-icon-question"></i>-->
+<!--              <el-badge :value="3" class="notice-badge">-->
+<!--                <i class="el-icon-bell"></i>-->
+<!--              </el-badge>-->
+<!--            </div>-->
+<!--            <div class="user-profile">-->
+<!--              <div class="avatar">-->
+<!--                <img src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" alt="">-->
+<!--              </div>-->
+<!--              <span class="user-name">超级管理员</span>-->
+<!--              <i class="el-icon-caret-bottom"></i>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--        </header>-->
 
-        <!-- 项目实际嵌套的区域 -->
-        <div class="nested-project-area">
-          <div class="production-sim-overlay">
-            <span class="env-tag">PRODUCTION ENVIRONMENT</span>
-          </div>
-          <div class="project-wrapper-card">
-            <router-view />
-          </div>
-        </div>
-      </main>
-    </div>
+<!--        &lt;!&ndash; 项目实际嵌套的区域 &ndash;&gt;-->
+<!--        <div class="nested-project-area">-->
+<!--          <div class="production-sim-overlay">-->
+<!--            <span class="env-tag">PRODUCTION ENVIRONMENT</span>-->
+<!--          </div>-->
+<!--          <div class="project-wrapper-card">-->
+<!--            <router-view />-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </main>-->
+<!--    </div>-->
   </div>
 </template>
 
@@ -148,7 +149,7 @@ body,
         color: #fff;
         font-size: 20px;
       }
-      
+
       .logo-text {
         font-size: 18px;
         font-weight: 600;
@@ -202,7 +203,7 @@ body,
         &.active {
           color: #fff;
           background: #1890ff;
-          
+
           &::after {
             content: "";
             position: absolute;
@@ -249,7 +250,7 @@ body,
         display: flex;
         align-items: center;
         gap: 20px;
-        
+
         .fold-btn {
           font-size: 20px;
           cursor: pointer;
@@ -310,7 +311,7 @@ body,
         right: 0;
         z-index: 1000;
         pointer-events: none;
-        
+
         .env-tag {
           display: inline-block;
           background: #52c41a;

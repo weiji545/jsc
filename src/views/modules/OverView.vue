@@ -5,7 +5,7 @@
     :centerBottomMode.sync="centerBottomMode"
     :centerPeriod.sync="centerPeriodSync"
     :scope="balanceScope"
-    v-loading="isLoading"
+    v-loading="false && isLoading"
     element-loading-text="加载中..."
     element-loading-spinner="el-icon-loading"
     element-loading-background="rgba(0, 0, 0, 0.7)"
@@ -55,10 +55,12 @@
           :scope="balanceScope"
           :globe-country-data="globeCountryData"
           :china-map-data="chinaMapData"
+          :china-map-flow-data="chinaMapFlowData"
           :world-map-flow-data="worldMapFlowData"
           :world-account-data="globeCountryData"
         />
         <FilterTabs
+          :showFundFlowOption="false"
           :scope="balanceScope"
           :scope-options="balanceScopes"
           :time="balanceTime"
@@ -166,6 +168,7 @@ import {
   getExchangeRates,
   getTrendData,
   getChinaMapData,
+  getChinaMapFlowData,
   getWorldMapFlowData,
   getWorldAccountData,
 } from '../../api/dashboard'
@@ -212,6 +215,7 @@ export default {
       regionList: [],
       exchangeRates: [],
       chinaMapData: [],
+      chinaMapFlowData: [],
       worldMapFlowData: [],
       trendData: {
         trade: { categories: [], bar: [], line: [] },
@@ -571,16 +575,17 @@ export default {
     },
     async fetchData() {
       this.isLoading = true
- 
+
 
       try {
-        const [overviewRes, baseRes, regionRes, exchangeRes, trendRes, chinaRes, flowRes] = await Promise.all([
+        const [overviewRes, baseRes, regionRes, exchangeRes, trendRes, chinaRes, chinaFlowRes, flowRes] = await Promise.all([
           getOverviewData(),
           getBaseDataList(),
           getRegionList(this.leftTopOrderByAsc),
           getExchangeRates(),
           getTrendData(this.trendSort),
           getChinaMapData(),
+          getChinaMapFlowData(),
           getWorldMapFlowData(),
         ])
 
@@ -594,6 +599,7 @@ export default {
         if (exchangeRes.code === 200) this.exchangeRates = exchangeRes.data
         if (trendRes.code === 200) this.trendData = trendRes.data
         if (chinaRes.code === 200) this.chinaMapData = chinaRes.data
+        if (chinaFlowRes.code === 200) this.chinaMapFlowData = chinaFlowRes.data
         if (flowRes.code === 200) this.worldMapFlowData = flowRes.data
       } catch (error) {
         console.error('Failed to fetch overview data:', error)

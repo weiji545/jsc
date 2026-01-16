@@ -10,6 +10,7 @@
         v-else-if="scope === 'domestic'"
         key="china-map"
         :map-data="chinaMapData"
+        :flow-data-prop="chinaMapFlowData"
       />
       <WorldMap
         v-else-if="scope === 'overseas'"
@@ -39,6 +40,10 @@ export default {
       default: () => ({}),
     },
     chinaMapData: {
+      type: Array,
+      default: () => [],
+    },
+    chinaMapFlowData: {
       type: Array,
       default: () => [],
     },

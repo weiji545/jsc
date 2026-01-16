@@ -34,9 +34,9 @@
         <template #item="{ item, index }">
           <div :key="index" class="ring-card">
             <div class="ring" :class="{ negative: item.percent < 0 }">
-              <!-- 环比增长徽章 -->
+              <!-- 环比增长 -->
               <div v-if="variant === 'sparkline'" class="trend-badge">
-                <div class="trend-label">环比增长</div>
+                <div class="trend-label">月度环比增长</div>
                 <div
                   class="trend-value"
                   :style="{ color: item.percent >= 0 ? '#0098FA' : '#FF3A3A' }"

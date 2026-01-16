@@ -11,6 +11,7 @@
 <script>
 import * as echarts from 'echarts'
 import chinaJson from './china.json'
+import { geoCoordMap } from './geo-coords.js'
 import { formatNumber } from '@/utils/utils.js'
 export default {
   name: 'ChinaMap',
@@ -19,9 +20,14 @@ export default {
       type: Array,
       default: () => [],
     },
+    flowDataProp: {
+      type: Array,
+      default: () => [],
+    },
   },
   data() {
     return {
+      flowData: [],
       highlightProvinces: [],
       currentHighlightIndex: 0,
       highlightInterval: 30000,
@@ -74,6 +80,12 @@ export default {
       },
       deep: true,
     },
+    flowDataProp: {
+      handler() {
+        this.processFlowData()
+      },
+      deep: true,
+    },
   },
   methods: {
     getThemeTitleColor() {
@@ -95,6 +107,159 @@ export default {
               color: this.getThemeTitleColor(),
             },
           },
+        })
+      }
+    },
+    processFlowData() {
+      this.flowData = JSON.parse(JSON.stringify(this.flowDataProp || []))
+      this.updateChartWithFlows()
+    },
+    updateChartWithFlows() {
+      if (!this.mainChart || !this.flowData || this.flowData.length === 0) return
+
+      const convertData = function (data) {
+        let res = []
+        for (let i = 0; i < data.length; i++) {
+          let dataItem = data[i]
+          let fromCoord = geoCoordMap[dataItem[0].name]
+          let toCoord = geoCoordMap[dataItem[1].name]
+          if (fromCoord && toCoord) {
+            res.push({
+              fromName: dataItem[0].name,
+              toName: dataItem[1].name,
+              coords: [fromCoord, toCoord],
+              value: dataItem[0].value,
+              date: dataItem[0].date,
+              balance: dataItem[0].balance,
+              inflow: dataItem[0].inflow,
+              count: dataItem[0].count
+            })
+          }
+        }
+        return res
+      }
+
+      const flowCenters = this.flowData || []
+      
+      // 获取当前的 option 和 series
+      const currentOption = this.mainChart.getOption()
+      let currentSeries = currentOption.series || []
+      
+      // 只保留 map 类型的 series (基础地图)
+      // 过滤掉之前的 lines, effectScatter, scatter 等飞线相关系列，防止重复累加
+      let baseSeries = currentSeries.filter(s => s.type === 'map')
+      
+      let newFlowSeries = []
+
+      flowCenters.forEach((item) => {
+        const centerName = item.center
+        const flows = item.flows || []
+
+        newFlowSeries.push(
+          {
+            name: centerName + '流向',
+            type: 'lines',
+            coordinateSystem: 'geo',
+            zlevel: 2,
+            effect: {
+              show: true,
+              period: 4,
+              trailLength: 0.4,
+              symbol: 'arrow',
+              symbolSize: 7,
+            },
+            lineStyle: {
+              color: '#FFFF00',
+              width: 1,
+              opacity: 1,
+              curveness: 0.3,
+            },
+            label: { show: false, position: 'middle', formatter: '{b}' },
+            data: convertData(flows),
+          },
+          {
+            type: 'effectScatter',
+            coordinateSystem: 'geo',
+            zlevel: 2,
+            rippleEffect: {
+              period: 15,
+              brushType: 'stroke',
+              scale: 4,
+            },
+            label: {
+              show: true,
+              position: 'top',
+              offset: [0, -5],
+              formatter: '{b}',
+              color: '#fff',
+              fontSize: 10,
+              backgroundColor: 'rgba(0,0,0,0.3)',
+              padding: [2, 4],
+              borderRadius: 2,
+            },
+            emphasis: {
+              show: true,
+              scale: true,
+              label: {
+                show: true,
+                backgroundColor: '#000',
+                padding: 4,
+                borderRadius: 2,
+                color: '#fff',
+                fontSize: 12,
+              },
+            },
+            symbol: 'circle',
+            symbolSize: (val) => 4 + (val[2] || 0) / 1000,
+            itemStyle: {
+              color: '#FFFF00',
+            },
+            data: flows.map((dataItem) => {
+              const coord = geoCoordMap[dataItem[0].name]
+              return coord ? {
+                name: dataItem[0].name,
+                value: coord.concat([dataItem[0].value]),
+              } : null
+            }).filter(i => i),
+          },
+          {
+            type: 'scatter',
+            coordinateSystem: 'geo',
+            zlevel: 2,
+            label: {
+              show: true,
+              position: 'right',
+              backgroundColor: '#1535A8',
+              color: '#fff',
+              padding: [4, 8],
+              borderRadius: 4,
+              formatter: '{b}',
+            },
+            emphasis: { show: true },
+            symbol: 'circle',
+            symbolSize: 1,
+            itemStyle: {
+              show: false,
+              color: '#1535A8',
+            },
+            data: [
+              {
+                name: centerName,
+                value: (geoCoordMap[centerName] || [0, 0]).concat([10]),
+              }],
+          },
+        )
+      })
+
+      if (newFlowSeries.length > 0) {
+        // 合并基础地图系列和新的飞线系列
+        const finalSeries = baseSeries.concat(newFlowSeries)
+        
+        this.mainChart.setOption({
+          series: finalSeries
+        }, {
+          notMerge: false,
+          replaceMerge: ['series'] // 显式声明替换 series 列表，确保多余的旧 series 被移除
         })
       }
     },
@@ -195,6 +360,53 @@ export default {
           trigger: 'item',
           alwaysShowContent: true, // 确保轮播时内容不消失
           formatter: (params) => {
+            // 处理飞线的tooltip
+            if (params.seriesType === 'lines') {
+              const d = params.data
+              return `
+                <div style="
+                  padding: 16px;
+                  background: rgba(10, 25, 41, 0.95);
+                  backdrop-filter: blur(10px);
+                  border-radius: 12px;
+                  border: 1px solid rgba(0, 212, 255, 0.4);
+                  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+                  min-width: 200px;
+                  color: #fff;
+                  font-family: inherit;
+                ">
+                  <div style="
+                    margin-bottom: 12px;
+                    color: #00D4FF;
+                    font-weight: bold;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                    padding-bottom: 8px;
+                    font-size: 16px;
+                  ">资金流向详情</div>
+                  <div style="margin: 8px 0; color: rgba(255,255,255,0.8); font-size: 14px; display: flex; justify-content: space-between;">
+                    <span>日期:</span>
+                    <span style="color: #00D4FF; font-weight: bold;">${d.date || '-'}</span>
+                  </div>
+                  <div style="margin: 8px 0; color: rgba(255,255,255,0.8); font-size: 14px; display: flex; justify-content: space-between;">
+                    <span>流向:</span>
+                    <span style="color: #FFDD33; font-weight: bold;">${d.fromName} → ${d.toName}</span>
+                  </div>
+                  <div style="margin: 8px 0; color: rgba(255,255,255,0.8); font-size: 14px; display: flex; justify-content: space-between;">
+                    <span>账户余额:</span>
+                    <span style="color: #00D4FF; font-weight: bold;">${formatNumber(d.balance)}</span>
+                  </div>
+                  <div style="margin: 8px 0; color: rgba(255,255,255,0.8); font-size: 14px; display: flex; justify-content: space-between;">
+                    <span>资金流入:</span>
+                    <span style="color: #FFDD33; font-weight: bold;">${formatNumber(d.inflow)}</span>
+                  </div>
+                  <div style="margin: 8px 0; color: rgba(255,255,255,0.8); font-size: 14px; display: flex; justify-content: space-between;">
+                    <span>流入笔数:</span>
+                    <span style="color: #00D4FF; font-weight: bold;">${d.count}</span>
+                  </div>
+                </div>`
+            }
+            
+            // 处理省份和地图区域的tooltip
             // 尝试获取业务数据
             const businessData = params.data || {}
             const val = businessData.value !== undefined ? businessData.value : (params.value || 0)
@@ -282,11 +494,25 @@ export default {
           itemHeight: 20,
           itemGap: 6,
         },
+        geo: {
+          map: 'china',
+          roam: false,
+          zoom: 1.2,
+          center: [104.195397, 35.86166],
+          label: { show: false },
+          itemStyle: {
+            // 透明，因为 series 会盖在上面显示颜色
+            areaColor: 'transparent',
+            borderColor: 'transparent',
+          },
+          silent: true,
+        },
         series: [
           {
             type: 'map',
+            // geoIndex: 0, // 移除关联，独立渲染以支持visualMap
             map: 'china',
-            roam: false, // 禁用鼠标拖拽和缩放
+            roam: false,
             zoom: 1.2,
             center: [104.195397, 35.86166],
             label: {
@@ -355,6 +581,9 @@ export default {
 
       this.mainChart.setOption(mainOption)
       this.bindChartEvents()
+
+      // 处理飞线数据
+      this.processFlowData()
 
       this.$nextTick(() => {
         if (this.shadowChart) {
