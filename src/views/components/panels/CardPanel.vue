@@ -1,14 +1,37 @@
 <template>
-  <div class="card-panel" :class="{ 'is-dark': isDarkMode, 'is-light': !isDarkMode, 'is-long': isLong, 'has-bottom-corner': showBottomCorner }" :style="panelStyle">
+  <div class="card-panel" :class="{ 'is-dark': isDarkMode, 'is-light': !isDarkMode, 'is-long': isLong, 'has-bottom-corner': !isLong && showBottomCorner }" :style="panelStyle">
     <div class="card-title">
       <div class="card-title-main">
         <slot name="title">{{ title }}</slot>
-        <span class="currency-indicator">
+        <span class="currency-indicator" v-if="showCurrency">
           <img src="../../img/warning-currency.png" alt="" class="currency-icon"/>
           <span class="currency-text">{{ currencyText }}</span>
         </span>
       </div>
-      <div v-if="displayUnit" class="card-unit">单位: {{ displayUnit }}</div>
+      <div class="card-unit-wrapper">
+        <!-- Configurable Left Action -->
+        <div v-if="actionLeft && actionLeft.options" class="action-group left">
+           <el-radio-group v-if="actionLeft.type === 'radio'" v-model="actionLeft.value" size="mini">
+              <el-radio v-for="opt in actionLeft.options" :key="opt.value" :label="opt.value">{{ opt.label }}</el-radio>
+           </el-radio-group>
+        </div>
+        <slot name="action-left"></slot>
+        <div v-if="displayUnit" class="card-unit">单位: {{ displayUnit }}</div>
+        <slot name="action-right"></slot>
+        <!-- Configurable Right Action -->
+        <div v-if="actionRight && actionRight.options" class="action-group right">
+           <div v-if="actionRight.type === 'text'" class="text-toggle-group">
+              <div v-for="(opt) in actionRight.options" :key="opt.value" class="text-toggle-item">
+                  <button
+                          class="text-toggle-btn"
+                          :class="{ active: actionRight.value === opt.value }"
+                          @click="actionRight.value = opt.value">
+                      {{ opt.label }}
+                  </button>
+              </div>
+           </div>
+        </div>
+      </div>
       <!-- 仅长条模式显示额外的 title-tabs（不影响其他 panel） -->
       <div v-if="isLong" class="card-title-tabs">
         <slot name="title-tabs"></slot>
@@ -66,7 +89,22 @@ export default {
     // 是否显示容器底部的装饰边角图片（默认关闭）
     showBottomCorner: {
       type: Boolean,
+      default: true,
+    },
+    // 是否显示币种指示器（默认关闭）
+    showCurrency: {
+      type: Boolean,
       default: false,
+    },
+    // 左侧操作配置 { type: 'radio'|'text', options: [{label, value}], value: Any }
+    actionLeft: {
+      type: Object,
+      default: null,
+    },
+    // 右侧操作配置
+    actionRight: {
+      type: Object,
+      default: null,
     },
   },
   computed: {
@@ -174,11 +212,28 @@ export default {
   color: #9E9E9E;
 }
 
+.card-unit-wrapper {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .action-group {
+    &.left {
+      margin-right: -9px;
+    }
+
+    &.right {
+      margin-right: 16px;
+    }
+  }
+}
+
 .card-unit {
   /* 恢复默认单位样式，长模式下另作覆盖 */
-  margin-left: auto;
   font-size: 12px;
   font-weight: 400;
+  white-space: nowrap;
 }
 
 /* 仅在长条模式下应用三等分布局与 tabs 样式，避免影响其他区域 */
@@ -195,7 +250,7 @@ export default {
   align-items: center;
 }
 
-.card-panel.is-long .card-unit {
+.card-panel.is-long .card-unit-wrapper {
   flex: 0 0 24%;
   margin-left: 0;
   justify-content: flex-end;
@@ -414,6 +469,51 @@ export default {
   background-repeat: no-repeat;
   background-position: bottom center;
   background-size: contain;
+}
+
+/* Text Toggle Button Styles */
+.text-toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #9EC7F0;
+  padding: 0 4px;
+}
+.text-toggle-btn.active {
+  color: #29F1FA;
+  font-weight: bold;
+}
+.text-toggle-group {
+  display: flex;
+  align-items: center;
+}
+.text-toggle-sep {
+  color: #9EC7F0;
+  margin: 0 4px;
+  font-size: 12px;
+}
+.text-toggle-item {
+  display: flex;
+  align-items: center;
+}
+</style>
+
+<style lang="scss" scoped>
+/* Scoped styles override for el-radio inside this component */
+::v-deep .el-radio {
+  color: #BCDEFF; /* Unchecked color */
+  margin: 0 8px 0 0;
+  line-height: 0;
+  display: inline-block;
+}
+
+::v-deep .el-radio__label {
+  padding-left: 5px;
+  font-weight: 400;
+}
+::v-deep .el-radio.is-checked {
+
 }
 </style>
 

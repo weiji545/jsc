@@ -15,7 +15,7 @@ export default {
       default: () => [],
     },
     accountDataProp: {
-      type: Object,
+      type: [Object, Array],
       default: () => ({}),
     },
   },
@@ -83,13 +83,7 @@ export default {
     },
     updateThemeColors() {
       if (this.chart) {
-        this.chart.setOption({
-          visualMap: {
-            textStyle: {
-              color: this.getThemeTitleColor(),
-            },
-          },
-        })
+        this.chart.setOption(this.getChartOption())
       }
     },
     processData() {

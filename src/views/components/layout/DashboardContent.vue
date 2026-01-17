@@ -2,9 +2,15 @@
   <div class="dashboard-content">
     <!-- 左侧区域：455px -->
     <div class="content-left">
-      <CardPanel style="height: 318px;" :title="getPanelTitle('left',0)" :unit="getPanelUnit('left',0)" :showBottomCorner="getPanelShowBottomCorner('left',0)" :contentPadding="getPanelContentPadding('left',0)" class="content-item">
+      <CardPanel style="height: 318px;" :title="getPanelTitle('left',0)" :unit="getPanelUnit('left',0)" :showBottomCorner="getPanelShowBottomCorner('left',0)" :showCurrency="getPanelShowCurrency('left',0)" :actionLeft="getPanelAction('left',0,'actionLeft')" :actionRight="getPanelAction('left',0,'actionRight')" :contentPadding="getPanelContentPadding('left',0)" class="content-item">
         <template #title>
           <span>{{ getPanelTitle('left', 0) }}</span>
+        </template>
+        <template #action-left>
+          <slot name="left-top-action-left"></slot>
+        </template>
+        <template #action-right>
+          <slot name="left-top-action-right"></slot>
         </template>
         <div class="panel-content">
           <!-- 左侧上方内容插槽 -->
@@ -12,7 +18,7 @@
         </div>
       </CardPanel>
 
-      <CardPanel :title="getPanelTitle('left',1)" :unit="getPanelUnit('left',1)" :showBottomCorner="getPanelShowBottomCorner('left',1)" :contentPadding="getPanelContentPadding('left',1)" class="content-item">
+      <CardPanel :title="getPanelTitle('left',1)" :unit="getPanelUnit('left',1)" :showBottomCorner="getPanelShowBottomCorner('left',1)" :showCurrency="getPanelShowCurrency('left',1)" :actionLeft="getPanelAction('left',1,'actionLeft')" :actionRight="getPanelAction('left',1,'actionRight')" :contentPadding="getPanelContentPadding('left',1)" class="content-item">
         <template #title>
           <span>{{ getPanelTitle('left', 1) }}</span>
         </template>
@@ -22,7 +28,7 @@
         </div>
       </CardPanel>
 
-      <CardPanel :title="getPanelTitle('left',2)" :unit="getPanelUnit('left',2)" :showBottomCorner="getPanelShowBottomCorner('left',2)" :contentPadding="getPanelContentPadding('left',2)" class="content-item">
+      <CardPanel :title="getPanelTitle('left',2)" :unit="getPanelUnit('left',2)" :showBottomCorner="getPanelShowBottomCorner('left',2)" :showCurrency="getPanelShowCurrency('left',2)" :actionLeft="getPanelAction('left',2,'actionLeft')" :actionRight="getPanelAction('left',2,'actionRight')" :contentPadding="getPanelContentPadding('left',2)" class="content-item">
         <template #title>
           <span>{{ getPanelTitle('left', 2) }}</span>
         </template>
@@ -54,7 +60,7 @@
 
       <!-- 下层区域 -->
       <div class="center-bottom">
-        <CardPanel :title="panelsConfig.center.title" :unit="panelsConfig.center.unit" class="center-bottom-panel" :isLong="true" :showBottomCorner="getPanelShowBottomCorner('center',0)" :contentPadding="getPanelContentPadding('center',0)">
+        <CardPanel :title="panelsConfig.center.title" :unit="panelsConfig.center.unit" class="center-bottom-panel" :isLong="true" :showBottomCorner="getPanelShowBottomCorner('center',0)" :showCurrency="getPanelShowCurrency('center',0)" :actionLeft="getPanelAction('center',0,'actionLeft')" :actionRight="getPanelAction('center',0,'actionRight')" :contentPadding="getPanelContentPadding('center',0)">
           <template #title>
             <slot name="center-bottom-title">
               <span>{{ panelsConfig.center.title }}</span>
@@ -90,7 +96,7 @@
 
     <!-- 右侧区域：455px -->
     <div class="content-right">
-      <CardPanel style="height: 318px;" :title="getPanelTitle('right',0)" :unit="getPanelUnit('right',0)" :showBottomCorner="getPanelShowBottomCorner('right',0)" :contentPadding="getPanelContentPadding('right',0)" class="content-item">
+      <CardPanel style="height: 318px;" :title="getPanelTitle('right',0)" :unit="getPanelUnit('right',0)" :showBottomCorner="getPanelShowBottomCorner('right',0)" :showCurrency="getPanelShowCurrency('right',0)" :actionLeft="getPanelAction('right',0,'actionLeft')" :actionRight="getPanelAction('right',0,'actionRight')" :contentPadding="getPanelContentPadding('right',0)" class="content-item">
         <template #title>
           <span>{{ getPanelTitle('right', 0) }}</span>
         </template>
@@ -100,7 +106,7 @@
         </div>
       </CardPanel>
 
-      <CardPanel :title="getPanelTitle('right',1)" :unit="getPanelUnit('right',1)" :showBottomCorner="getPanelShowBottomCorner('right',1)" :contentPadding="getPanelContentPadding('right',1)" class="content-item">
+      <CardPanel :title="getPanelTitle('right',1)" :unit="getPanelUnit('right',1)" :showBottomCorner="getPanelShowBottomCorner('right',1)" :showCurrency="getPanelShowCurrency('right',1)" :actionLeft="getPanelAction('right',1,'actionLeft')" :actionRight="getPanelAction('right',1,'actionRight')" :contentPadding="getPanelContentPadding('right',1)" class="content-item">
         <template #title>
           <span>{{ getPanelTitle('right', 1) }}</span>
         </template>
@@ -110,7 +116,7 @@
         </div>
       </CardPanel>
 
-      <CardPanel :title="getPanelTitle('right',2)" :unit="getPanelUnit('right',2)" :showBottomCorner="getPanelShowBottomCorner('right',2)" :contentPadding="getPanelContentPadding('right',2)" class="content-item">
+      <CardPanel :title="getPanelTitle('right',2)" :unit="getPanelUnit('right',2)" :showBottomCorner="getPanelShowBottomCorner('right',2)" :showCurrency="getPanelShowCurrency('right',2)" :actionLeft="getPanelAction('right',2,'actionLeft')" :actionRight="getPanelAction('right',2,'actionRight')" :contentPadding="getPanelContentPadding('right',2)" class="content-item">
         <template #title>
           <span>{{ getPanelTitle('right', 2) }}</span>
         </template>
@@ -219,10 +225,28 @@ export default {
     // 从 panelsConfig 中读取是否显示底部边角装饰，未配置时默认 false
     getPanelShowBottomCorner(side, idx) {
       try {
-        return !!(this.panelsConfig && this.panelsConfig[side] && this.panelsConfig[side][idx] &&
-          this.panelsConfig[side][idx].showBottomCorner)
+        const item = Array.isArray(this.panelsConfig[side]) ? this.panelsConfig[side][idx] : this.panelsConfig[side]
+        return !(item && item.showBottomCorner === false)
       } catch (e) {
         return false
+      }
+    },
+    // 从 panelsConfig 中读取是否显示币种配置，未配置时默认 false
+    getPanelShowCurrency(side, idx) {
+      try {
+        const item = Array.isArray(this.panelsConfig[side]) ? this.panelsConfig[side][idx] : this.panelsConfig[side]
+        return !!(item && item.showCurrency)
+      } catch (e) {
+        return false
+      }
+    },
+    // 安全读取 panelsConfig 中的 actionLeft / actionRight 配置
+    getPanelAction(side, idx, prop) {
+      try {
+        const item = Array.isArray(this.panelsConfig[side]) ? this.panelsConfig[side][idx] : this.panelsConfig[side]
+        return (item && item[prop]) || null
+      } catch (e) {
+        return null
       }
     }
     ,

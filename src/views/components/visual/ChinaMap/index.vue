@@ -108,6 +108,8 @@ export default {
             },
           },
         })
+        // 主题更新可能会影响图层渲染，重新加载飞线以确保显示
+        this.updateChartWithFlows()
       }
     },
     processFlowData() {
@@ -140,15 +142,15 @@ export default {
       }
 
       const flowCenters = this.flowData || []
-      
+
       // 获取当前的 option 和 series
       const currentOption = this.mainChart.getOption()
       let currentSeries = currentOption.series || []
-      
+
       // 只保留 map 类型的 series (基础地图)
       // 过滤掉之前的 lines, effectScatter, scatter 等飞线相关系列，防止重复累加
       let baseSeries = currentSeries.filter(s => s.type === 'map')
-      
+
       let newFlowSeries = []
 
       flowCenters.forEach((item) => {
@@ -254,7 +256,7 @@ export default {
       if (newFlowSeries.length > 0) {
         // 合并基础地图系列和新的飞线系列
         const finalSeries = baseSeries.concat(newFlowSeries)
-        
+
         this.mainChart.setOption({
           series: finalSeries
         }, {
@@ -405,7 +407,7 @@ export default {
                   </div>
                 </div>`
             }
-            
+
             // 处理省份和地图区域的tooltip
             // 尝试获取业务数据
             const businessData = params.data || {}
@@ -462,6 +464,7 @@ export default {
         visualMap: {
           show: true,
           type: 'piecewise',
+          seriesIndex: [0], // Only apply to the map series
           inverse: true,
           pieces: [
             {
@@ -592,7 +595,7 @@ export default {
         if (this.mainChart) {
           this.mainChart.resize()
         }
-        
+
         // 延迟启动轮播，确保地图完全渲染完成
         if (this.initTimerId) clearTimeout(this.initTimerId)
         this.initTimerId = setTimeout(() => {
@@ -650,7 +653,7 @@ export default {
 
       // 确保从第一个省份开始
       this.currentHighlightIndex = 0
-      
+
       this.isRotating = true
       this.highlightTimer = setInterval(() => {
         this.highlightNextProvince()
@@ -678,7 +681,7 @@ export default {
     },
     highlightSpecificProvince(provinceName) {
       if (!this.mainChart) return
-      
+
       // 验证省份是否在轮播列表中
       if (!this.highlightProvinces.includes(provinceName)) {
         console.warn('[ChinaMap] Province not in highlight list:', provinceName)
@@ -714,12 +717,12 @@ export default {
     },
     clearCurrentHighlight() {
       if (!this.mainChart) return
-      
+
       this.mainChart.dispatchAction({
         type: 'downplay',
         seriesIndex: 0,
       })
-      
+
       this.mainChart.dispatchAction({
         type: 'hideTip'
       })

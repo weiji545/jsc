@@ -226,20 +226,20 @@ export default {
       // ========== 面板配置 ==========
       panelsConfig: {
         left: [
-          { title: '账户数量统计', unit: '户' },
+          { title: '账户数量统计', unit: '户', showCurrency: true, showBottomCorner: false },
           {
             title: '账户区域统计',
             unit: '户',
-            showBottomCorner: true,
+            showCurrency: true,
             contentPadding: { paddingTop: 9, paddingLeft: 14, paddingRight: 14 },
           },
-          { title: '账户币种统计', unit: '户', showBottomCorner: true },
+          { title: '账户币种统计', unit: '户', showCurrency: true },
         ],
-        center: { title: '余额变动趋势分析', unit: '万元', contentPadding: { paddingTop: 0 } },
+        center: { title: '余额变动趋势分析', unit: '万元', contentPadding: { paddingTop: 0 }, showCurrency: true },
         right: [
-          { title: '资金金额统计', unit: '万元' },
-          { title: '存款金额统计', unit: '万元', showBottomCorner: true },
-          { title: '币种余额统计', unit: '万元', showBottomCorner: true },
+          { title: '资金金额统计', unit: '万元', showCurrency: true, showBottomCorner: false },
+          { title: '存款金额统计', unit: '万元', showCurrency: true },
+          { title: '币种余额统计', unit: '万元', showCurrency: true },
         ],
       },
 
