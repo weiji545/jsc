@@ -60,7 +60,7 @@
 
       <!-- 下层区域 -->
       <div class="center-bottom">
-        <CardPanel :title="panelsConfig.center.title" :unit="panelsConfig.center.unit" class="center-bottom-panel" :isLong="true" :showBottomCorner="getPanelShowBottomCorner('center',0)" :showCurrency="getPanelShowCurrency('center',0)" :actionLeft="getPanelAction('center',0,'actionLeft')" :actionRight="getPanelAction('center',0,'actionRight')" :contentPadding="getPanelContentPadding('center',0)">
+        <CardPanel :title="panelsConfig.center.title" :unit="centerBottomMode === null ? '' : panelsConfig.center.unit" class="center-bottom-panel" :isLong="true" :showBottomCorner="getPanelShowBottomCorner('center',0)" :showCurrency="getPanelShowCurrency('center',0)" :actionLeft="getPanelAction('center',0,'actionLeft')" :actionRight="getPanelAction('center',0,'actionRight')" :contentPadding="getPanelContentPadding('center',0)">
           <template #title>
             <slot name="center-bottom-title">
               <span>{{ panelsConfig.center.title }}</span>
@@ -75,8 +75,9 @@
                 <span v-show="centerPeriodComputed === 'month'">月</span>
 <!--                <label><input type="radio" name="centerPeriod" value="day" v-model="centerPeriodComputed"/>天</label>-->
 <!--                <label><input type="radio" name="centerPeriod" value="month" v-model="centerPeriodComputed"/>月</label>-->
+                 <span v-if="centerBottomMode === null" style="margin-left: 20px; font-size: 12px; font-weight: 400; opacity: 1;">单位: {{ panelsConfig.center.unit }}</span>
               </div>
-              <div class="text-toggle">
+              <div class="text-toggle" v-if="centerBottomMode !== null">
                 <button type="button" :class="['text-btn', { selected: centerBottomModeComputed === 'a' }]" @click="centerBottomModeComputed = 'a'">
                   资金交易趋势
                 </button>

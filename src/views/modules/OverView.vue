@@ -72,7 +72,7 @@
       </div>
     </template>
 
-    <!-- 中间下方 余额变动趋势分析 -->
+    <!-- 中下 余额变动趋势分析 -->
     <template #center-bottom-title>
       <div class="trend-title-bar">
         <div class="trend-title">余额变动趋势分析</div>
@@ -103,7 +103,7 @@
       />
     </template>
 
-    <!-- 右上 资金金额统计 ，下方使用 EChartSparkline -->
+    <!-- 右上 资金金额统计 -->
     <template #right-top>
       <OverviewMetricPanel
         :domestic-value="overview.transactionAmount.domestic || overview.accountsSummary.domestic"
@@ -151,12 +151,7 @@
 import DashboardContent from '../components/layout/DashboardContent.vue'
 import CoreOverviewPanel from '../components/panels/CoreOverviewPanel.vue'
 import FilterTabs from '../components/common/FilterTabs.vue'
-import PagedCarousel from '../components/common/PagedCarousel.vue'
-import EChartRingBar from '../components/charts/EChartRingBar.vue'
 import EChartPieRing from '../components/charts/EChartPieRing.vue'
-import EChartBarLine from '../components/charts/EChartBarLine.vue'
-import EChartSparkline from '../components/charts/EChartSparkline.vue'
-import EchartGauge from '../components/charts/EchartGauge.vue'
 import RankingStats from './overview-widgets/RegionRankList.vue'
 import OverviewMetricPanel from './overview-widgets/OverviewMetricPanel.vue'
 import TrendAnalysis from './overview-widgets/TrendAnalysis.vue'
@@ -170,7 +165,6 @@ import {
   getChinaMapData,
   getChinaMapFlowData,
   getWorldMapFlowData,
-  getWorldAccountData,
 } from '../../api/dashboard'
 import { formatNumber } from '../../utils/utils.js'
 
@@ -180,12 +174,7 @@ export default {
     DashboardContent,
     CoreOverviewPanel,
     FilterTabs,
-    PagedCarousel,
-    EChartRingBar,
     EChartPieRing,
-    EChartBarLine,
-    EChartSparkline,
-    EchartGauge,
     RegionRankList: RankingStats,
     OverviewMetricPanel,
     TrendAnalysis,

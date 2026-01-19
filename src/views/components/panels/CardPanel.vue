@@ -11,7 +11,7 @@
       <div class="card-unit-wrapper">
         <!-- Configurable Left Action -->
         <div v-if="actionLeft && actionLeft.options" class="action-group left">
-           <el-radio-group v-if="actionLeft.type === 'radio'" v-model="actionLeft.value" size="mini">
+           <el-radio-group v-if="actionLeft.type === 'radio'" v-model="actionLeft.value" size="mini" :style="{'margin-right': displayUnit ? '9px' : 0}">
               <el-radio v-for="opt in actionLeft.options" :key="opt.value" :label="opt.value">{{ opt.label }}</el-radio>
            </el-radio-group>
         </div>

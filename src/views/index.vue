@@ -31,7 +31,7 @@ export default {
   },
   data() {
     return {
-      currentModule: 'overView',
+      currentModule: 'AccountManagement',
       currency: 'RMB',
       baseWidth: 1920,
       baseHeight: 1080,

@@ -29,7 +29,7 @@ export default {
       default: 0,
     },
     height: {
-      type: Number,
+      type: [Number, String],
       default: 260,
     },
     // 可配置显示哪条 y 轴，支持 'bar' | 'line' | 'both' | ['bar','line']（默认仅显示折线的 y 轴）
@@ -85,7 +85,17 @@ export default {
     xAxisMaxLength: {
       type: Number,
       default: 100,
-    }
+    },
+    // Chart direction: 'vertical' | 'horizontal'
+    direction: {
+      type: String,
+      default: 'vertical',
+    },
+    // Customize bar max width
+    barMaxWidth: {
+      type: Number,
+      default: 26,
+    },
   },
   data() {
     return {
@@ -197,6 +207,7 @@ export default {
     barData: { handler() { this.updateChart() }, deep: true },
     lineData: { handler() { this.updateChart() }, deep: true },
     options: { handler() { this.updateChart() }, deep: true },
+    direction() { this.updateChart() },
   },
   methods: {
     initChart() {
@@ -268,6 +279,7 @@ export default {
       }
       const effectiveLegendName = (this.options && this.options.legendName) || this.legendName || '账户余额'
       const effectiveSeries2Name = (this.options && this.options.series2Name) || this.series2Name || '交易笔数'
+      const isHorizontal = this.direction === 'horizontal'
 
       // 主题判断
       let isDark = true
@@ -295,34 +307,65 @@ export default {
         showLineAxis = true
       }
 
-      const yAxisArray = []
-      // 始终提供两个轴对象，确保 index 1 始终有效且不会导致 ECharts 内部 coordinate 系统混乱
-      yAxisArray.push({
+      // 构建 categoryAxis
+      const categoryAxis = {
+        type: 'category',
+        data: this.categories || [],
+        axisLabel: {
+          color: '#9E9E9E',
+          formatter: (value) => {
+            if (value && value.length > this.xAxisMaxLength) {
+              // 简单截断
+              return value.substring(0, this.xAxisMaxLength - 1) + '..'
+            }
+            return value
+          },
+        },
+        axisLine: {
+          show: true,
+          lineStyle: { color: '#636363' },
+        },
+        boundaryGap: true,
+      }
+      // 水平模式下，Y轴(分类轴)通常inverse=true，使得第一个数据在顶部
+      if (isHorizontal) {
+        categoryAxis.inverse = true
+      }
+
+      // 构建 Value Axes
+      const valueAxisBar = {
         type: 'value',
         show: showBarAxis,
         name: this.showYAxisName && showBarAxis ? effectiveLegendName : '',
-        position: 'left',
+        // position determined by axis index usually, but explicit works too
+        position: isHorizontal ? 'bottom' : 'left',
         axisLabel: { color: '#9E9E9E' },
         axisLine: { show: false },
         splitLine: {
           show: true,
           lineStyle: { color: '#636363' },
         },
-      })
-      yAxisArray.push({
+      }
+
+      const valueAxisLine = {
         type: 'value',
         show: showLineAxis,
         name: this.showYAxisName && showLineAxis ? effectiveSeries2Name : '',
-        position: showBarAxis ? 'right' : 'left', // 如果 bar 轴显示，line 轴在右，否则也在左
+        position: isHorizontal ? 'top' : (showBarAxis ? 'right' : 'left'),
         axisLabel: { color: '#9E9E9E' },
         axisLine: { show: false },
         splitLine: {
-          show: !showBarAxis, // 仅当左侧轴隐藏时显示
+          show: !showBarAxis,
           lineStyle: { color: '#636363' },
         },
-      })
+      }
 
-      const option = Object.assign({
+      const yAxisArray = [valueAxisBar, valueAxisLine]
+
+      // Gradient Coords
+      const gradientCoords = isHorizontal ? [0, 0, 1, 0] : [0, 0, 0, 1]
+
+      const baseOption = {
         tooltip: {
           trigger: 'axis',
           backgroundColor: 'rgba(0,0,0,0.7)',
@@ -334,7 +377,6 @@ export default {
           inactiveColor: legendInactiveColor,
           data: (function () {
             const arr = [effectiveLegendName]
-            // 只有当有折线数据时才添加折线图例
             if ((this.lineData && this.lineData.length > 0) && showLineAxis) {
               arr.push(effectiveSeries2Name)
             }
@@ -348,46 +390,31 @@ export default {
           bottom: '15%',
           containLabel: false,
         },
-        xAxis: {
-          type: 'category',
-          data: this.categories || [],
-          axisLabel: {
-            color: '#9E9E9E',
-            formatter: (value) => {
-              if (value && value.length > this.xAxisMaxLength) {
-                return value.substring(0, this.xAxisMaxLength - 1) + '..'
-              }
-              return value
-            },
-          },
-          axisLine: {
-            show: true,
-            lineStyle: { color: '#636363' },
-          },
-          boundaryGap: true,
-        },
-        yAxis: yAxisArray,
+        // Assign axes dynamically based on direction
+        xAxis: isHorizontal ? yAxisArray : categoryAxis,
+        yAxis: isHorizontal ? categoryAxis : yAxisArray,
         series: [
           {
             name: effectiveLegendName,
             type: 'bar',
             yAxisIndex: 0,
+            xAxisIndex: 0,
             data: this.barData || [],
             itemStyle: {
-              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              color: new echarts.graphic.LinearGradient(...gradientCoords, [
                 { offset: 0, color: '#3FB4F0' },
                 { offset: 1, color: '#086ED9' },
               ]),
             },
-            barMaxWidth: 26,
+            barMaxWidth: this.barMaxWidth,
             z: 2,
           },
-          // 只有当有折线数据时才添加折线系列
           ...((this.lineData && this.lineData.length > 0) ? [
             {
               name: effectiveSeries2Name,
               type: 'line',
-              yAxisIndex: 1,
+              yAxisIndex: isHorizontal ? 0 : 1,
+              xAxisIndex: isHorizontal ? 1 : 0,
               data: this.lineData || [],
               symbol: 'circle',
               symbolSize: 6,
@@ -396,7 +423,9 @@ export default {
               z: 3,
             }] : []),
         ],
-      }, this.options)
+      }
+
+      const option = Object.assign(baseOption, this.options)
 
       // Apply lineColor prop if provided (must happen after options merge)
       try {
