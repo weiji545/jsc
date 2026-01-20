@@ -36,6 +36,16 @@ export default {
       type: String,
       default: '',
     },
+    // 中心显示的文本（第一行）
+    centerText: {
+      type: String,
+      default: '',
+    },
+    // 中心显示的文本（第二行）
+    centerSubText: {
+      type: String,
+      default: '',
+    },
   },
   data() {
     return {
@@ -326,6 +336,31 @@ export default {
           option[k] = this.options[k]
         })
       }
+
+      // 添加 Title (中心文字) - 使用 title 组件
+      if (this.centerText || this.centerSubText) {
+        const themeColor = this.getThemeColors()
+        option.title = {
+          text: this.centerText,
+          subtext: this.centerSubText,
+          left: 'center',
+          top: 'center',
+          itemGap: 12, // 文本与副文本之间的间距
+          textStyle: {
+            color: themeColor,
+            fontSize: 12,
+            fontFamily: 'Microsoft YaHei',
+            fontWeight: 'normal',
+          },
+          subtextStyle: {
+            color: themeColor,
+            fontSize: 16,
+            fontFamily: 'Microsoft YaHei',
+            fontWeight: 'bold',
+          },
+        }
+      }
+
       // 如果用户在顶层 options 中传入 color 数组，要优先用于 series 的颜色
       // 默认 option.series[0].color 会覆盖顶层 color，故在此处将其同步到 series[0].color
       if (this.options && Array.isArray(this.options.color)) {

@@ -2,7 +2,7 @@
   <div class="dashboard-content">
     <!-- 左侧区域：455px -->
     <div class="content-left">
-      <CardPanel style="height: 318px;" :title="getPanelTitle('left',0)" :unit="getPanelUnit('left',0)" :showBottomCorner="getPanelShowBottomCorner('left',0)" :showCurrency="getPanelShowCurrency('left',0)" :actionLeft="getPanelAction('left',0,'actionLeft')" :actionRight="getPanelAction('left',0,'actionRight')" :contentPadding="getPanelContentPadding('left',0)" class="content-item">
+      <CardPanel style="height: 318px;" :title="getPanelTitle('left',0)" :unit="getPanelUnit('left',0)" :showBottomCorner="getPanelShowBottomCorner('left',0)" :showCurrency="getPanelShowCurrency('left',0)" :actionLeft="getPanelAction('left',0,'actionLeft')" :actionRight="getPanelAction('left',0,'actionRight')" :contentPadding="getPanelContentPadding('left',0)" class="content-item" @action-left-change="onActionChange('left', 0, 'left', $event)" @action-right-change="onActionChange('left', 0, 'right', $event)">
         <template #title>
           <span>{{ getPanelTitle('left', 0) }}</span>
         </template>
@@ -18,7 +18,7 @@
         </div>
       </CardPanel>
 
-      <CardPanel :title="getPanelTitle('left',1)" :unit="getPanelUnit('left',1)" :showBottomCorner="getPanelShowBottomCorner('left',1)" :showCurrency="getPanelShowCurrency('left',1)" :actionLeft="getPanelAction('left',1,'actionLeft')" :actionRight="getPanelAction('left',1,'actionRight')" :contentPadding="getPanelContentPadding('left',1)" class="content-item">
+      <CardPanel :title="getPanelTitle('left',1)" :unit="getPanelUnit('left',1)" :showBottomCorner="getPanelShowBottomCorner('left',1)" :showCurrency="getPanelShowCurrency('left',1)" :actionLeft="getPanelAction('left',1,'actionLeft')" :actionRight="getPanelAction('left',1,'actionRight')" :contentPadding="getPanelContentPadding('left',1)" class="content-item" @action-left-change="onActionChange('left', 1, 'left', $event)" @action-right-change="onActionChange('left', 1, 'right', $event)">
         <template #title>
           <span>{{ getPanelTitle('left', 1) }}</span>
         </template>
@@ -28,7 +28,7 @@
         </div>
       </CardPanel>
 
-      <CardPanel :title="getPanelTitle('left',2)" :unit="getPanelUnit('left',2)" :showBottomCorner="getPanelShowBottomCorner('left',2)" :showCurrency="getPanelShowCurrency('left',2)" :actionLeft="getPanelAction('left',2,'actionLeft')" :actionRight="getPanelAction('left',2,'actionRight')" :contentPadding="getPanelContentPadding('left',2)" class="content-item">
+      <CardPanel :title="getPanelTitle('left',2)" :unit="getPanelUnit('left',2)" :showBottomCorner="getPanelShowBottomCorner('left',2)" :showCurrency="getPanelShowCurrency('left',2)" :actionLeft="getPanelAction('left',2,'actionLeft')" :actionRight="getPanelAction('left',2,'actionRight')" :contentPadding="getPanelContentPadding('left',2)" class="content-item" @action-left-change="onActionChange('left', 2, 'left', $event)" @action-right-change="onActionChange('left', 2, 'right', $event)">
         <template #title>
           <span>{{ getPanelTitle('left', 2) }}</span>
         </template>
@@ -47,7 +47,16 @@
         <div class="data-display">
           <div class="data-item" v-for="(item, index) in dataList" :key="index">
             <div class="data-content">
-              <div class="data-number">{{ formatNumber(item.value, item.decimals || 0) }}</div>
+              <div class="data-number">
+                <template v-if="item.unit === '万元'">
+                  <span class="num-value">{{ formatLargeNumber(item.value, item.decimals, true, item.unit).value }}</span>
+                  <span class="num-suffix">{{ formatLargeNumber(item.value, item.decimals, true, item.unit).suffix }}</span>
+                </template>
+                <template v-else>
+                  <span class="num-value">{{ formatNumber(item.value, item.decimals || 0) }}</span>
+                  <span class="num-suffix">{{ item.unit }}</span>
+                </template>
+              </div>
               <div class="data-label">{{ item.label }}</div>
             </div>
           </div>
@@ -60,7 +69,7 @@
 
       <!-- 下层区域 -->
       <div class="center-bottom">
-        <CardPanel :title="panelsConfig.center.title" :unit="centerBottomMode === null ? '' : panelsConfig.center.unit" class="center-bottom-panel" :isLong="true" :showBottomCorner="getPanelShowBottomCorner('center',0)" :showCurrency="getPanelShowCurrency('center',0)" :actionLeft="getPanelAction('center',0,'actionLeft')" :actionRight="getPanelAction('center',0,'actionRight')" :contentPadding="getPanelContentPadding('center',0)">
+        <CardPanel :title="panelsConfig.center.title" :unit="centerBottomMode === null ? '' : panelsConfig.center.unit" class="center-bottom-panel" :isLong="true" :showBottomCorner="getPanelShowBottomCorner('center',0)" :showCurrency="getPanelShowCurrency('center',0)" :actionLeft="getPanelAction('center',0,'actionLeft')" :actionRight="getPanelAction('center',0,'actionRight')" :contentPadding="getPanelContentPadding('center',0)" @action-left-change="onActionChange('center', 0, 'left', $event)" @action-right-change="onActionChange('center', 0, 'right', $event)">
           <template #title>
             <slot name="center-bottom-title">
               <span>{{ panelsConfig.center.title }}</span>
@@ -97,7 +106,7 @@
 
     <!-- 右侧区域：455px -->
     <div class="content-right">
-      <CardPanel style="height: 318px;" :title="getPanelTitle('right',0)" :unit="getPanelUnit('right',0)" :showBottomCorner="getPanelShowBottomCorner('right',0)" :showCurrency="getPanelShowCurrency('right',0)" :actionLeft="getPanelAction('right',0,'actionLeft')" :actionRight="getPanelAction('right',0,'actionRight')" :contentPadding="getPanelContentPadding('right',0)" class="content-item">
+      <CardPanel style="height: 318px;" :title="getPanelTitle('right',0)" :unit="getPanelUnit('right',0)" :showBottomCorner="getPanelShowBottomCorner('right',0)" :showCurrency="getPanelShowCurrency('right',0)" :actionLeft="getPanelAction('right',0,'actionLeft')" :actionRight="getPanelAction('right',0,'actionRight')" :contentPadding="getPanelContentPadding('right',0)" class="content-item" @action-left-change="onActionChange('right', 0, 'left', $event)" @action-right-change="onActionChange('right', 0, 'right', $event)">
         <template #title>
           <span>{{ getPanelTitle('right', 0) }}</span>
         </template>
@@ -107,7 +116,7 @@
         </div>
       </CardPanel>
 
-      <CardPanel :title="getPanelTitle('right',1)" :unit="getPanelUnit('right',1)" :showBottomCorner="getPanelShowBottomCorner('right',1)" :showCurrency="getPanelShowCurrency('right',1)" :actionLeft="getPanelAction('right',1,'actionLeft')" :actionRight="getPanelAction('right',1,'actionRight')" :contentPadding="getPanelContentPadding('right',1)" class="content-item">
+      <CardPanel :title="getPanelTitle('right',1)" :unit="getPanelUnit('right',1)" :showBottomCorner="getPanelShowBottomCorner('right',1)" :showCurrency="getPanelShowCurrency('right',1)" :actionLeft="getPanelAction('right',1,'actionLeft')" :actionRight="getPanelAction('right',1,'actionRight')" :contentPadding="getPanelContentPadding('right',1)" class="content-item" @action-left-change="onActionChange('right', 1, 'left', $event)" @action-right-change="onActionChange('right', 1, 'right', $event)">
         <template #title>
           <span>{{ getPanelTitle('right', 1) }}</span>
         </template>
@@ -117,7 +126,7 @@
         </div>
       </CardPanel>
 
-      <CardPanel :title="getPanelTitle('right',2)" :unit="getPanelUnit('right',2)" :showBottomCorner="getPanelShowBottomCorner('right',2)" :showCurrency="getPanelShowCurrency('right',2)" :actionLeft="getPanelAction('right',2,'actionLeft')" :actionRight="getPanelAction('right',2,'actionRight')" :contentPadding="getPanelContentPadding('right',2)" class="content-item">
+      <CardPanel :title="getPanelTitle('right',2)" :unit="getPanelUnit('right',2)" :showBottomCorner="getPanelShowBottomCorner('right',2)" :showCurrency="getPanelShowCurrency('right',2)" :actionLeft="getPanelAction('right',2,'actionLeft')" :actionRight="getPanelAction('right',2,'actionRight')" :contentPadding="getPanelContentPadding('right',2)" class="content-item" @action-left-change="onActionChange('right', 2, 'left', $event)" @action-right-change="onActionChange('right', 2, 'right', $event)">
         <template #title>
           <span>{{ getPanelTitle('right', 2) }}</span>
         </template>
@@ -132,7 +141,7 @@
 
 <script>
 import CardPanel from '../panels/CardPanel.vue'
-import { formatNumber } from '../../../utils/utils.js'
+import { formatNumber, formatLargeNumber } from '../../../utils/utils.js'
 
 export default {
   name: 'DashboardContent',
@@ -205,6 +214,7 @@ export default {
   },
   methods: {
     formatNumber,
+    formatLargeNumber,
     // 安全读取 panelsConfig 中的 title 与 unit，若缺失返回空字符串
     getPanelTitle(side, idx) {
       try {
@@ -265,6 +275,16 @@ export default {
       } catch (e) {
         return {}
       }
+    },
+    // 处理action变化事件
+    onActionChange(side, index, actionType, value) {
+      // 转发事件到父组件，携带位置和类型信息
+      this.$emit('panel-action-change', {
+        side,      // 'left', 'center', 'right'
+        index,     // 0, 1, 2
+        actionType, // 'left' or 'right'
+        value      // 新的值
+      })
     },
   },
 }
@@ -352,21 +372,21 @@ export default {
   justify-content: center;
   align-items: center;
   flex: 1;
-
+  color: #3AACFF;
   // 第一个数据项数字颜色 #24D9B5
   &:nth-child(1) .data-number {
     color: #24D9B5;
   }
 
-  // 第二个数据项数字颜色 #3AACFF
-  &:nth-child(2) .data-number {
-    color: #3AACFF;
-  }
+  // // 第二个数据项数字颜色 #3AACFF
+  // &:nth-child(2) .data-number {
+  //   color: #3AACFF;
+  // }
 
-  // 第三个数据项数字颜色 #24D9B5（如果只有3个，可以循环使用）
-  &:nth-child(3) .data-number {
-    color: #24D9B5;
-  }
+  // // 第三个数据项数字颜色 #24D9B5（如果只有3个，可以循环使用）
+  // &:nth-child(3) .data-number {
+  //   color: #24D9B5;
+  // }
 
   /* 浅色模式下统一使用变量 */
   .is-light-mode & .data-number {
@@ -386,6 +406,17 @@ export default {
   line-height: 1.2;
   margin-bottom: 10px;
   text-align: left;
+  display: flex;
+  align-items: baseline; // 确保底部对齐
+
+  .num-value {
+    font-size: 50px;
+  }
+
+  .num-suffix {
+    font-size: 24px;
+    margin-left: 2px;
+  }
 }
 
 .data-label {

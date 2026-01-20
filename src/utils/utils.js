@@ -37,11 +37,13 @@ export function formatNumber(num, decimals = 0) {
 }
 
 /**
- * 格式化大数字（带单位：万、百万等）
  * @param {Number|String} num - 要格式化的数字
- * @returns {String} 格式化后的字符串
+ * @param {Number} decimals - 保留小数位数，默认为2
+ * @param {Boolean} split - 是否分开返回（整数和小数+单位）
+ * @param {String} unit - 自定义单位（替换默认的'元'）
+ * @returns {String|Object} 格式化后的字符串或对象
  */
-export function formatLargeNumber(num) {
+export function formatLargeNumber(num, decimals = 0, split = false, unit) {
   if (num === null || num === undefined || num === '') {
     return '0'
   }
@@ -52,12 +54,38 @@ export function formatLargeNumber(num) {
     return '0'
   }
 
-  if (number >= 1000000) {
-    return formatNumber((number / 1000000).toFixed(2)) + 'M'
+  let amount = number
+  let magnitude = ''
+
+  if (number >= 100000000) {
+    amount = number / 100000000
+    magnitude = '亿元'
   } else if (number >= 10000) {
-    return formatNumber((number / 10000).toFixed(2)) + '万'
-  } else {
-    return formatNumber(number)
+    amount = number / 10000
+    magnitude = '万元'
   }
+
+  // const unitSuffix = unit !== undefined ? unit : (magnitude ? '元' : '')
+  const resultStr = formatNumber(amount, decimals) + magnitude //  + unitSuffix
+
+  if (split) {
+    const dotIndex = resultStr.indexOf('.')
+    if (dotIndex > -1) {
+      return {
+        value: resultStr.substring(0, dotIndex),
+        suffix: resultStr.substring(dotIndex)
+      }
+    }
+    const match = resultStr.match(/([\d,]+)(.*)/)
+    if (match) {
+        return {
+            value: match[1],
+            suffix: match[2]
+        }
+    }
+    return { value: resultStr, suffix: '' }
+  }
+
+  return resultStr
 }
 

@@ -1,6 +1,6 @@
 <template>
-  <div class="card-panel" :class="{ 'is-dark': isDarkMode, 'is-light': !isDarkMode, 'is-long': isLong, 'has-bottom-corner': !isLong && showBottomCorner }" :style="panelStyle">
-    <div class="card-title">
+  <div class="card-panel" :class="{ 'is-dark': isDarkMode, 'is-light': !isDarkMode, 'is-long': isLong, 'has-bottom-corner': showBottomCorner }" :style="panelStyle">
+    <div class="card-title" :style="titleBgStyle">
       <div class="card-title-main">
         <slot name="title">{{ title }}</slot>
         <span class="currency-indicator" v-if="showCurrency">
@@ -10,8 +10,8 @@
       </div>
       <div class="card-unit-wrapper">
         <!-- Configurable Left Action -->
-        <div v-if="actionLeft && actionLeft.options" class="action-group left">
-           <el-radio-group v-if="actionLeft.type === 'radio'" v-model="actionLeft.value" size="mini" :style="{'margin-right': displayUnit ? '9px' : 0}">
+        <div v-if="actionLeft && actionLeft.options" class="action-group left" :style="{'margin-right': !displayUnit && !actionRight ? '87px' : ''}">
+           <el-radio-group v-if="actionLeft.type === 'radio'" v-model="actionLeftValue" size="mini" :style="{'margin-right': displayUnit ? '9px' : 0}">
               <el-radio v-for="opt in actionLeft.options" :key="opt.value" :label="opt.value">{{ opt.label }}</el-radio>
            </el-radio-group>
         </div>
@@ -24,8 +24,8 @@
               <div v-for="(opt) in actionRight.options" :key="opt.value" class="text-toggle-item">
                   <button
                           class="text-toggle-btn"
-                          :class="{ active: actionRight.value === opt.value }"
-                          @click="actionRight.value = opt.value">
+                          :class="{ active: actionRightValue === opt.value }"
+                          @click="actionRightValue = opt.value">
                       {{ opt.label }}
                   </button>
               </div>
@@ -149,6 +149,43 @@ export default {
         width: this.longWidth,
         height: this.longHeight,
       }
+    },
+    actionLeftValue: {
+      get() {
+        return this.actionLeft ? this.actionLeft.value : null
+      },
+      set(val) {
+        this.$emit('action-left-change', val)
+      }
+    },
+    actionRightValue: {
+      get() {
+        return this.actionRight ? this.actionRight.value : null
+      },
+      set(val) {
+        this.$emit('action-right-change', val)
+      }
+    },
+    titleBgStyle() {
+      if (this.isLong) return {}
+      if (!this.actionRight || !this.actionRight.options) return {}
+
+      const idx = this.actionRight.options.findIndex(opt => opt.value === this.actionRight.value)
+
+      if (idx === 0 || idx === 1) {
+        const suffix = idx + 1
+        const imgName = this.isDarkMode
+          ? `subtitle-active-${suffix}.png`
+          : `subtitle-light-active-${suffix}.png`
+        try {
+          return {
+            backgroundImage: `url(${require('../../img/' + imgName)})`
+          }
+        } catch (e) {
+          return {}
+        }
+      }
+      return {}
     },
   },
 }
@@ -469,6 +506,10 @@ export default {
   background-repeat: no-repeat;
   background-position: bottom center;
   background-size: contain;
+}
+
+.card-panel.is-long.has-bottom-corner {
+  background-image: url('../../img/container-bottom-corner-long.png');
 }
 
 /* Text Toggle Button Styles */

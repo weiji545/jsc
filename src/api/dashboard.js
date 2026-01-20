@@ -41,27 +41,6 @@ export const getWorldMapFlowData = () => {
 }
 
 /**
- * 获取世界地图地区账户统计数据
- */
-export const getWorldAccountData = () => {
-  const accountDataMap = {
-    '尼日利亚': { count: 120, balance: 1253000 },
-    '美国': { count: 85, balance: 2340000 },
-    '法国': { count: 320, balance: 5670000 },
-    '美国芝加哥': { count: 64, balance: 1890000 },
-    '加纳库马西': { count: 45, balance: 980000 },
-    '英国曼彻斯特': { count: 110, balance: 3120000 },
-    '德国汉堡': { count: 92, balance: 2750000 },
-    '哈萨克斯坦': { count: 38, balance: 1150000 },
-    '墨西哥': { count: 156, balance: 4230000 },
-    '加拿大温哥华': { count: 78, balance: 2100000 },
-    '中国': { count: 500, balance: 12000000 },
-    '俄罗斯': { count: 300, balance: 8000000 },
-  }
-  return mockApi(accountDataMap)
-}
-
-/**
  * 获取概览数据
  */
 export const getOverviewData = () => {
@@ -249,8 +228,8 @@ export const getChinaMapFlowData = () => {
  */
 export const getBaseDataList = () => {
   const baseDataList = [
-    { label: '账户总数', value: 183220, isAmount: false },
-    { label: '账户余额总数', value: 56200, isAmount: true, decimals: 2 },
+    { label: '账户总数', value: 183220, },
+    { label: '账户余额总数', value: 56200, decimals: 2, unit: '万元' },
   ]
   return mockApi(baseDataList)
 }

@@ -50,7 +50,6 @@
     <!-- 中间上方 核心区域（地球 / 地图） + 通用选项卡 -->
     <template #center-top>
       <div class="core-top">
-
         <CoreOverviewPanel
           :scope="balanceScope"
           :globe-country-data="globeCountryData"
