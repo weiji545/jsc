@@ -1,7 +1,7 @@
 <template>
   <div class="core-filter-bar" :class="{ 'is-dark': isDarkMode, 'is-light': !isDarkMode }">
     <div class="core-radios">
-      <template v-if="showFundFlowOption" >
+      <template v-if="showFundFlowOption">
         <div :class="['core-radio', { active: scope === 'global' }]" @click="onScopeClick('global')">
           <span class="core-label" style="width: 120px; text-align: center;">全局</span>
         </div>
@@ -11,7 +11,7 @@
           placeholder="境内"
           v-model="fundFlowDomestic"
           class="accent-select"
-          :options="fundFlowOptions"
+          :options="fundFlowDomesticOptions"
           :props="{ expandTrigger: 'hover' }"
           :popper-class="isDarkMode ? 'filter-cascader-popper dark-mode' : 'filter-cascader-popper'"
           @change="onFundFlowChange('domestic')"
@@ -24,10 +24,10 @@
           placeholder="境外"
           v-model="fundFlowOverseas"
           class="accent-select"
-          :options="fundFlowOptions"
+          :options="fundFlowOverseasOptions"
           :props="{ expandTrigger: 'hover' }"
           :popper-class="isDarkMode ? 'filter-cascader-popper dark-mode' : 'filter-cascader-popper'"
-          @change="onFundFlowChange('')"
+          @change="onFundFlowChange('overseas')"
           @visible-change="onCascaderVisibleChange"
           filterable>
         </el-cascader>
@@ -151,33 +151,19 @@ export default {
         },
       ],
     },
+    fundFlowDomesticOptions: {
+      type: Array,
+      default: () => [],
+    },
+    fundFlowOverseasOptions: {
+      type: Array,
+      default: () => [],
+    },
   },
   data() {
     return {
       fundFlowDomestic: [],
       fundFlowOverseas: [],
-      fundFlowOptions: [{
-          label: '资金流入',
-          value: 'inflow',
-          children: [{
-            label: '美国',
-            value: 'USA',
-          }, {
-            label: '中国',
-            value: 'China'
-          }]
-        },
-        {
-          label: '资金流出',
-          value: 'outflow',
-          children: [{
-            label: '北京',
-            value: 'beijing',
-          }, {
-            label: '上海',
-            value: 'shanghai'
-          }]
-        }],
       innerTime: this.time,
       timeValue: '',
       choiceDate: null,
@@ -215,7 +201,8 @@ export default {
           const currentMonth = now.getMonth() // 0-11
 
           // 不能选择超过当前月
-          if (time.getFullYear() > currentYear || (time.getFullYear() === currentYear && time.getMonth() > currentMonth)) {
+          if (time.getFullYear() > currentYear ||
+            (time.getFullYear() === currentYear && time.getMonth() > currentMonth)) {
             return true
           }
 
@@ -274,12 +261,20 @@ export default {
   },
   methods: {
     onFundFlowChange(from) {
+      this.onScopeClick(from)
+      let payload = []
       if (from === 'domestic') {
-        console.log()
+        payload = this.fundFlowDomestic
+        this.fundFlowOverseas = []
       } else if (from === 'overseas') {
-        console.log()
+        payload = this.fundFlowOverseas
+        this.fundFlowDomestic = []
       }
-      console.log('fundFlowDomestic: ', this.fundFlowDomestic)
+      // 触发资金流向选择事件
+      this.$emit('change-fund-flow', {
+        scope: from,
+        value: payload
+      })
     },
     onCascaderVisibleChange(visible) {
       if (visible) {

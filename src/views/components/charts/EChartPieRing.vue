@@ -97,7 +97,7 @@ export default {
       try {
         const container = this.$refs.chartRoot
         if (!container) return
-        
+
         // 如果实例已存在，先销毁
         if (this.chart) {
           this.chart.dispose()
@@ -163,7 +163,7 @@ export default {
       // 为 legend/tooltip 格式化使用当前 data 的值，通过闭包传入 dataList
       const dataList = this.data || []
       const unit = this.unit || ''
-      
+
       // 统一判定“空”数据的辅助函数
       const isEmpty = (v) => v === null || v === undefined || v === ''
 
@@ -178,14 +178,14 @@ export default {
         const it = dataList.find((d) => d.name === name)
         if (!it) return name
         // const displayValue = isEmpty(it.value) ? '-' : formatNumber(it.value)
-        
+
         // ECharts 4.8.0 不支持 overflow: 'truncate'，在此处手动处理截断
         let displayName = name
         // 阈值设为 6，大约对应原本设置的 width: 50
         if (displayName && displayName.length > 5) {
           displayName = displayName.substring(0, 5) + '..'
         }
-        
+
         // 使用 rich 文本标记，配合 legend.textStyle.rich 进行对齐
         // return `{name|${displayName}} {value|${displayValue}}`
         return `{name|${displayName}}`
@@ -196,10 +196,10 @@ export default {
           formatter: function (params) {
             // params: 单点数据对象
             // 获取原始数值以便判定是否显示 '-'
-            const rawValue = params.data && Object.prototype.hasOwnProperty.call(params.data, 'originalValue') 
-              ? params.data.originalValue 
+            const rawValue = params.data && Object.prototype.hasOwnProperty.call(params.data, 'originalValue')
+              ? params.data.originalValue
               : params.value
-            
+
             const displayValue = isEmpty(rawValue) ? '-' : formatNumber(rawValue)
             const unitStr = unit ? ' ' + unit : ''
             const str = `
@@ -214,7 +214,7 @@ export default {
         // 默认显示 legend，支持翻页
         legend: {
           show: true,
-          type: 'scroll',
+          type: 'plain',
           orient: 'vertical',
           left: '80%',
           align: 'left',

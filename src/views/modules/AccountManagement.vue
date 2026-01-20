@@ -42,14 +42,17 @@
           :world-account-data="globeCountryData"
         />
         <FilterTabs
-          :showFundFlowOption="false"
+          :show-fund-flow-option="true"
           :scope="balanceScope"
           :scope-options="balanceScopes"
           :time="balanceTime"
           :time-options="balanceTimeOptions"
+          :fund-flow-domestic-options="fundFlowDomesticOptions"
+          :fund-flow-overseas-options="fundFlowOverseasOptions"
           @change-scope="changeBalanceScope"
           @change-time="(val) => (balanceTime = val)"
           @change-custom-time="handleCustomTimeChange"
+          @change-fund-flow="handleFundFlowChange"
         />
       </div>
     </template>
@@ -104,7 +107,7 @@
             :options="getPieOptions(['#FAC858', '#283E81', '#91CC75', '#507AFC', '#097C38', '#93BEFF'], 'pie', {
               type: 'plain',
               orient: 'horizontal',
-              width: 165,
+              width: 130,
               itemWidth: 10,
               itemHeight: 10,
               itemGap: 8,
@@ -178,6 +181,57 @@ export default {
   },
   data() {
     return {
+      // 境内外资金流向
+      fundFlowDomesticOptions: [
+        {
+          label: '资金流入',
+          value: 'inflow',
+          children: [
+            {
+              label: '北京',
+              value: 'beijing',
+            }, {
+              label: '上海',
+              value: 'shanghai',
+            }],
+        },
+        {
+          label: '资金流出',
+          value: 'outflow',
+          children: [
+            {
+              label: '杭州',
+              value: 'hangzhou',
+            }, {
+              label: '深圳',
+              value: 'shenzhen',
+            }],
+        }],
+      fundFlowOverseasOptions: [
+        {
+          label: '资金流入',
+          value: 'inflow',
+          children: [
+            {
+              label: '美国',
+              value: 'USA',
+            }, {
+              label: '中国',
+              value: 'China',
+            }],
+        },
+        {
+          label: '资金流出',
+          value: 'outflow',
+          children: [
+            {
+              label: '北京',
+              value: 'beijing',
+            }, {
+              label: '上海',
+              value: 'shanghai',
+            }],
+        }],
       // 模块二的数据展示列表
       dataList: [
         { label: "模块一", value: 12300.23 },
@@ -424,6 +478,9 @@ export default {
     },
     handleCustomTimeChange(payload) {
       this.customTimeRange = payload
+    },
+    handleFundFlowChange(payload) {
+      console.log('handleFundFlowChange', payload)
     },
     async fetchMapData() {
       try {

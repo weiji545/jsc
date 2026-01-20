@@ -188,6 +188,30 @@ export default {
       return {}
     },
   },
+  mounted() {
+    this.preloadImages()
+  },
+  methods: {
+    preloadImages() {
+      const imagesToPreload = [
+        'subtitle-active-1.png',
+        'subtitle-active-2.png',
+        'subtitle-light-active-1.png',
+        'subtitle-light-active-2.png'
+      ]
+      
+      imagesToPreload.forEach(name => {
+        try {
+          // Utilise webpack's require to get the correct path
+          const imgUrl = require('../../img/' + name)
+          const img = new Image()
+          img.src = imgUrl
+        } catch (e) {
+          // Ignore if image not found
+        }
+      })
+    }
+  }
 }
 </script>
 
