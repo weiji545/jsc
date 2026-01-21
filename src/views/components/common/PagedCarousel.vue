@@ -2,12 +2,14 @@
   <div class="paged-carousel">
     <el-carousel :autoplay="autoplay" :interval="interval" :loop="loop" :height="height" indicator-position="outside">
       <el-carousel-item v-for="(slide, sidx) in slides" :key="sidx">
-        <div class="slide-row">
-          <template v-for="(it, idx) in slide">
-            <!-- 将 item 与 index 暴露给父级 slot -->
-            <slot name="item" :item="it" :index="sidx * perPage + idx"></slot>
-          </template>
-        </div>
+        <slot name="page" :pageItems="slide" :pageIndex="sidx">
+          <div class="slide-row">
+            <template v-for="(it, idx) in slide">
+              <!-- 将 item 与 index 暴露给父级 slot -->
+              <slot name="item" :item="it" :index="sidx * perPage + idx"></slot>
+            </template>
+          </div>
+        </slot>
       </el-carousel-item>
     </el-carousel>
   </div>

@@ -45,13 +45,13 @@ export function formatNumber(num, decimals = 0) {
  */
 export function formatLargeNumber(num, decimals = 0, split = false, unit) {
   if (num === null || num === undefined || num === '') {
-    return '0'
+    return split ? { value: '0', suffix: '' } : '0'
   }
 
   const number = typeof num === 'string' ? parseFloat(num) : num
 
   if (isNaN(number)) {
-    return '0'
+    return split ? { value: '0', suffix: '' } : '0'
   }
 
   let amount = number

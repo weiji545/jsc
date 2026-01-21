@@ -49,11 +49,11 @@
             <div class="data-content">
               <div class="data-number">
                 <template v-if="item.unit === '万元'">
-                  <span class="num-value">{{ formatLargeNumber(item.value, item.decimals, true, item.unit).value }}</span>
+                  <span class="num-value" :style="{'font-size': dataList.length > 2 ? '40px' : '50px'}">{{ formatLargeNumber(item.value, item.decimals, true, item.unit).value }}</span>
                   <span class="num-suffix">{{ formatLargeNumber(item.value, item.decimals, true, item.unit).suffix }}</span>
                 </template>
                 <template v-else>
-                  <span class="num-value">{{ formatNumber(item.value, item.decimals || 0) }}</span>
+                  <span class="num-value" :style="{'font-size': dataList.length > 2 ? '40px' : '50px'}">{{ formatNumber(item.value, item.decimals || 0) }}</span>
                   <span class="num-suffix">{{ item.unit }}</span>
                 </template>
               </div>
@@ -414,7 +414,7 @@ export default {
   }
 
   .num-suffix {
-    font-size: 24px;
+    font-size: 22px;
     margin-left: 2px;
   }
 }

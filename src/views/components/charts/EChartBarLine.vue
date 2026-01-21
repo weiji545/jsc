@@ -86,6 +86,11 @@ export default {
       type: Number,
       default: 100,
     },
+    // 强制设置数值轴的最大值（用于多页图表统一刻度）
+    valueAxisMax: {
+      type: Number,
+      default: null,
+    },
     // Chart direction: 'vertical' | 'horizontal'
     direction: {
       type: String,
@@ -208,6 +213,7 @@ export default {
     lineData: { handler() { this.updateChart() }, deep: true },
     options: { handler() { this.updateChart() }, deep: true },
     direction() { this.updateChart() },
+    valueAxisMax() { this.updateChart() },
   },
   methods: {
     initChart() {
@@ -221,6 +227,19 @@ export default {
 
         this.chart = echarts.init(container)
         this.updateChart()
+
+        // 获取数值轴的ticks
+        // horizontal模式下，数值轴是X轴；vertical模式下，数值轴是Y轴
+        const axisComponentType = this.direction === 'horizontal' ? 'xAxis' : 'yAxis';
+        const model = this.chart.getModel().getComponent(axisComponentType, 0); 
+        if (model) {
+          const ticks = model.axis.scale.getTicks(); // 获取所有刻度点
+          // console.log('当前数值轴刻度值：', ticks);
+          // 发出事件，将当前轴的最大值传出
+          if (ticks && ticks.length > 0) {
+            this.$emit('axis-ticks', { ticks, max: ticks[ticks.length - 1] })
+          }
+        }
 
         // 彻底解决高度 0 问题
         setTimeout(() => {
@@ -336,6 +355,7 @@ export default {
       const valueAxisBar = {
         type: 'value',
         show: showBarAxis,
+        max: this.valueAxisMax, // 应用强制最大值
         name: this.showYAxisName && showBarAxis ? effectiveLegendName : '',
         // position determined by axis index usually, but explicit works too
         position: isHorizontal ? 'bottom' : 'left',

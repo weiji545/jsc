@@ -1,28 +1,30 @@
 <template>
-  <div class="data-table-wrapper" :style="{ flexDirection: direction }">
-    <el-table 
-      :data="tableData" 
-      size="small" 
-      style="width:100%" 
+  <div class="data-table-wrapper" :style="{ flexDirection: direction }" :class="{ 'header-only': headerOnly }">
+    <el-table
+      :data="tableData"
+      size="small"
+      style="width:100%"
       :max-height="maxHeight"
+      :show-header="showHeader"
+      :class="{ 'is-dense': dense }"
       @sort-change="handleSortChange"
     >
-      <el-table-column 
-        v-for="column in columns" 
+      <el-table-column
+        v-for="column in columns"
         :key="column.prop"
-        :align="column.align || 'center'" 
-        :header-align="column.headerAlign || 'center'" 
-        :prop="column.prop" 
-        :label="column.label" 
+        :align="column.align || 'center'"
+        :header-align="column.headerAlign || 'center'"
+        :prop="column.prop"
+        :label="column.label"
         :width="column.width"
         :sortable="column.sortable || false"
         :show-overflow-tooltip="!column.maxLength && column.showOverflowTooltip !== false"
       >
         <template slot-scope="scope">
-          <el-tooltip 
+          <el-tooltip
             v-if="column.maxLength && isTruncated(scope.row, column)"
-            effect="dark" 
-            :content="String(getRawDisplayValue(scope.row, column))" 
+            effect="dark"
+            :content="String(getRawDisplayValue(scope.row, column))"
             placement="top"
           >
             <span>{{ getTruncatedValue(scope.row, column) }}</span>
@@ -59,6 +61,21 @@ export default {
     direction: {
       type: String,
       default: 'row'
+    },
+    // 是否显示表头
+    showHeader: {
+      type: Boolean,
+      default: true
+    },
+    // 是否只显示表头（隐藏内容）
+    headerOnly: {
+      type: Boolean,
+      default: false
+    },
+    // 紧凑模式（减小行高）
+    dense: {
+      type: Boolean,
+      default: false
     }
   },
   methods: {
@@ -110,12 +127,31 @@ export default {
   width: 100%;
   max-width: 100%; // 确保不超过父容器
   overflow: hidden; // 防止溢出
+
+  &.header-only {
+    height: auto !important;
+    min-height: 0 !important;
+
+    ::v-deep .el-table__body-wrapper {
+      display: none !important;
+    }
+    ::v-deep .el-table__empty-block {
+      display: none !important;
+    }
+  }
 }
 
 /* 局部表格样式覆盖 */
 ::v-deep .el-table {
   font-size: 14px;
   table-layout: fixed; // 固定表格布局，严格遵守列宽
+
+  &.is-dense {
+    .el-table__cell {
+      padding: 0px 0 !important; // 紧凑模式
+      height: 32px !important; // 强制降低行高
+    }
+  }
 
   &::before {
     height: 0;
@@ -124,7 +160,7 @@ export default {
   &, tr, .el-table__cell {
     background: transparent !important;
   }
-  
+
   // 彻底隐藏gutter列
   th.gutter,
   td.gutter,
@@ -170,14 +206,17 @@ export default {
     position: relative;
     color: var(--color-title, #fff) !important;
     border: none !important;
-    
+    padding: 3px 0; // 默认稍微紧凑一点，原先可能是 12px
+
     // 文本溢出处理
     .cell {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      line-height: normal; // 防止行高撑开
     }
   }
+
 
   .el-table__body-wrapper {
     // 隐藏纵向滚动条
@@ -199,12 +238,14 @@ export default {
         background: rgba(0, 212, 255, 0.8);
       }
     }
-    
+
     // 彻底禁用纵向滚动
     overflow-y: hidden !important;
   }
 
   .el-table__header-wrapper {
+    display: flex;
+    height: 37px;
     background: linear-gradient(180deg, #1C3B68 0%, rgba(47, 61, 82, 0.0885) 100%);
 
     th {

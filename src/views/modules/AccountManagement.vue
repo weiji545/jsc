@@ -16,20 +16,26 @@
       <div class="module-content">模块二 - 左中内容</div>
     </template>
     <template #left-bottom>
-      <EChartBarLine
-        :categories="leftBottomData.categories"
-        :barData="leftBottomData.values"
-        :visibleY="'bar'"
-        :xAxisMaxLength="4"
-        unit="户"
-        height="260"
-        direction="horizontal"
-        :barMaxWidth="13"
-        :options="{
-          legend: { show: false },
-          grid: { left: 70, top: 20, bottom: 50 },
-        }"
-      />
+      <PagedCarousel :items="getLeftBottomChartData" :per-page="5" height="220px">
+        <template #page="{ pageItems, pageIndex }">
+          <EChartBarLine
+            :categories="packetChartData(pageItems).categories"
+            :barData="packetChartData(pageItems).values"
+            :visibleY="'bar'"
+            :xAxisMaxLength="4"
+            unit="户"
+            height="220"
+            direction="horizontal"
+            :barMaxWidth="13"
+            :valueAxisMax="leftBottomAxisMax"
+            @axis-ticks="(payload) => handleLeftBottomTicks(payload, pageIndex)"
+            :options="{
+              legend: { show: false },
+              grid: { left: 70, top: 20, bottom: 30 },
+            }"
+          />
+        </template>
+      </PagedCarousel>
     </template>
     <template #center-top>
       <div class="core-top">
@@ -85,14 +91,25 @@
           <div class="tab-section">
             <TabSwitch v-model="rightTopSwitch" :options="rightTopOptions" />
           </div>
-          <div class="table-section">
+           <div class="table-section">
             <DataTable
-              :table-data="rightTopTableData"
               :columns="rightTopColumns"
-              direction="column"
-              max-height="200px"
-              @sort-change="handleTableSort"
+              :header-only="true"
+              style="margin-bottom: 0;"
             />
+            <PagedCarousel :items="rightTopTableData" :per-page="5" height="172px">
+              <template #page="{ pageItems }">
+                <DataTable
+                  :table-data="pageItems"
+                  :columns="rightTopColumns"
+                  direction="column"
+                  max-height="172px"
+                  :show-header="false"
+                  :dense="true"
+                  @sort-change="handleTableSort"
+                />
+              </template>
+            </PagedCarousel>
           </div>
         </div>
       </div>
@@ -118,12 +135,23 @@
         </div>
         <div class="split-right-2">
           <DataTable
-            :table-data="rightMiddleTableData"
             :columns="rightMiddleColumns"
-            direction="row"
-            max-height="250px"
-            @sort-change="handleTableSort"
+            :header-only="true"
+            style="margin-bottom: 0;"
           />
+          <PagedCarousel :items="rightMiddleTableData" :per-page="5" height="172px">
+            <template #page="{ pageItems }">
+              <DataTable
+                :table-data="pageItems"
+                :columns="rightMiddleColumns"
+                direction="row"
+                max-height="172px"
+                :show-header="false"
+                :dense="true"
+                @sort-change="handleTableSort"
+              />
+            </template>
+          </PagedCarousel>
         </div>
       </div>
     </template>
@@ -143,15 +171,24 @@
           <div class="tab-section">
             <TabSwitch v-model="rightBottomSwitch" :options="rightBottomOptions" />
           </div>
-          <div class="table-section">
             <DataTable
-              :table-data="rightBottomTableData"
               :columns="rightBottomColumns"
-              direction="column"
-              max-height="200px"
-              @sort-change="handleTableSort"
+              :header-only="true"
+              style="margin-bottom: 0;"
             />
-          </div>
+            <PagedCarousel :items="rightBottomTableData" :per-page="5" height="157px">
+              <template #page="{ pageItems }">
+                <DataTable
+                  :table-data="pageItems"
+                  :columns="rightBottomColumns"
+                  direction="column"
+                  max-height="157px"
+                  :show-header="false"
+                  :dense="true"
+                  @sort-change="handleTableSort"
+                />
+              </template>
+            </PagedCarousel>
         </div>
       </div>
     </template>
@@ -166,6 +203,7 @@ import EChartBarLine from "../components/charts/EChartBarLine.vue";
 import EChartPieRing from "../components/charts/EChartPieRing.vue";
 import TabSwitch from "../components/common/TabSwitch.vue";
 import DataTable from "../components/common/DataTable.vue";
+import PagedCarousel from "../components/common/PagedCarousel.vue";
 import { getOverviewData, getChinaMapData, getChinaMapFlowData, getWorldMapFlowData } from '../../api/dashboard';
 
 export default {
@@ -178,6 +216,7 @@ export default {
     EChartPieRing,
     TabSwitch,
     DataTable,
+    PagedCarousel,
   },
   data() {
     return {
@@ -320,6 +359,14 @@ export default {
           {
             title: "开户行所在国家地区",
             unit: "户",
+            actionLeft: {
+              type: "radio",
+              value: "bank",
+              options: [
+                { label: "银行", value: "bank" },
+                { label: "机构", value: "institution" },
+              ],
+            },
           },
         ],
         center: {
@@ -372,8 +419,16 @@ export default {
         ],
       },
       leftBottomData: {
-        categories: ["中国", "美国", "日本", "俄罗斯", "玻利维亚共和国"],
-        values: [12000, 10000, 8000, 7000, 1200],
+        categories: [
+          "中国", "美国", "日本", "俄罗斯", "玻利维亚",
+          "法国", "德国", "英国", "澳大利亚", "加拿大",
+          "新加坡", "韩国", "意大利", "巴西", "印度"
+        ],
+        values: [
+          12002, 10000, 8000, 7000, 1200,
+          1000, 950, 900, 850, 800,
+          750, 700, 650, 600, 550
+        ],
       },
       centerBottomData: {
         categories: (function () {
@@ -425,7 +480,19 @@ export default {
       rightMiddleTableData: [],
       // 右下表格数据
       rightBottomTableData: [],
+      // 左下翻页图表统一使用的X轴最大值（数值轴）
+      leftBottomAxisMax: null,
     };
+  },
+  computed: {
+    // 将 leftBottomData 转换为对象数组供 PagedCarousel 使用
+    getLeftBottomChartData() {
+      if (!this.leftBottomData || !this.leftBottomData.categories) return []
+      return this.leftBottomData.categories.map((cat, idx) => ({
+        category: cat,
+        value: this.leftBottomData.values[idx] || 0
+      }))
+    },
   },
   watch: {
     // 监听右上 Tab 切换
@@ -653,6 +720,8 @@ export default {
         { bankName: '中国工商银行', type: '定期', count: 380, ratio: 30.4 },
         { bankName: '建设银行', type: '协定', count: 250, ratio: 20.0 },
         { bankName: '农业银行', type: '通知', count: 170, ratio: 13.6 },
+        { bankName: '民生银行', type: '通知', count: 140, ratio: 11.6 },
+        { bankName: '兴业银行', type: '通知', count: 130, ratio: 10.4 },
       ]
     },
     // 请求右上表格数据
@@ -665,6 +734,10 @@ export default {
           { bankName: '中国工商银行', count: 980, ratio: 28.2 },
           { bankName: '建设银行', count: 750, ratio: 21.3 },
           { bankName: '农业银行', count: 520, ratio: 15.0 },
+          { bankName: '民生银行', count: 357, ratio: 13.6 },
+          { bankName: '交通银行', count: 357, ratio: 12.3 },
+          { bankName: '兴业银行', count: 357, ratio: 10.5 },
+          { bankName: '光大银行', count: 357, ratio: 10.5 },
         ]
       } else { // 非直联
         this.rightTopTableData = [
@@ -684,6 +757,8 @@ export default {
           { bankName: '中国工商银行', accountCount: 4320 },
           { bankName: '建设银行', accountCount: 3200 },
           { bankName: '农业银行', accountCount: 2150 },
+          { bankName: '浦发银行', accountCount: 1750 },
+          { bankName: '民生银行', accountCount: 1620 },
         ]
       } else { // 销户
         this.rightBottomTableData = [
@@ -732,6 +807,21 @@ export default {
     handleTableSort({ prop, order }) {
       console.log('Table sort changed:', { prop, order })
       // 这里可以添加排序逻辑或发起API请求
+    },
+    handleLeftBottomTicks(payload, pageIndex) {
+      // 只使用第一页的轴刻度（由第一页数据决定）
+      if (pageIndex === 0 && payload && payload.max) {
+        console.log('Capture LeftBottom Axis Max from Page 0:', payload.max)
+        this.leftBottomAxisMax = payload.max
+      }
+    },
+    // 辅助方法：将 PagedCarousel 传回的 items 还原为 ECharts 需要的 array 格式
+    packetChartData(items) {
+      if (!items) return { categories: [], values: [] }
+      return {
+        categories: items.map(i => i.category),
+        values: items.map(i => i.value)
+      }
     },
   },
 };
@@ -819,6 +909,7 @@ export default {
   justify-content: center;
   min-width: 0; // 关键：允许flex子元素收缩
   overflow: hidden; // 防止溢出
+  flex-direction: column;
 }
 
 // 垂直布局样式
@@ -833,7 +924,7 @@ export default {
 // TabSwitch区域
 .tab-section {
   flex-shrink: 0;
-  padding-bottom: 10px;
+  padding-bottom: 2px;
   display: flex;
   align-items: center;
   justify-content: center;

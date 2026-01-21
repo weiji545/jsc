@@ -363,6 +363,10 @@ export default {
     // 切换范围
     onScopeClick(value) {
       console.log('change-scope', value)
+      if (value === 'global') {
+        this.fundFlowDomestic = []
+        this.fundFlowOverseas = []
+      }
       this.$emit('change-scope', value)
     },
     // 切换时间
