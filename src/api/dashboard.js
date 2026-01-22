@@ -229,7 +229,7 @@ export const getChinaMapFlowData = () => {
 export const getBaseDataList = () => {
   const baseDataList = [
     { label: '账户总数', value: 183220, },
-    { label: '账户余额总数', value: 56200, decimals: 2, unit: '万元' },
+    { label: '账户余额总数', value: 851116678266.14, decimals: 2, unit: '万元' },
   ]
   return mockApi(baseDataList)
 }

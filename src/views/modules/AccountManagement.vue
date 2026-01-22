@@ -16,26 +16,7 @@
       <div class="module-content">模块二 - 左中内容</div>
     </template>
     <template #left-bottom>
-      <PagedCarousel :items="getLeftBottomChartData" :per-page="5" height="220px">
-        <template #page="{ pageItems, pageIndex }">
-          <EChartBarLine
-            :categories="packetChartData(pageItems).categories"
-            :barData="packetChartData(pageItems).values"
-            :visibleY="'bar'"
-            :xAxisMaxLength="4"
-            unit="户"
-            height="220"
-            direction="horizontal"
-            :barMaxWidth="13"
-            :valueAxisMax="leftBottomAxisMax"
-            @axis-ticks="(payload) => handleLeftBottomTicks(payload, pageIndex)"
-            :options="{
-              legend: { show: false },
-              grid: { left: 70, top: 20, bottom: 30 },
-            }"
-          />
-        </template>
-      </PagedCarousel>
+      <AccountLeftBottom />
     </template>
     <template #center-top>
       <div class="core-top">
@@ -76,121 +57,13 @@
       />
     </template>
     <template #right-top>
-      <div class="split-layout">
-        <div class="split-left-4">
-          <EChartPieRing
-            variant="donut"
-            :data="rightTopData"
-            height="100%"
-            :options="getPieOptions(['#6C63F0', '#ED589D'], 'donut')"
-            centerText="银行账户总数"
-            centerSubText="19200"
-          />
-        </div>
-        <div class="split-right-5 vertical-layout">
-          <div class="tab-section">
-            <TabSwitch v-model="rightTopSwitch" :options="rightTopOptions" />
-          </div>
-           <div class="table-section">
-            <DataTable
-              :columns="rightTopColumns"
-              :header-only="true"
-              style="margin-bottom: 0;"
-            />
-            <PagedCarousel :items="rightTopTableData" :per-page="5" height="172px">
-              <template #page="{ pageItems }">
-                <DataTable
-                  :table-data="pageItems"
-                  :columns="rightTopColumns"
-                  direction="column"
-                  max-height="172px"
-                  :show-header="false"
-                  :dense="true"
-                  @sort-change="handleTableSort"
-                />
-              </template>
-            </PagedCarousel>
-          </div>
-        </div>
-      </div>
+      <AccountRightTop />
     </template>
     <template #right-middle>
-      <div class="split-layout">
-        <div class="split-left-1">
-          <EChartPieRing
-            variant="pie"
-            :data="rightMiddleData"
-            height="100%"
-            :options="getPieOptions(['#FAC858', '#283E81', '#91CC75', '#507AFC', '#097C38', '#93BEFF'], 'pie', {
-              type: 'plain',
-              orient: 'horizontal',
-              width: 130,
-              itemWidth: 10,
-              itemHeight: 10,
-              itemGap: 8,
-              left: 'center',
-              top: '5%',
-            })"
-          />
-        </div>
-        <div class="split-right-2">
-          <DataTable
-            :columns="rightMiddleColumns"
-            :header-only="true"
-            style="margin-bottom: 0;"
-          />
-          <PagedCarousel :items="rightMiddleTableData" :per-page="5" height="172px">
-            <template #page="{ pageItems }">
-              <DataTable
-                :table-data="pageItems"
-                :columns="rightMiddleColumns"
-                direction="row"
-                max-height="172px"
-                :show-header="false"
-                :dense="true"
-                @sort-change="handleTableSort"
-              />
-            </template>
-          </PagedCarousel>
-        </div>
-      </div>
+      <AccountRightMiddle />
     </template>
     <template #right-bottom>
-      <div class="split-layout">
-        <div class="split-left-4">
-          <EChartPieRing
-            variant="donut"
-            :data="rightBottomData"
-            height="100%"
-            :options="getPieOptions(['#4396F3', '#5EC8C1'], 'donut')"
-            centerText="账户总数"
-            centerSubText="19200"
-          />
-        </div>
-        <div class="split-right-5 vertical-layout">
-          <div class="tab-section">
-            <TabSwitch v-model="rightBottomSwitch" :options="rightBottomOptions" />
-          </div>
-            <DataTable
-              :columns="rightBottomColumns"
-              :header-only="true"
-              style="margin-bottom: 0;"
-            />
-            <PagedCarousel :items="rightBottomTableData" :per-page="5" height="157px">
-              <template #page="{ pageItems }">
-                <DataTable
-                  :table-data="pageItems"
-                  :columns="rightBottomColumns"
-                  direction="column"
-                  max-height="157px"
-                  :show-header="false"
-                  :dense="true"
-                  @sort-change="handleTableSort"
-                />
-              </template>
-            </PagedCarousel>
-        </div>
-      </div>
+      <AccountRightBottom />
     </template>
   </DashboardContent>
 </template>
@@ -200,10 +73,10 @@ import DashboardContent from "../components/layout/DashboardContent.vue";
 import CoreOverviewPanel from "../components/panels/CoreOverviewPanel.vue";
 import FilterTabs from "../components/common/FilterTabs.vue";
 import EChartBarLine from "../components/charts/EChartBarLine.vue";
-import EChartPieRing from "../components/charts/EChartPieRing.vue";
-import TabSwitch from "../components/common/TabSwitch.vue";
-import DataTable from "../components/common/DataTable.vue";
-import PagedCarousel from "../components/common/PagedCarousel.vue";
+import AccountRightTop from "./account-widgets/AccountRightTop.vue";
+import AccountRightMiddle from "./account-widgets/AccountRightMiddle.vue";
+import AccountRightBottom from "./account-widgets/AccountRightBottom.vue";
+import AccountLeftBottom from "./account-widgets/AccountLeftBottom.vue";
 import { getOverviewData, getChinaMapData, getChinaMapFlowData, getWorldMapFlowData } from '../../api/dashboard';
 
 export default {
@@ -213,10 +86,10 @@ export default {
     CoreOverviewPanel,
     FilterTabs,
     EChartBarLine,
-    EChartPieRing,
-    TabSwitch,
-    DataTable,
-    PagedCarousel,
+    AccountRightTop,
+    AccountRightMiddle,
+    AccountRightBottom,
+    AccountLeftBottom,
   },
   data() {
     return {
@@ -418,18 +291,6 @@ export default {
           },
         ],
       },
-      leftBottomData: {
-        categories: [
-          "中国", "美国", "日本", "俄罗斯", "玻利维亚",
-          "法国", "德国", "英国", "澳大利亚", "加拿大",
-          "新加坡", "韩国", "意大利", "巴西", "印度"
-        ],
-        values: [
-          12002, 10000, 8000, 7000, 1200,
-          1000, 950, 900, 850, 800,
-          750, 700, 650, 600, 550
-        ],
-      },
       centerBottomData: {
         categories: (function () {
           const arr = [];
@@ -444,101 +305,14 @@ export default {
         })(),
         values: [1500, 1600, 1550, 1700, 1650, 1800, 1900],
       },
-      rightTopSwitch: "view1",
-      rightTopOptions: [
-        { label: "直联", value: "view1" },
-        { label: "非直联", value: "view2" },
-      ],
-      rightTopData: [
-        { name: '直联', value: 14592 },
-        { name: '非直联', value: 4608 },
-      ],
-      rightMiddleData: [
-        { name: '活期', value: 35 },
-        { name: '定期', value: 32 },
-        { name: '协定', value: 20 },
-        { name: '通知', value: 13 },
-        { name: '东亚', value: 13 },
-        { name: '其他', value: 13 },
-      ],
-      rightBottomSwitch: "view1",
-      rightBottomOptions: [
-        { label: "正常", value: "view1" },
-        { label: "销户", value: "view2" },
-      ],
-      rightBottomData: [
-        { name: '正常', value: 14592 },
-        { name: '销户', value: 4608 },
-      ],
-      // 表格列配置
-      rightTopColumns: [],
-      rightMiddleColumns: [],
-      rightBottomColumns: [],
-      // 右上表格数据
-      rightTopTableData: [],
-      // 右中表格数据
-      rightMiddleTableData: [],
-      // 右下表格数据
-      rightBottomTableData: [],
-      // 左下翻页图表统一使用的X轴最大值（数值轴）
-      leftBottomAxisMax: null,
     };
   },
-  computed: {
-    // 将 leftBottomData 转换为对象数组供 PagedCarousel 使用
-    getLeftBottomChartData() {
-      if (!this.leftBottomData || !this.leftBottomData.categories) return []
-      return this.leftBottomData.categories.map((cat, idx) => ({
-        category: cat,
-        value: this.leftBottomData.values[idx] || 0
-      }))
-    },
-  },
-  watch: {
-    // 监听右上 Tab 切换
-    rightTopSwitch(val) {
-      this.fetchRightTopTableData(val)
-    },
-    // 监听右下 Tab 切换
-    rightBottomSwitch(val) {
-      this.fetchRightBottomTableData(val)
-    },
-  },
+  computed: {},
+  watch: {},
   created() {
-    this.initTableColumns()
-    this.initTableData()
     this.fetchMapData()
   },
   methods: {
-    getPieOptions(colors, variant = 'pie', legendConfig = {}) {
-      const isDonut = variant === 'donut'
-      const radius = isDonut ? ['55%', '85%'] : ['0%', '86%'];
-      const center = isDonut ? ["50%", "55%"] : ["50%", "60%"];
-      return {
-        color: colors,
-        legend: {
-          top: "0%",
-          left: "center",
-          orient: "horizontal",
-          width: 180, // Force wrapping (approx 2 items per line)
-          itemGap: 15,
-          ...legendConfig,
-        },
-        series: [
-          {
-            radius: radius,
-            center: center,
-            labelLine: { show: false },
-            label: {
-              show: true,
-              position: "inside",
-              color: "#fff",
-              formatter: "{d}%",
-            },
-          },
-        ],
-      };
-    },
     changeBalanceScope(val) {
       this.balanceScope = val
       this.updatePanelTitles()
@@ -634,148 +408,14 @@ export default {
       this.updatePanelTitles()
     },
     // 初始化表格列配置
-    initTableColumns() {
-      // 引入formatter方法
-      const formatNumber = require('@/utils/utils.js').formatNumber
-      const formatPercent = (row, column, cellValue) => {
-        return cellValue ? cellValue + '%' : '-'
-      }
+    // initTableColumns removed
 
-      // 右上：银行名称 数量 占比
-      this.rightTopColumns = [
-        {
-          prop: 'bankName',
-          label: '银行名称',
-          width: '100',
-          maxLength: 4, // 超过4个字符显示省略号
-          showOverflowTooltip: true // hover时显示完整内容
-        },
-        {
-          prop: 'count',
-          label: '数量',
-          width: '70',
-          formatter: (row, column, cellValue) => formatNumber(cellValue, 0)
-        },
-        {
-          prop: 'ratio',
-          label: '占比',
-          width: '70',
-          formatter: formatPercent
-        },
-      ]
-
-      // 右中：银行名称 类型 数量 占比
-      this.rightMiddleColumns = [
-        {
-          prop: 'bankName',
-          label: '银行名称',
-          width: '100',
-          maxLength: 4,
-          showOverflowTooltip: true
-        },
-        {
-          prop: 'type',
-          label: '类型',
-          width: '60'
-        },
-        {
-          prop: 'count',
-          label: '数量',
-          width: '70',
-          formatter: (row, column, cellValue) => formatNumber(cellValue, 0)
-        },
-        {
-          prop: 'ratio',
-          label: '占比',
-          width: '70',
-          formatter: formatPercent
-        },
-      ]
-
-      // 右下：银行名称 账户数量
-      this.rightBottomColumns = [
-        {
-          prop: 'bankName',
-          label: '银行名称',
-          width: '120',
-          maxLength: 4,
-          showOverflowTooltip: true
-        },
-        {
-          prop: 'accountCount',
-          label: '账户数量',
-          width: '100',
-          formatter: (row, column, cellValue) => formatNumber(cellValue, 0)
-        },
-      ]
-    },
     // 初始化表格数据
-    initTableData() {
-      this.fetchRightTopTableData(this.rightTopSwitch)
-      this.fetchRightBottomTableData(this.rightBottomSwitch)
+    // initTableData removed
 
-      // 右中数据（固定展示）
-      this.rightMiddleTableData = [
-        { bankName: '中国银行', type: '活期', count: 450, ratio: 36.0 },
-        { bankName: '中国工商银行', type: '定期', count: 380, ratio: 30.4 },
-        { bankName: '建设银行', type: '协定', count: 250, ratio: 20.0 },
-        { bankName: '农业银行', type: '通知', count: 170, ratio: 13.6 },
-        { bankName: '民生银行', type: '通知', count: 140, ratio: 11.6 },
-        { bankName: '兴业银行', type: '通知', count: 130, ratio: 10.4 },
-      ]
-    },
-    // 请求右上表格数据
-    fetchRightTopTableData(val) {
-      console.log('Fetching RightTop data for:', val)
-      // 模拟根据不同 Tab 加载不同数据
-      if (val === 'view1') { // 直联
-        this.rightTopTableData = [
-          { bankName: '中国银行', count: 1250, ratio: 35.5 },
-          { bankName: '中国工商银行', count: 980, ratio: 28.2 },
-          { bankName: '建设银行', count: 750, ratio: 21.3 },
-          { bankName: '农业银行', count: 520, ratio: 15.0 },
-          { bankName: '民生银行', count: 357, ratio: 13.6 },
-          { bankName: '交通银行', count: 357, ratio: 12.3 },
-          { bankName: '兴业银行', count: 357, ratio: 10.5 },
-          { bankName: '光大银行', count: 357, ratio: 10.5 },
-        ]
-      } else { // 非直联
-        this.rightTopTableData = [
-          { bankName: '招商银行', count: 600, ratio: 40.0 },
-          { bankName: '浦发银行', count: 500, ratio: 33.3 },
-          { bankName: '兴业银行', count: 400, ratio: 26.7 },
-        ]
-      }
-    },
-    // 请求右下表格数据
-    fetchRightBottomTableData(val) {
-      console.log('Fetching RightBottom data for:', val)
-      // 模拟请求
-      if (val === 'view1') { // 正常
-        this.rightBottomTableData = [
-          { bankName: '中国银行', accountCount: 5680 },
-          { bankName: '中国工商银行', accountCount: 4320 },
-          { bankName: '建设银行', accountCount: 3200 },
-          { bankName: '农业银行', accountCount: 2150 },
-          { bankName: '浦发银行', accountCount: 1750 },
-          { bankName: '民生银行', accountCount: 1620 },
-        ]
-      } else { // 销户
-        this.rightBottomTableData = [
-          { bankName: '民生银行', accountCount: 120 },
-          { bankName: '光大银行', accountCount: 80 },
-        ]
-      }
-    },
     // 请求左侧模块数据
     fetchLeftPanelData(index) {
-      const config = this.panelsConfig.left[index]
-      const leftVal = config.actionLeft ? config.actionLeft.value : null
-      const rightVal = config.actionRight ? config.actionRight.value : null
-      console.log(`Fetching Left[${index}] data. ActionLeft: ${leftVal}, ActionRight: ${rightVal}`)
-
-      // 模拟数据刷新逻辑
-      // 这里可以根据不同 index 展示不同的 Mock 数据逻辑
+       console.log(`Fetching Left[${index}] data`)
     },
     // 请求中间模块数据
     fetchCenterPanelData() {
@@ -785,43 +425,7 @@ export default {
     },
     // 请求右侧模块数据
     fetchRightPanelData(index) {
-      const config = this.panelsConfig.right[index]
-      const leftVal = config.actionLeft ? config.actionLeft.value : null
-      const rightVal = config.actionRight ? config.actionRight.value : null
-      console.log(`Fetching Right[${index}] data. ActionLeft: ${leftVal}, ActionRight: ${rightVal}`)
-
-      // 特殊处理右侧各模块，因为它们有独立的数据变量
-      if (index === 0) {
-        this.fetchRightTopTableData(this.rightTopSwitch)
-      } else if (index === 1) {
-        // 刷新右中表格数据
-        this.rightMiddleTableData = [
-          { bankName: '招商银行', type: '活期', count: 120, ratio: 10.0 },
-          { bankName: '浦发银行', type: '定期', count: 80, ratio: 8.0 },
-        ]
-      } else if (index === 2) {
-        this.fetchRightBottomTableData(this.rightBottomSwitch)
-      }
-    },
-    // 处理表格排序
-    handleTableSort({ prop, order }) {
-      console.log('Table sort changed:', { prop, order })
-      // 这里可以添加排序逻辑或发起API请求
-    },
-    handleLeftBottomTicks(payload, pageIndex) {
-      // 只使用第一页的轴刻度（由第一页数据决定）
-      if (pageIndex === 0 && payload && payload.max) {
-        console.log('Capture LeftBottom Axis Max from Page 0:', payload.max)
-        this.leftBottomAxisMax = payload.max
-      }
-    },
-    // 辅助方法：将 PagedCarousel 传回的 items 还原为 ECharts 需要的 array 格式
-    packetChartData(items) {
-      if (!items) return { categories: [], values: [] }
-      return {
-        categories: items.map(i => i.category),
-        values: items.map(i => i.value)
-      }
+       console.log(`Fetching Right[${index}] data`)
     },
   },
 };
@@ -862,80 +466,5 @@ export default {
   }
 }
 
-.text-toggle-group {
-  display: flex;
-  align-items: center;
-}
-.text-toggle-sep {
-  color: #9ec7f0;
-  margin: 0 4px;
-  font-size: 12px;
-}
-.split-layout {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  align-items: center;
-}
-.split-left-4 {
-  flex: 4;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.split-right-5 {
-  flex: 5;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-left: 10px;
-}
-.split-left-1 {
-  flex: 1;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 0; // 关键：允许flex子元素收缩
-  overflow: hidden; // 防止溢出
-}
-.split-right-2 {
-  flex: 2;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 0; // 关键：允许flex子元素收缩
-  overflow: hidden; // 防止溢出
-  flex-direction: column;
-}
-
-// 垂直布局样式
-.vertical-layout {
-  padding: 0;
-  flex-direction: column !important;
-  align-items: stretch !important;
-  justify-content: flex-start !important;
-  overflow: hidden; // 防止溢出
-}
-
-// TabSwitch区域
-.tab-section {
-  flex-shrink: 0;
-  padding-bottom: 2px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-// 表格区域
-.table-section {
-  flex: 1;
-  min-height: 0; // 关键：允许flex子元素收缩
-  overflow: hidden; // 防止溢出
-  width: 100%; // 确保不超过父容器宽度
-}
 </style>
 

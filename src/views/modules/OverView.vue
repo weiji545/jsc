@@ -1,6 +1,6 @@
 <template>
   <DashboardContent
-    :data-list="dataList"
+    :data-list="baseDataList"
     :panelsConfig="panelsConfigComputed"
     :centerBottomMode.sync="centerBottomMode"
     :centerPeriod.sync="centerPeriodSync"
@@ -299,21 +299,6 @@ export default {
     }
   },
   computed: {
-    // 根据当前选中货币返回用于展示的 dataList
-    dataList() {
-      const convert =
-        this.$store &&
-        this.$store.getters &&
-        this.$store.getters['currency/convert']
-          ? this.$store.getters['currency/convert']
-          : (v) => v
-      return (this.baseDataList || []).map((it) => {
-        if (it.isAmount) {
-          return Object.assign({}, it, { value: convert(it.value) })
-        }
-        return it
-      })
-    },
     // 账户币种统计 固定数据（可在未来改为从后端或 mock 中读取）
     convertedCurrencyPie() {
       const list = (this.overview && this.overview.currencyPie) || []
