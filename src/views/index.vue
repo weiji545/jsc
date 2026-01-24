@@ -4,6 +4,7 @@
       <div class="dashboard-container" :class="isDarkMode ? 'is-dark-mode' : 'is-light-mode'">
         <!-- Header 部分 -->
         <DashboardHeader
+          :active-module="currentModule"
           @module-change="handleModuleChange"
           @currency-change="handleCurrencyChange"
         />
@@ -85,6 +86,16 @@ export default {
       }
     }
   },
+  watch: {
+    '$route.query.module': {
+      handler(val) {
+        if (val && val !== this.currentModule) {
+          this.currentModule = val
+        }
+      },
+      immediate: true
+    }
+  },
   mounted() {
     this.updateScale()
     window.addEventListener('resize', this.queueUpdateScale, { passive: true })
@@ -108,6 +119,20 @@ export default {
     handleModuleChange(module) {
       this.currentModule = module
       console.log('切换到模块:', module)
+      // Update URL query parameter without refreshing
+      if (this.$route.query.module !== module) {
+        this.$router.push({
+          query: {
+            ...this.$route.query,
+            module: module
+          }
+        }).catch(err => {
+          // Ignore NavigationDuplicated errors
+          if (err.name !== 'NavigationDuplicated') {
+            console.warn(err)
+          }
+        })
+      }
     },
     handleCurrencyChange(currency) {
       this.currency = currency

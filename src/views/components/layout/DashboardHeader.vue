@@ -73,7 +73,12 @@ import fullScreenIconShrink from '../../img/full-screen-icon-shrink.png'
 
 export default {
   name: 'DashboardHeader',
-  props: {},
+  props: {
+    activeModule: {
+      type: String,
+      default: ''
+    }
+  },
   data() {
     return {
       headlineImg,
@@ -93,6 +98,16 @@ export default {
         { label: '账户管理', value: 'AccountManagement', disabled: false },
         { label: '资金管理', value: 'module3', disabled: true }
       ]
+    }
+  },
+  watch: {
+    activeModule: {
+      handler(val) {
+        if (val) {
+          this.currentModule = val
+        }
+      },
+      immediate: true
     }
   },
   computed: {
