@@ -11,7 +11,7 @@
 <script>
 import * as echarts from 'echarts'
 import chinaJson from './china.json'
-import { geoCoordMap } from './geo-coords.js'
+
 import { formatNumber } from '@/utils/utils.js'
 export default {
   name: 'ChinaMap',
@@ -119,6 +119,16 @@ export default {
     updateChartWithFlows() {
       if (!this.mainChart || !this.flowData || this.flowData.length === 0) return
 
+      // 构建 geoCoordMap 供飞线使用，使用 chinaJson 中的坐标
+      const geoCoordMap = {}
+      if (chinaJson && chinaJson.features) {
+        chinaJson.features.forEach((feature) => {
+          if (feature.properties && feature.properties.name && feature.properties.center) {
+            geoCoordMap[feature.properties.name] = feature.properties.center
+          }
+        })
+      }
+
       const convertData = function (data) {
         let res = []
         for (let i = 0; i < data.length; i++) {
@@ -134,6 +144,7 @@ export default {
               date: dataItem[0].date,
               balance: dataItem[0].balance,
               inflow: dataItem[0].inflow,
+              outflow: dataItem[0].outflow,
               count: dataItem[0].count
             })
           }
@@ -401,6 +412,11 @@ export default {
                     <span>资金流入:</span>
                     <span style="color: #FFDD33; font-weight: bold;">${formatNumber(d.inflow)}</span>
                   </div>
+                  ${d.outflow ? `
+                  <div style="margin: 8px 0; color: rgba(255,255,255,0.8); font-size: 14px; display: flex; justify-content: space-between;">
+                    <span>资金流出:</span>
+                    <span style="color: #FFDD33; font-weight: bold;">${formatNumber(d.outflow)}</span>
+                  </div>` : ''}
                   <div style="margin: 8px 0; color: rgba(255,255,255,0.8); font-size: 14px; display: flex; justify-content: space-between;">
                     <span>流入笔数:</span>
                     <span style="color: #00D4FF; font-weight: bold;">${d.count}</span>
@@ -606,6 +622,12 @@ export default {
     },
 
     bindChartEvents() {
+      this.mainChart.on('click', (params) => {
+        if (params.seriesType === 'map') {
+          this.$emit('province-click', params.name)
+        }
+      })
+
       this.mainChart.on('mouseover', (params) => {
         if (this.outId) clearTimeout(this.outId)
         if (params.seriesType === 'map') {

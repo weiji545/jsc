@@ -27,8 +27,11 @@
           :china-map-flow-data="chinaMapFlowData"
           :world-map-flow-data="worldMapFlowData"
           :world-account-data="globeCountryData"
+          @province-click="handleProvinceClick"
+          @country-click="handleCountryClick"
         />
         <FilterTabs
+          ref="filterTabs"
           :show-fund-flow-option="true"
           :scope="balanceScope"
           :scope-options="balanceScopes"
@@ -101,10 +104,13 @@ export default {
           children: [
             {
               label: '北京',
-              value: 'beijing',
+              value: '北京',
+            }, {
+              label: '青海省',
+              value: '青海省',
             }, {
               label: '上海',
-              value: 'shanghai',
+              value: '上海',
             }],
         },
         {
@@ -113,10 +119,10 @@ export default {
           children: [
             {
               label: '杭州',
-              value: 'hangzhou',
+              value: '杭州',
             }, {
               label: '深圳',
-              value: 'shenzhen',
+              value: '深圳',
             }],
         }],
       fundFlowOverseasOptions: [
@@ -126,10 +132,10 @@ export default {
           children: [
             {
               label: '美国',
-              value: 'USA',
+              value: '美国',
             }, {
               label: '中国',
-              value: 'China',
+              value: '中国',
             }],
         },
         {
@@ -138,10 +144,10 @@ export default {
           children: [
             {
               label: '北京',
-              value: 'beijing',
+              value: '北京',
             }, {
               label: '上海',
-              value: 'shanghai',
+              value: '上海',
             }],
         }],
       // 模块二的数据展示列表
@@ -426,6 +432,34 @@ export default {
     // 请求右侧模块数据
     fetchRightPanelData(index) {
        console.log(`Fetching Right[${index}] data`)
+    },
+    handleProvinceClick(provinceName) {
+      console.log('Province clicked:', provinceName);
+      const path = this.findPathToValue(this.fundFlowDomesticOptions, provinceName);
+      if (path && this.$refs.filterTabs) {
+        this.$refs.filterTabs.setFundFlowDomestic(path);
+      }
+    },
+    handleCountryClick(countryName) {
+      console.log('Country clicked:', countryName);
+      const path = this.findPathToValue(this.fundFlowOverseasOptions, countryName);
+      if (path && this.$refs.filterTabs) {
+         this.$refs.filterTabs.setFundFlowOverseas(path);
+      }
+    },
+    findPathToValue(options, targetValue) {
+      for (const option of options) {
+        if (option.value === targetValue) {
+          return [option.value];
+        }
+        if (option.children) {
+          const childPath = this.findPathToValue(option.children, targetValue);
+          if (childPath) {
+            return [option.value, ...childPath];
+          }
+        }
+      }
+      return null;
     },
   },
 };

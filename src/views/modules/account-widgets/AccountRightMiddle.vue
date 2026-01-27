@@ -47,12 +47,12 @@ export default {
   data() {
     return {
       chartData: [
-        { name: '活期', value: 35 },
-        { name: '定期', value: 32 },
-        { name: '协定', value: 20 },
-        { name: '通知', value: 13 },
-        { name: '东亚', value: 13 },
-        { name: '其他', value: 13 },
+        { name: '活期啊啊啊啊啊', value: 35 },
+        { name: '定期啊啊啊啊啊', value: 32 },
+        { name: '协定啊啊啊啊啊', value: 20 },
+        { name: '通知啊啊啊啊啊', value: 13 },
+        { name: '东亚啊啊啊啊啊', value: 13 },
+        { name: '其他啊啊啊啊啊', value: 13 },
       ],
       columns: [],
       tableData: [],
@@ -82,6 +82,9 @@ export default {
       const radius = isDonut ? ['55%', '85%'] : ['0%', '86%'];
       const center = isDonut ? ["50%", "55%"] : ["50%", "60%"];
       return {
+        tooltip: {
+          confine: true
+        },
         color: colors,
         legend: {
           top: "0%",

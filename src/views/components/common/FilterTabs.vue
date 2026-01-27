@@ -15,7 +15,7 @@
           :props="{ expandTrigger: 'hover' }"
           :popper-class="isDarkMode ? 'filter-cascader-popper dark-mode' : 'filter-cascader-popper'"
           @change="onFundFlowChange('domestic')"
-          @visible-change="onCascaderVisibleChange"
+          @visible-change="(val) => onCascaderVisibleChange(val, 'domestic')"
           filterable>
         </el-cascader>
 
@@ -28,7 +28,7 @@
           :props="{ expandTrigger: 'hover' }"
           :popper-class="isDarkMode ? 'filter-cascader-popper dark-mode' : 'filter-cascader-popper'"
           @change="onFundFlowChange('overseas')"
-          @visible-change="onCascaderVisibleChange"
+          @visible-change="(val) => onCascaderVisibleChange(val, 'overseas')"
           filterable>
         </el-cascader>
       </template>
@@ -55,7 +55,7 @@
         :props="{ expandTrigger: 'hover' }"
         :popper-class="isDarkMode ? 'filter-cascader-popper dark-mode' : 'filter-cascader-popper'"
         @change="onTimeChange"
-        @visible-change="onCascaderVisibleChange">
+        @visible-change="(val) => onCascaderVisibleChange(val, 'time')">
       </el-cascader>
 
       <template v-if="showTimeRangeType > 0">
@@ -276,8 +276,21 @@ export default {
         value: payload
       })
     },
-    onCascaderVisibleChange(visible) {
+    onCascaderVisibleChange(visible, type) {
       if (visible) {
+        if (type === 'domestic' && (!this.fundFlowDomestic || this.fundFlowDomestic.length === 0)) {
+          this.fundFlowDomestic = ['inflow', '北京']
+          this.onFundFlowChange('domestic')
+          this.$nextTick(() => {
+            this.closeCascaderPanel('cascaderDomestic')
+          })
+        } else if (type === 'overseas' && (!this.fundFlowOverseas || this.fundFlowOverseas.length === 0)) {
+          this.fundFlowOverseas = ['inflow', '美国']
+          this.onFundFlowChange('overseas')
+          this.$nextTick(() => {
+            this.closeCascaderPanel('cascaderOverseas')
+          })
+        }
         this.createPickerBackdrop()
       } else {
         this.removePickerBackdrop()
@@ -440,6 +453,14 @@ export default {
       const m = date.getMonth()
       const lastDay = new Date(y, m + 1, 0)
       return this.formatDate(lastDay)
+    },
+    setFundFlowDomestic(val) {
+      this.fundFlowDomestic = val
+      this.onFundFlowChange('domestic')
+    },
+    setFundFlowOverseas(val) {
+      this.fundFlowOverseas = val
+      this.onFundFlowChange('overseas')
     },
   },
 }

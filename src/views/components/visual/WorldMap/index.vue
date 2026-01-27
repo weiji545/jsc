@@ -213,6 +213,12 @@ export default {
       })
     },
     bindChartEvents() {
+      this.chart.on('click', (params) => {
+        if (params.seriesType === 'map') {
+          this.$emit('country-click', params.name)
+        }
+      })
+
       this.chart.on('mouseover', (params) => {
         if (this.outId) clearTimeout(this.outId)
         if (params.seriesType === 'map') {
@@ -270,6 +276,7 @@ export default {
               date: dataItem[0].date,
               balance: dataItem[0].balance,
               inflow: dataItem[0].inflow,
+              outflow: dataItem[0].outflow,
               count: dataItem[0].count
             })
           }
@@ -502,6 +509,7 @@ export default {
                   <span style="color: #2AB8FF;">流向:</span> <span style="float: right; margin-left: 20px;">${d.fromName} -> ${d.toName}</span><br/>
                   <span style="color: #2AB8FF;">账户余额:</span> <span style="float: right; margin-left: 20px;">${formatNumber(d.balance)}</span><br/>
                   <span style="color: #2AB8FF;">资金流入:</span> <span style="float: right; margin-left: 20px;">${formatNumber(d.inflow)}</span><br/>
+                  ${d.outflow ? `<span style="color: #2AB8FF;">资金流出:</span> <span style="float: right; margin-left: 20px;">${formatNumber(d.outflow)}</span><br/>` : ''}
                   <span style="color: #2AB8FF;">流入笔数:</span> <span style="float: right; margin-left: 20px;">${d.count}</span>
                 </div>
               `

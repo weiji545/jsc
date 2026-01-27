@@ -11,12 +11,14 @@
         key="china-map"
         :map-data="chinaMapData"
         :flow-data-prop="chinaMapFlowData"
+        @province-click="$emit('province-click', $event)"
       />
       <WorldMap
         v-else-if="scope === 'overseas'"
         key="world-map"
         :flow-data-prop="worldMapFlowData"
         :account-data-prop="worldAccountData"
+        @country-click="$emit('country-click', $event)"
       />
     </transition>
   </div>
