@@ -18,6 +18,10 @@ export default {
       type: [Object, Array],
       default: () => ({}),
     },
+    flowType: {
+      type: String,
+      default: 'inflow',
+    },
   },
   data() {
     return {
@@ -67,6 +71,9 @@ export default {
         this.processData()
       },
       deep: true,
+    },
+    flowType() {
+      this.updateChart()
     },
   },
   methods: {
@@ -221,13 +228,36 @@ export default {
 
       this.chart.on('mouseover', (params) => {
         if (this.outId) clearTimeout(this.outId)
-        if (params.seriesType === 'map') {
+        
+        // 任何交互都停止轮播
+        if (['map', 'scatter', 'effectScatter'].includes(params.seriesType)) {
           this.stopHighlight()
+        }
+
+        if (params.seriesType === 'map') {
           // 手动触发高亮显示背景色
           this.chart.dispatchAction({
             type: 'highlight',
             seriesIndex: 0,
-            dataIndex: params.dataIndex
+            dataIndex: params.dataIndex,
+          })
+        } else if (params.seriesType === 'scatter' || params.seriesType === 'effectScatter') {
+          console.log('hover 目标标签')
+          // 如果hover的是标签/点，也要高亮对应的地图区域
+          const mapSeries = this.chart.getModel().getSeriesByIndex(0)
+          const mapDataIndex = mapSeries.getData().indexOfName(params.name)
+          if (mapDataIndex >= 0) {
+            this.chart.dispatchAction({
+              type: 'highlight',
+              seriesIndex: 0,
+              dataIndex: mapDataIndex,
+            })
+          }
+          // 显式触发 Tooltip
+          this.chart.dispatchAction({
+            type: 'showTip',
+            seriesIndex: params.seriesIndex,
+            dataIndex: params.dataIndex,
           })
         }
       })
@@ -235,7 +265,7 @@ export default {
       // 鼠标移出时恢复自动高亮
       this.chart.on('mouseout', (params) => {
         if (this.outId) clearTimeout(this.outId)
-        if (params.seriesType === 'map') {
+        if (['map', 'scatter', 'effectScatter'].includes(params.seriesType)) {
           // 先清除当前高亮
           this.clearCurrentHighlight()
           this.outId = setTimeout(() => {
@@ -261,16 +291,29 @@ export default {
         centerCountries.add(center.center)
       })
 
-      const convertData = function (data) {
+      const convertData = (data) => {
         let res = []
         for (let i = 0; i < data.length; i++) {
           let dataItem = data[i]
-          let fromCoord = geoCoordMap[dataItem[0].name]
-          let toCoord = geoCoordMap[dataItem[1].name]
+          let fromName = dataItem[0].name
+          let toName = dataItem[1].name
+          let fromCoord = geoCoordMap[fromName]
+          let toCoord = geoCoordMap[toName]
+
+          if (this.flowType === 'outflow') {
+            const tempCoord = fromCoord
+            fromCoord = toCoord
+            toCoord = tempCoord
+
+            const tempName = fromName
+            fromName = toName
+            toName = tempName
+          }
+
           if (fromCoord && toCoord) {
             res.push({
-              fromName: dataItem[0].name,
-              toName: dataItem[1].name,
+              fromName: fromName,
+              toName: toName,
               coords: [fromCoord, toCoord],
               value: dataItem[0].value,
               date: dataItem[0].date,
@@ -301,7 +344,7 @@ export default {
       // 添加底图系列
       series.push({
         type: 'map',
-        roam: false,
+        roam: true,
         label: {
           show: false, // 默认隐藏，hover时显示
         },
@@ -370,6 +413,7 @@ export default {
             type: 'effectScatter',
             coordinateSystem: 'geo',
             zlevel: 2,
+            triggerEvent: true,
             rippleEffect: {
               period: 15,
               brushType: 'stroke',
@@ -414,7 +458,8 @@ export default {
           {
             type: 'scatter',
             coordinateSystem: 'geo',
-            zlevel: 2,
+            zlevel: 3,
+            triggerEvent: true,
             label: {
               show: true,
               position: 'right',
@@ -428,7 +473,6 @@ export default {
             symbol: 'circle',
             symbolSize: 1,
             itemStyle: {
-              show: false,
               color: '#1535A8',
             },
             data: [
@@ -524,7 +568,7 @@ export default {
           tooltip: { show: true },
           scaleLimit: { min: 1, max: 5 },
           label: { show: false },
-          roam: false,
+          roam: true,
           itemStyle: {
             areaColor: {
               type: 'radial',

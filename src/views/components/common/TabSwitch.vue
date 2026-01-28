@@ -40,8 +40,10 @@ export default {
   height: 29px;
   border: 2px solid #0098FA;
   box-sizing: border-box;
-  /* Assuming no border-radius is explicitly requested, but usually 2-4px looks better.
-     I will stick to strict requirements or minimal defaults. */
+
+  .is-light-mode & {
+    border-color: #8CD1FD;
+  }
 }
 
 .tab-item {
@@ -52,21 +54,52 @@ export default {
   font-size: 14px;
   cursor: pointer;
   transition: all 0.3s;
+  position: relative;
 
-  /* Unselected state */
+  /* Unselected state (Dark mode default) */
   color: #BCDEFF;
   background: linear-gradient( 0deg, rgba(9,136,255,0.5) 0%, rgba(9,17,39,0) 100%);
 
   &.active {
-    /* Selected state */
+    /* Selected state (Dark mode default) */
     font-weight: bold;
     color: #FFFFFF;
     background: #204F8E;
   }
 
-  /* Border between items */
+  /* Border between items (Dark mode default) */
   &:not(:last-child) {
     border-right: 2px solid #0098FA;
   }
+
+  /* Light mode styles */
+  .is-light-mode & {
+    color: #666666;
+    background: #FFFFFF;
+
+    &:not(:last-child) {
+      border-right: 2px solid #8CD1FD;
+    }
+
+    &.active {
+      color: #FFFFFF;
+      background: #53BAFC;
+      font-weight: bold;
+
+      /* Active border in light mode */
+      &::after {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        border: 2px solid #0098FA;
+        pointer-events: none;
+        z-index: 1;
+      }
+    }
+  }
 }
 </style>
+

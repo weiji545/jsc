@@ -254,4 +254,35 @@ export default {
     }
   }
 }
+
+/* 浅色模式覆盖 - 使用更强的选择器 */
+.is-light-mode .data-table-wrapper {
+  ::v-deep {
+    .el-table {
+      background: transparent !important;
+    }
+    
+    .el-table__header-wrapper {
+      background: linear-gradient(180deg, rgba(19, 83, 173, 0.125) 0%, rgba(19, 64, 138, 0.075) 49.65%, rgba(5, 102, 225, 0.15) 100%) !important;
+    }
+
+    th.el-table__cell {
+      background: transparent !important;
+      color: #666666 !important;
+    }
+
+    .el-table__cell {
+      color: #181818 !important;
+    }
+
+    tbody tr:hover {
+      background-image: none !important;
+      background: linear-gradient(270deg, rgba(0, 107, 255, 0) 0%, rgba(0, 152, 250, 0.2) 51.3%, rgba(0, 107, 255, 0) 100%) !important;
+
+      .el-table__cell {
+        color: #0098FA !important;
+      }
+    }
+  }
+}
 </style>

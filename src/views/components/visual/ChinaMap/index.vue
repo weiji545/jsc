@@ -20,9 +20,9 @@ export default {
       type: Array,
       default: () => [],
     },
-    flowDataProp: {
-      type: Array,
-      default: () => [],
+    flowType: {
+      type: String,
+      default: 'inflow',
     },
   },
   data() {
@@ -86,6 +86,9 @@ export default {
       },
       deep: true,
     },
+    flowType() {
+      this.updateChartWithFlows()
+    },
   },
   methods: {
     getThemeTitleColor() {
@@ -129,16 +132,29 @@ export default {
         })
       }
 
-      const convertData = function (data) {
+      const convertData = (data) => {
         let res = []
         for (let i = 0; i < data.length; i++) {
           let dataItem = data[i]
-          let fromCoord = geoCoordMap[dataItem[0].name]
-          let toCoord = geoCoordMap[dataItem[1].name]
+          let fromName = dataItem[0].name
+          let toName = dataItem[1].name
+          let fromCoord = geoCoordMap[fromName]
+          let toCoord = geoCoordMap[toName]
+
+          if (this.flowType === 'outflow') {
+            const tempCoord = fromCoord
+            fromCoord = toCoord
+            toCoord = tempCoord
+
+            const tempName = fromName
+            fromName = toName
+            toName = tempName
+          }
+
           if (fromCoord && toCoord) {
             res.push({
-              fromName: dataItem[0].name,
-              toName: dataItem[1].name,
+              fromName: fromName,
+              toName: toName,
               coords: [fromCoord, toCoord],
               value: dataItem[0].value,
               date: dataItem[0].date,
@@ -371,7 +387,6 @@ export default {
         tooltip: {
           show: true,
           trigger: 'item',
-          alwaysShowContent: true, // 确保轮播时内容不消失
           formatter: (params) => {
             // 处理飞线的tooltip
             if (params.seriesType === 'lines') {
@@ -630,8 +645,11 @@ export default {
 
       this.mainChart.on('mouseover', (params) => {
         if (this.outId) clearTimeout(this.outId)
+        
+        // 任何交互都停止轮播
+        this.stopHighlight()
+
         if (params.seriesType === 'map') {
-          this.stopHighlight()
           // 手动触发高亮显示变化
           this.mainChart.dispatchAction({
             type: 'highlight',
@@ -644,13 +662,33 @@ export default {
       // 鼠标移出时恢复自动高亮
       this.mainChart.on('mouseout', (params) => {
         if (this.outId) clearTimeout(this.outId)
-        if (params.seriesType === 'map') {
-          // 先清除当前高亮
-          this.clearCurrentHighlight()
-          this.outId = setTimeout(() => {
-            this.startHighlight()
-          }, 3000) // 延迟3秒后恢复轮播
+        
+        // 先清除当前高亮
+        this.clearCurrentHighlight()
+
+        if (!this.mapData || this.mapData.length === 0) {
+          this.stopHighlight()
+          return
         }
+
+        this.outId = setTimeout(() => {
+          this.startHighlight()
+        }, 3000) // 延迟3秒后恢复轮播
+      })
+
+      // 鼠标离开整个容器时，确保隐藏提示框
+      this.mainChart.on('globalout', () => {
+        if (this.outId) clearTimeout(this.outId)
+        this.clearCurrentHighlight()
+
+        if (!this.mapData || this.mapData.length === 0) {
+          this.stopHighlight()
+          return
+        }
+
+        this.outId = setTimeout(() => {
+          this.startHighlight()
+        }, 3000)
       })
 
       // 同步两个地图的视图
@@ -672,7 +710,7 @@ export default {
     },
     startHighlight() {
       this.stopHighlight()
-
+      if(this.mapData.length === 0) return
       // 确保从第一个省份开始
       this.currentHighlightIndex = 0
 

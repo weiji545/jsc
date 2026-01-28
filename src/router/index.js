@@ -1,22 +1,27 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Dashboard from '../views/index.vue'
+// import Dashboard from '../views/index.vue'
 
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: '/',
-    redirect: '/dashboard',
+    redirect: '/overview',
   },
   {
-    path: '/dashboard',
-    name: 'Dashboard',
-    component: Dashboard,
+    path: '/overview',
+    name: 'Overview',
+    component: () => import('../views/index.vue'),
+  },
+  {
+    path: '/accountManagement',
+    name: 'AccountManagement',
+    component: () => import('../views/index.vue'),
   },
   {
     path: '*',
-    redirect: '/dashboard',
+    redirect: '/overview',
   },
 ]
 
@@ -26,4 +31,3 @@ const router = new VueRouter({
 })
 
 export default router
-

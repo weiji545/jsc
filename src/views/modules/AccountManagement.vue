@@ -29,6 +29,7 @@
           :world-account-data="globeCountryData"
           @province-click="handleProvinceClick"
           @country-click="handleCountryClick"
+          :flow-type="fundFlowType"
         />
         <FilterTabs
           ref="filterTabs"
@@ -143,6 +144,9 @@ export default {
           value: 'outflow',
           children: [
             {
+              label: '美国',
+              value: '美国',
+            }, {
               label: '北京',
               value: '北京',
             }, {
@@ -311,6 +315,7 @@ export default {
         })(),
         values: [1500, 1600, 1550, 1700, 1650, 1800, 1900],
       },
+      fundFlowType: 'inflow',
     };
   },
   computed: {},
@@ -328,6 +333,9 @@ export default {
     },
     handleFundFlowChange(payload) {
       console.log('handleFundFlowChange', payload)
+      if (Array.isArray(payload) && payload.length > 0) {
+        this.fundFlowType = payload[0]
+      }
     },
     async fetchMapData() {
       try {

@@ -24,6 +24,7 @@ export const getWorldMapFlowData = () => {
     {
       center: '中国',
       flows: [
+        [{ name: "中国香港", value: 3670, date: '2025-01-15', balance: 1253000, inflow: 3670, count: 5 }, { name: "中国" }],
         [{ name: "尼日利亚", value: 9100, date: '2025-01-15', balance: 1253000, inflow: 9100, count: 5 }, { name: "中国" }],
         [{ name: "美国", value: 2370, date: '2025-01-14', balance: 2340000, inflow: 2370, count: 12 }, { name: "中国" }],
         [{ name: "英国", value: 3110, date: '2025-01-13', balance: 3120000, inflow: 3110, count: 8 }, { name: "中国" }],
@@ -35,6 +36,16 @@ export const getWorldMapFlowData = () => {
         [{ name: "俄罗斯", value: 8000, date: '2025-01-07', balance: 8000000, inflow: 8000, count: 11 }, { name: "中国" }],
         [{ name: "巴西", value: 5000, date: '2025-01-06', balance: 950000, inflow: 5000, count: 3 }, { name: "中国" }]
       ],
+    },
+    {
+      center: '美国',
+      flows: [
+        [{ name: "中国", value: 8800, date: '2025-01-15', balance: 5430000, inflow: 8800, count: 20 }, { name: "美国" }],
+        [{ name: "英国", value: 4500, date: '2025-01-14', balance: 2100000, inflow: 4500, count: 10 }, { name: "美国" }],
+        [{ name: "加拿大", value: 6700, date: '2025-01-13', balance: 3200000, inflow: 6700, count: 15 }, { name: "美国" }],
+        [{ name: "墨西哥", value: 3200, date: '2025-01-12', balance: 1500000, inflow: 3200, count: 8 }, { name: "美国" }],
+        [{ name: "日本", value: 5100, date: '2025-01-11', balance: 2800000, inflow: 5100, count: 12 }, { name: "美国" }]
+      ]
     }
   ]
   return mockApi(data)
@@ -123,6 +134,11 @@ export const getOverviewData = () => {
         name: '中国',
         count: 12500,
         balance: 125680.5,
+      },
+      {
+        name: '中国香港',
+        count: 7250,
+        balance: 12940.5,
       },
       {
         name: '美国',
@@ -219,6 +235,33 @@ export const getChinaMapFlowData = () => {
         [{ name: '天津', value: 2600, date: '2025-01-06', balance: 760000, inflow: 2600, count: 5 }, { name: '北京' }],
       ],
     },
+    {
+      center: '上海',
+      flows: [
+        [{ name: '北京', value: 9000, date: '2025-01-15', balance: 2500000, inflow: 9000, count: 20 }, { name: '上海' }],
+        [{ name: '苏州', value: 7500, date: '2025-01-14', balance: 1800000, inflow: 7500, count: 15 }, { name: '上海' }],
+        [{ name: '南京', value: 6800, date: '2025-01-13', balance: 1600000, inflow: 6800, count: 12 }, { name: '上海' }],
+        [{ name: '杭州', value: 6500, date: '2025-01-12', balance: 1700000, inflow: 6500, count: 14 }, { name: '上海' }],
+      ]
+    },
+    {
+      center: '深圳',
+      flows: [
+        [{ name: '北京', value: 7000, date: '2025-01-14', balance: 1900000, inflow: 7000, count: 10 }, { name: '深圳' }],
+        [{ name: '广州', value: 8200, date: '2025-01-13', balance: 2000000, inflow: 8200, count: 16 }, { name: '深圳' }],
+        [{ name: '东莞', value: 5400, date: '2025-01-12', balance: 1200000, inflow: 5400, count: 8 }, { name: '深圳' }],
+        [{ name: '上海', value: 6900, date: '2025-01-11', balance: 1800000, inflow: 6900, count: 11 }, { name: '深圳' }],
+      ]
+    },
+    {
+      center: '杭州',
+      flows: [
+        [{ name: '上海', value: 7800, date: '2025-01-15', balance: 1900000, inflow: 7800, count: 13 }, { name: '杭州' }],
+        [{ name: '宁波', value: 5600, date: '2025-01-14', balance: 1400000, inflow: 5600, count: 9 }, { name: '杭州' }],
+        [{ name: '温州', value: 4200, date: '2025-01-13', balance: 1100000, inflow: 4200, count: 7 }, { name: '杭州' }],
+        [{ name: '北京', value: 5000, date: '2025-01-12', balance: 1300000, inflow: 5000, count: 8 }, { name: '杭州' }],
+      ]
+    }
   ]
   return mockApi(data)
 }

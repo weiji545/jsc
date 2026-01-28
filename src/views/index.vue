@@ -87,10 +87,13 @@ export default {
     }
   },
   watch: {
-    '$route.query.module': {
-      handler(val) {
-        if (val && val !== this.currentModule) {
-          this.currentModule = val
+    '$route.path': {
+      handler() {
+        const path = this.$route.path
+        if (path === '/accountManagement') {
+          this.currentModule = 'AccountManagement'
+        } else if (path === '/overview') {
+          this.currentModule = 'overView'
         }
       },
       immediate: true
@@ -117,28 +120,30 @@ export default {
   },
   methods: {
     handleModuleChange(module) {
+      if (this.currentModule === module) return
       this.currentModule = module
       console.log('切换到模块:', module)
-      // Update URL query parameter without refreshing
-      if (this.$route.query.module !== module) {
-        this.$router.push({
-          query: {
-            ...this.$route.query,
-            module: module
-          }
-        }).catch(err => {
-          // Ignore NavigationDuplicated errors
-          if (err.name !== 'NavigationDuplicated') {
-            console.warn(err)
-          }
-        })
+      
+      let path = '/overview'
+      if (module === 'AccountManagement') {
+        path = '/accountManagement'
+      } else if (module === 'overView') {
+        path = '/overview'
       }
+      
+      this.$router.push({
+        path: path,
+        query: this.$route.query 
+      }).catch(err => {
+        if (err.name !== 'NavigationDuplicated') {
+          console.warn(err)
+        }
+      })
     },
     handleCurrencyChange(currency) {
       this.currency = currency
       console.log('切换货币:', currency)
     },
-    // 深色模式由 Vuex 管理，组件无需再处理本地状态
     queueUpdateScale() {
       if (this.rafId) return
       this.rafId = requestAnimationFrame(() => {
@@ -147,15 +152,11 @@ export default {
       })
     },
     updateScale() {
-      // 获取当前组件根元素的宽度，以适应可能的嵌套环境
       const containerWidth = this.$el ? this.$el.clientWidth : window.innerWidth
-      // 优先保证宽度占满容器，允许垂直滚动
       const scale = containerWidth / this.baseWidth
       this.scale = Number(scale.toFixed(4))
-      // 水平方向不需要偏移，垂直方向贴近顶部，避免下方空白
       this.offsetX = 0
       this.offsetY = 0
-      // 通知子组件图表重绘
       this.$nextTick(() => {
         this.$emit('scale-changed')
       })

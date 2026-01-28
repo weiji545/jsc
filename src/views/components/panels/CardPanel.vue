@@ -199,7 +199,7 @@ export default {
         'subtitle-light-active-1.png',
         'subtitle-light-active-2.png'
       ]
-      
+
       imagesToPreload.forEach(name => {
         try {
           // Utilise webpack's require to get the correct path
@@ -253,6 +253,7 @@ export default {
   align-items: center;
   min-width: 0;
   gap: 8px;
+  font-size: 20px;
 }
 
 .currency-indicator {
@@ -544,10 +545,19 @@ export default {
   font-size: 14px;
   color: #9EC7F0;
   padding: 0 4px;
+  transition: color 0.3s;
+
+  .card-panel.is-light & {
+    color: #666666;
+  }
 }
 .text-toggle-btn.active {
   color: #29F1FA;
   font-weight: bold;
+
+  .card-panel.is-light & {
+    color: #096DD9;
+  }
 }
 .text-toggle-group {
   display: flex;
@@ -569,16 +579,51 @@ export default {
 ::v-deep .el-radio {
   color: #BCDEFF; /* Unchecked color */
   margin: 0 8px 0 0;
-  line-height: 0;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.3s;
+
+  .card-panel.is-light & {
+    color: #666666;
+  }
 }
 
 ::v-deep .el-radio__label {
   padding-left: 5px;
   font-weight: 400;
 }
-::v-deep .el-radio.is-checked {
 
+::v-deep .el-radio__inner {
+  background-color: transparent;
+  border-color: #409EFF; // Default el-radio border
+
+  .card-panel.is-dark & {
+    border-color: #5b8def;
+  }
+
+  .card-panel.is-light & {
+    border-color: #DCDFE6;
+  }
+}
+
+::v-deep .el-radio.is-checked {
+  .el-radio__label {
+    color: #29F1FA;
+
+    .card-panel.is-light & {
+      color: #096DD9;
+    }
+  }
+
+  .el-radio__inner {
+    border-color: #29F1FA;
+    background: #29F1FA;
+
+    .card-panel.is-light & {
+      border-color: #096DD9;
+      background: #096DD9;
+    }
+  }
 }
 </style>
 

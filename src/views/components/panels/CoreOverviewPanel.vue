@@ -11,6 +11,7 @@
         key="china-map"
         :map-data="chinaMapData"
         :flow-data-prop="chinaMapFlowData"
+        :flow-type="flowType"
         @province-click="$emit('province-click', $event)"
       />
       <WorldMap
@@ -18,6 +19,7 @@
         key="world-map"
         :flow-data-prop="worldMapFlowData"
         :account-data-prop="worldAccountData"
+        :flow-type="flowType"
         @country-click="$emit('country-click', $event)"
       />
     </transition>
@@ -56,6 +58,10 @@ export default {
     worldAccountData: {
       type: Array,
       default: () => [],
+    },
+    flowType: {
+      type: String,
+      default: 'inflow',
     },
   },
 }

@@ -472,7 +472,7 @@ export default {
 // 左右两侧的卡片项 - 固定尺寸
 .content-item {
   width: 455px;
-  height: 302px;
+  height: 310px;
   flex-shrink: 0;
 }
 
