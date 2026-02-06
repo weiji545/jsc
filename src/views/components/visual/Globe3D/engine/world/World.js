@@ -109,6 +109,13 @@ export default class World {
     this.option.dom.addEventListener('mouseleave', this._handleMouseLeave)
   }
 
+  updateData(globeCountryData) {
+    this.option.globeCountryData = globeCountryData
+    if (this.earth) {
+      this.earth.updateData(globeCountryData)
+    }
+  }
+
   render() {
     if (this.isDestroyed) return
     this.animationFrameId = requestAnimationFrame(this.render.bind(this))

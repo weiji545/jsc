@@ -7,21 +7,26 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    redirect: '/overview',
+    redirect: '/over-view',
   },
   {
-    path: '/overview',
-    name: 'Overview',
+    path: '/over-view',
+    name: 'OverView',
     component: () => import('../views/index.vue'),
   },
   {
-    path: '/accountManagement',
+    path: '/account-management',
     name: 'AccountManagement',
     component: () => import('../views/index.vue'),
   },
   {
+    path: '/configurable-layout',
+    name: 'ConfigurableLayout',
+    component: () => import('../views/index.vue'),
+  },
+  {
     path: '*',
-    redirect: '/overview',
+    redirect: '/over-view',
   },
 ]
 

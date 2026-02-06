@@ -69,6 +69,9 @@ export default class Earth {
 
     this.markupPoint = new Group()
     this.markupPoint.name = 'markupPoint'
+    this.labelsGroup = new Group()
+    this.labelsGroup.name = 'labelsGroup'
+
     this.waveMeshArr = []
 
     this.circleLineList = []
@@ -120,6 +123,68 @@ export default class Earth {
     }
   }
 
+  // 更新数据的方法
+  async updateData(globeCountryData) {
+    this.options.globeCountryData = globeCountryData
+
+    // 如果是数组结构，转换为以 name (中文名) 为 key 的对象 map，方便后续高效匹配
+    if (Array.isArray(this.options.globeCountryData)) {
+      this.dataMap = this.options.globeCountryData.reduce((acc, item) => {
+        if (item.name) acc[item.name] = item
+        return acc
+      }, {})
+    } else {
+      this.dataMap = this.options.globeCountryData || {}
+    }
+
+    // 清理旧的数据点和标签
+    this.clearDataObjects()
+
+    // 重新创建点和标签
+    await this.createMarkupPoint()
+    await this.createSpriteLabel()
+    // this.createFlyLine() // 如果需要的话
+  }
+
+  clearDataObjects() {
+    // 清理波纹数组
+    this.waveMeshArr = []
+
+    // 清理点位组
+    if (this.markupPoint) {
+      this.markupPoint.traverse(obj => {
+        if (obj.geometry) obj.geometry.dispose()
+        if (obj.material) {
+          if (Array.isArray(obj.material)) {
+            obj.material.forEach(m => m.dispose())
+          } else {
+            obj.material.dispose()
+          }
+        }
+      })
+      this.markupPoint.clear()
+    }
+
+    // 清理标签组
+    if (this.labelsGroup) {
+      this.labelsGroup.traverse(obj => {
+        if (obj.geometry) obj.geometry.dispose()
+        if (obj.material) {
+          if (Array.isArray(obj.material)) {
+            obj.material.forEach(m => {
+              if (m.map) m.map.dispose()
+              m.dispose()
+            })
+          } else {
+            if (obj.material.map) obj.material.map.dispose()
+            obj.material.dispose()
+          }
+        }
+      })
+      this.labelsGroup.clear()
+    }
+  }
+
   async init() {
     return new Promise(async resolve => {
       this.createEarth(); // 创建地球
@@ -128,6 +193,8 @@ export default class Earth {
       this.createEarthAperture() // 创建地球的大气层
       await this.createMarkupPoint() // 创建柱状点位
       await this.createSpriteLabel() // 创建标签
+      this.earthGroup.add(this.markupPoint)
+      this.earthGroup.add(this.labelsGroup)
       // this.createAnimateCircle() // 创建环绕卫星
       // this.createFlyLine() // 创建飞线
 
@@ -358,7 +425,7 @@ export default class Earth {
         this.markupPoint.add(waveMesh2)
         this.waveMeshArr.push(waveMesh2)
       }))
-      this.earthGroup.add(this.markupPoint)
+      // this.earthGroup.add(this.markupPoint) // 这里的添加移到 init 或 updateData 中统一处理
     }))
   }
 
@@ -446,7 +513,7 @@ export default class Earth {
 
         sprite.scale.set(worldWidth, worldHeight, 1)
         sprite.position.set(p.x * 1.1, p.y * 1.1, p.z * 1.1)
-        this.earth.add(sprite)
+        this.labelsGroup.add(sprite)
       })
     })
   }

@@ -20,7 +20,7 @@
 import DashboardHeader from './components/layout/DashboardHeader.vue'
 import OverView from './modules/OverView.vue'
 import AccountManagement from './modules/AccountManagement.vue'
-import Module3 from './modules/Module3.vue'
+import ConfigurableLayout from './modules/ConfigurableLayout.vue'
 
 export default {
   name: 'Dashboard',
@@ -28,7 +28,7 @@ export default {
     DashboardHeader,
     OverView,
     AccountManagement,
-    Module3
+    ConfigurableLayout
   },
   data() {
     return {
@@ -69,9 +69,9 @@ export default {
     // 根据当前模块返回对应的组件
     currentModuleComponent() {
       const moduleMap = {
-        overView: OverView,
+        OverView: OverView,
         AccountManagement: AccountManagement,
-        module3: Module3
+        ConfigurableLayout: ConfigurableLayout
       }
       return moduleMap[this.currentModule] || OverView
     },
@@ -90,10 +90,12 @@ export default {
     '$route.path': {
       handler() {
         const path = this.$route.path
-        if (path === '/accountManagement') {
+        if (path === '/account-management') {
           this.currentModule = 'AccountManagement'
-        } else if (path === '/overview') {
-          this.currentModule = 'overView'
+        } else if (path === '/over-view') {
+          this.currentModule = 'OverView'
+        } else if (path === '/configurable-layout') {
+          this.currentModule = 'ConfigurableLayout'
         }
       },
       immediate: true
@@ -123,17 +125,19 @@ export default {
       if (this.currentModule === module) return
       this.currentModule = module
       console.log('切换到模块:', module)
-      
-      let path = '/overview'
+
+      let path = '/over-view'
       if (module === 'AccountManagement') {
-        path = '/accountManagement'
-      } else if (module === 'overView') {
-        path = '/overview'
+        path = '/account-management'
+      } else if (module === 'OverView') {
+        path = '/over-view'
+      } else if (module === 'ConfigurableLayout') {
+        path = '/configurable-layout'
       }
-      
+
       this.$router.push({
         path: path,
-        query: this.$route.query 
+        query: this.$route.query
       }).catch(err => {
         if (err.name !== 'NavigationDuplicated') {
           console.warn(err)

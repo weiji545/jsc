@@ -40,11 +40,13 @@ export default {
   watch: {
     globeCountryData: {
       handler(val) {
-        if (val && !this.world) {
-          const hasData = Array.isArray(val) ? val.length > 0 : Object.keys(val).length > 0
-          if (hasData) {
-            this.initWorld()
-          }
+        if (this.world) {
+          this.world.updateData(val)
+        } else if (val) {
+          this.initWorld()
+          // const hasData = Array.isArray(val) ? val.length > 0 : Object.keys(val).length > 0
+          // if (hasData) {
+          // }
         }
       },
       immediate: true,
@@ -52,13 +54,11 @@ export default {
   },
   methods: {
     initWorld() {
+      if (this.world) return // Avoid multiple initializations
       this.$nextTick(() => {
         if (this.isDestroyed) return
         const dom = this.$refs.earthCanvas
-        if (!dom) {
-          return
-
-        }
+        if (!dom) return
         this.world = new World({
           dom,
           globeCountryData: this.globeCountryData,

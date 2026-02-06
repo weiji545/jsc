@@ -94,9 +94,9 @@ export default {
       timeTimer: null,
       // 模块配置
       modules: [
-        { label: '总览', value: 'overView', disabled: false },
+        { label: '总览', value: 'OverView', disabled: false },
         { label: '账户管理', value: 'AccountManagement', disabled: false },
-        { label: '资金管理', value: 'module3', disabled: true }
+        { label: '可配置页面', value: 'ConfigurableLayout', disabled: false }
       ]
     }
   },

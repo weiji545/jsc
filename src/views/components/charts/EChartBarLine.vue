@@ -32,10 +32,10 @@ export default {
       type: [Number, String],
       default: 260,
     },
-    // 可配置显示哪条 y 轴，支持 'bar' | 'line' | 'both' | ['bar','line']（默认仅显示折线的 y 轴）
+    // 可配置显示哪条 y 轴，支持 'bar' | 'line' | 'both' | ['bar','line']（默认仅显示柱状的 y 轴）
     visibleY: {
       type: [String, Array],
-      default: () => 'line',
+      default: () => 'bar',
     },
     // 是否显示 y 轴名称（提示文字），默认不显示
     showYAxisName: {
@@ -231,7 +231,7 @@ export default {
         // 获取数值轴的ticks
         // horizontal模式下，数值轴是X轴；vertical模式下，数值轴是Y轴
         const axisComponentType = this.direction === 'horizontal' ? 'xAxis' : 'yAxis';
-        const model = this.chart.getModel().getComponent(axisComponentType, 0); 
+        const model = this.chart.getModel().getComponent(axisComponentType, 0);
         if (model) {
           const ticks = model.axis.scale.getTicks(); // 获取所有刻度点
           // console.log('当前数值轴刻度值：', ticks);
@@ -355,6 +355,7 @@ export default {
       const valueAxisBar = {
         type: 'value',
         show: showBarAxis,
+        minInterval: 1, // 保证刻度为整数
         max: this.valueAxisMax, // 应用强制最大值
         name: this.showYAxisName && showBarAxis ? effectiveLegendName : '',
         // position determined by axis index usually, but explicit works too
@@ -370,6 +371,7 @@ export default {
       const valueAxisLine = {
         type: 'value',
         show: showLineAxis,
+        minInterval: 1, // 保证刻度为整数
         name: this.showYAxisName && showLineAxis ? effectiveSeries2Name : '',
         position: isHorizontal ? 'top' : (showBarAxis ? 'right' : 'left'),
         axisLabel: { color: '#9E9E9E' },

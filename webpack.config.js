@@ -13,7 +13,7 @@ module.exports = (env, argv) => {
     output: {
       path: path.resolve(__dirname, 'dist'),
       filename: isProduction ? 'js/[name].[contenthash].js' : 'js/[name].js',
-      publicPath: '/'
+      publicPath: './'
     },
     resolve: {
       extensions: ['.js', '.vue', '.json', '.png', '.jpg', '.gif', '.svg'],
@@ -52,7 +52,7 @@ module.exports = (env, argv) => {
           test: /\.(png|jpg|gif|svg)$/,
           loader: 'url-loader',
           options: {
-            limit: 8192,
+            limit: 2048000, // 增大到 2MB，允许内联地球贴图
             name: 'img/[name].[hash:7].[ext]',
             esModule: false
           }
