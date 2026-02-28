@@ -143,12 +143,12 @@ export const getOverviewData = () => {
       {
         name: '美国',
         count: 15230,
-        balance: 234567.8,
+        balance: 234567000.8,
       },
       {
         name: '俄罗斯',
         count: 5670,
-        balance: 34567.9,
+        balance: 64567000.9,
       },
       {
         name: '加拿大',

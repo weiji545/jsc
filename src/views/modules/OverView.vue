@@ -435,57 +435,6 @@ export default {
         }
       },
     },
-    // 计算标准的时间范围返回值
-    standardizedTimeRange() {
-      const now = new Date()
-      // 辅助函数：格式化日期
-      const format = (date) => {
-        const y = date.getFullYear()
-        const m = String(date.getMonth() + 1).padStart(2, '0')
-        const d = String(date.getDate()).padStart(2, '0')
-        return `${y}-${m}-${d}`
-      }
-      // 辅助函数：获取上个月的第一天和最后一天
-      const getLastMonthRange = (baseDate) => {
-        const firstDay = new Date(baseDate.getFullYear(), baseDate.getMonth() - 1, 1)
-        const lastDay = new Date(baseDate.getFullYear(), baseDate.getMonth(), 0)
-        return { startDate: format(firstDay), endDate: format(lastDay) }
-      }
-
-      const mode = this.balanceTime[0]
-      const subType = this.balanceTime[1]
-
-      if (mode === 'day') {
-        // 当按'天'时, 不论选择的是哪天,startDate和endDate分别为当前(new Date())上个月的第一天 and 最后一天
-        return getLastMonthRange(now)
-      } else if (mode === 'month') {
-        if (subType === 'month') {
-          // 选择'近一月'startDate和endDate 分别为当前(new Date())上个月的第一天和最后一天
-          return getLastMonthRange(now)
-        } else if (subType === 'year') {
-          // 选择'近一年'时 为当年第一天 和 当天
-          const firstDay = new Date(now.getFullYear(), 0, 1)
-          return { startDate: format(firstDay), endDate: format(now) }
-        } else if (subType === 'customizedMonth') {
-          // 选择'自定义月'时, 为结束月份 的第一天和最后一天(如果是当月 则选择当天 不能超过当天)
-          if (!this.customTimeRange || !this.customTimeRange.endBsnDate) {
-            return { startDate: '', endDate: '' }
-          }
-          const endBsnDate = new Date(this.customTimeRange.endBsnDate)
-          const firstDay = new Date(endBsnDate.getFullYear(), endBsnDate.getMonth(), 1)
-          let lastDay
-          if (endBsnDate.getFullYear() === now.getFullYear() && endBsnDate.getMonth() === now.getMonth()) {
-            // 如果是当月 则选择当天
-            lastDay = now
-          } else {
-            // 结束月份 的最后一天
-            lastDay = new Date(endBsnDate.getFullYear(), endBsnDate.getMonth() + 1, 0)
-          }
-          return { startDate: format(firstDay), endDate: format(lastDay) }
-        }
-      }
-      return { startDate: '', endDate: '' }
-    },
   },
   watch: {
     // 监听统计范围的变化

@@ -13,13 +13,13 @@ export class Resources {
   setLoadingManager() {
     this.manager = new LoadingManager()
     this.manager.onStart = () => {
-      console.log('开始加载资源文件')
+      // console.log('开始加载资源文件')
     }
     this.manager.onLoad = () => {
       this.callback()
     }
     this.manager.onProgress = url => {
-      console.log(`正在加载：${url}`)
+      // console.log(`正在加载：${url}`)
     }
     this.manager.onError = url => {
       console.log('加载失败：' + url)

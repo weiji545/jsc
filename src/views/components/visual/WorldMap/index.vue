@@ -95,7 +95,7 @@ export default {
     },
     processData() {
       this.flowData = JSON.parse(JSON.stringify(this.flowDataProp || []))
-      
+
       // 如果 accountDataProp 是数组，转换为以 name 为 key 的对象 Map，方便后续展示和匹配
       if (Array.isArray(this.accountDataProp)) {
         this.accountDataMap = this.accountDataProp.reduce((acc, item) => {
@@ -121,7 +121,6 @@ export default {
 
       this.updateChart()
     },
-    // fetchData removed
     initChart() {
       if (!this.$refs.chartContainer) return
 
@@ -228,7 +227,7 @@ export default {
 
       this.chart.on('mouseover', (params) => {
         if (this.outId) clearTimeout(this.outId)
-        
+
         // 任何交互都停止轮播
         if (['map', 'scatter', 'effectScatter'].includes(params.seriesType)) {
           this.stopHighlight()
@@ -242,7 +241,7 @@ export default {
             dataIndex: params.dataIndex,
           })
         } else if (params.seriesType === 'scatter' || params.seriesType === 'effectScatter') {
-          console.log('hover 目标标签')
+          // console.log('hover 目标标签')
           // 如果hover的是标签/点，也要高亮对应的地图区域
           const mapSeries = this.chart.getModel().getSeriesByIndex(0)
           const mapDataIndex = mapSeries.getData().indexOfName(params.name)
@@ -275,11 +274,11 @@ export default {
       })
     },
     getChartOption() {
-      const colorList = [
-        '#4ab2e5', '#4fb6d2', '#52b9c7', '#5abead', '#f34e2b', '#f56321',
-        '#f56f1c', '#f58414', '#f58f0e', '#f5a305', '#e7ab0b', '#dfae10',
-        '#d5b314', '#c1bb1f', '#b9be23', '#a6c62c', '#96cc34',
-      ]
+      // const colorList = [
+      //   '#4ab2e5', '#4fb6d2', '#52b9c7', '#5abead', '#f34e2b', '#f56321',
+      //   '#f56f1c', '#f58414', '#f58f0e', '#f5a305', '#e7ab0b', '#dfae10',
+      //   '#d5b314', '#c1bb1f', '#b9be23', '#a6c62c', '#96cc34',
+      // ]
 
       const flowCenters = this.flowData || []
       const accountDataMap = this.accountDataMap || {}
@@ -344,25 +343,16 @@ export default {
       // 添加底图系列
       series.push({
         type: 'map',
-        roam: true,
+        geoIndex: 0,
+        z: 2,
         label: {
           show: false, // 默认隐藏，hover时显示
         },
         tooltip: { show: true },
         itemStyle: {
-          borderColor: 'rgb(147, 235, 248)',
-          borderWidth: 0.1,
-          areaColor: {
-            type: 'radial',
-            x: 0.5,
-            y: 0.5,
-            r: 0.8,
-            colorStops: [
-              { offset: 0, color: 'rgb(210,246,253)' },
-              { offset: 1, color: 'rgb(154,210,244)' },
-            ],
-            globalCoord: true,
-          },
+          // borderColor: this.isDarkMode ? 'rgba(147, 235, 248, 0.3)' : 'rgba(147, 235, 248, 0.4)',
+          // borderWidth: 0.5,
+          areaColor: 'rgba(78, 156, 239, 0.9)',
         },
         emphasis: {
           label: {
@@ -378,30 +368,32 @@ export default {
           shadowColor: 'rgba(255,221,51,0.5)',
           shadowBlur: 10,
         },
-        zoom: 1.05,
-        map: 'world',
         // 为所有国家设置数据，包含余额信息
         data: mapData,
       })
 
+      // 添加流向数据
       flowCenters.forEach((item) => {
         const centerName = item.center
         const flows = item.flows || []
 
         series.push(
-          {
+          { // 流向线
             name: centerName + '流向',
             type: 'lines',
+            coordinateSystem: 'geo',
+            geoIndex: 0,
             zlevel: 2,
+            z: 3,
             effect: {
               show: true,
               period: 4,
               trailLength: 0.4,
               symbol: 'arrow',
-              symbolSize: 7,
+              symbolSize: 8,
             },
             lineStyle: {
-              color: '#FFFF00',
+              color: '#F5F05E',
               width: 1,
               opacity: 1,
               curveness: 0.3,
@@ -409,26 +401,50 @@ export default {
             label: { show: false, position: 'middle', formatter: '{b}' },
             data: convertData(flows),
           },
-          {
+          { // 资金起始国家散点(黄色的圈 和 黑色的框)
             type: 'effectScatter',
             coordinateSystem: 'geo',
+            geoIndex: 0,
             zlevel: 2,
+            z: 3,
             triggerEvent: true,
             rippleEffect: {
               period: 15,
               brushType: 'stroke',
-              scale: 4,
+              scale: 3,
+            },
+            tooltip: {
+              show: true,
+              formatter: (params) => {
+                const name = params.name
+                const data = accountDataMap[name]
+                if (data) {
+                  return `
+                    <div style="font-size: 15px; font-weight: bold; margin-bottom: 6px; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px;">${name}</div>
+                    <div style="line-height: 22px;">
+                      <span style="color: #2AB8FF;">账户数量:</span> <span style="float: right; margin-left: 20px;">${formatNumber(data.count, 0)}</span><br/>
+                      <span style="color: #2AB8FF;">账户余额:</span> <span style="float: right; margin-left: 20px;">${formatNumber(data.balance / 10000, 2)} 万元</span>
+                    </div>
+                  `
+                }
+                return name
+              },
             },
             label: {
-              show: true, // 显示流向源头的国家标签
+              show: true, // 显示流向源头的国家标签 黑色标签
               position: 'top',
               offset: [0, -5],
               formatter: '{b}',
-              color: '#fff',
               fontSize: 10,
+              color: '#fff',
               backgroundColor: 'rgba(0,0,0,0.3)',
               padding: [2, 4],
               borderRadius: 2,
+
+              // backgroundColor: '#1535A8',
+              // color: '#fff',
+              // padding: [4, 8],
+              // borderRadius: 4,
             },
             emphasis: {
               show: true,
@@ -443,25 +459,50 @@ export default {
               },
             },
             symbol: 'circle',
-            symbolSize: (val) => 4 + (val[2] || 0) / 1000,
+            symbolSize: (val) => 6 + (val[2] || 0) / 1000,
             itemStyle: {
-              color: '#FFFF00',
+              color: '#F5F05E',
             },
             data: flows.map((dataItem) => {
-              const coord = geoCoordMap[dataItem[0].name]
+              const name = dataItem[0].name
+              const coord = geoCoordMap[name]
               return coord ? {
-                name: dataItem[0].name,
+                name: name,
                 value: coord.concat([dataItem[0].value]),
+                inflow: dataItem[0].inflow,
+                date: dataItem[0].date,
+                label: {
+                  show: !centerCountries.has(name) // 如果该国家有蓝色标签，则不显示黑色标签
+                }
               } : null
             }).filter(i => i),
           },
-          {
+          { // 蓝色背景标签的散点
             type: 'scatter',
             coordinateSystem: 'geo',
+            geoIndex: 0,
             zlevel: 3,
+            z: 3,
             triggerEvent: true,
-            label: {
+            tooltip: {
               show: true,
+              formatter: (params) => {
+                const name = params.name
+                const data = accountDataMap[name]
+                if (data) {
+                  return `
+                    <div style="font-size: 15px; font-weight: bold; margin-bottom: 6px; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px;">${name}</div>
+                    <div style="line-height: 22px;">
+                      <span style="color: #2AB8FF;">账户数量:</span> <span style="float: right; margin-left: 20px;">${formatNumber(data.count, 0)}</span><br/>
+                      <span style="color: #2AB8FF;">账户余额:</span> <span style="float: right; margin-left: 20px;">${formatNumber(data.balance / 10000, 2)} 万元</span>
+                    </div>
+                  `
+                }
+                return name
+              },
+            },
+            label: {
+              show: true, // 蓝色标签
               position: 'right',
               backgroundColor: '#1535A8',
               color: '#fff',
@@ -471,14 +512,16 @@ export default {
             },
             emphasis: { show: true },
             symbol: 'circle',
-            symbolSize: 1,
+            symbolSize: flows.length > 0 ? 8 : 1,
             itemStyle: {
-              color: '#1535A8',
+              color: flows.length > 0 ? '#F00' : 'transparent',
             },
             data: [
               {
                 name: centerName,
                 value: (geoCoordMap[centerName] || [0, 0]).concat([10]),
+                inflow: item.inflow,
+                date: item.date,
               }],
           },
         )
@@ -565,23 +608,16 @@ export default {
           map: 'world',
           aspectScale: 0.75,
           zoom: 1.05,
+          z: 1,
           tooltip: { show: true },
           scaleLimit: { min: 1, max: 5 },
           label: { show: false },
           roam: true,
           itemStyle: {
-            areaColor: {
-              type: 'radial',
-              x: 0.5,
-              y: 0.5,
-              r: 0.8,
-              colorStops: [
-                { offset: 0, color: '#09132c' },
-                { offset: 1, color: '#274d68' },
-              ],
-              globalCoord: true,
-            },
-            shadowColor: 'rgb(58,115,192)',
+            areaColor: 'rgba(78, 156, 239, 0.9)',
+            borderColor: this.isDarkMode ? 'rgba(147, 235, 248, 0.3)' : 'rgba(147, 235, 248, 0.4)',
+            borderWidth: 0.7,
+            shadowColor: this.isDarkMode ? 'rgba(58, 115, 192, 0.5)' : 'rgba(0, 0, 0, 0.1)',
             shadowOffsetX: 10,
             shadowOffsetY: 11,
           },

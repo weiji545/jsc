@@ -13,7 +13,7 @@ module.exports = (env, argv) => {
     output: {
       path: path.resolve(__dirname, 'dist'),
       filename: isProduction ? 'js/[name].[contenthash].js' : 'js/[name].js',
-      publicPath: './'
+      publicPath: '/'
     },
     resolve: {
       extensions: ['.js', '.vue', '.json', '.png', '.jpg', '.gif', '.svg'],

@@ -401,7 +401,7 @@ export default {
             endBsnDate: this.formatDate(last),
           })
         } else if (lastId === 'year') {
-          const first = new Date(now.getFullYear(), 0, 1)
+          const first = new Date(now.getFullYear(), now.getMonth() - 12, 1)
           this.$emit('change-custom-time', {
             startBsnDate: this.formatDate(first),
             endBsnDate: this.formatDate(now),

@@ -212,17 +212,18 @@ export default {
 
 .region_item_img {
   width: 20px;
-  height: 23px;
+  height: 29px;
 }
 
 .rank-number {
-  width: 28px;
-  height: 30px;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: rgba(255, 255, 255, 0.2);
-  color: #cfcfcf;
+  background: rgba(255, 255, 255, 0.55);
+  color: #ffffff;
   font-weight: 600;
 }
 

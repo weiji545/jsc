@@ -313,7 +313,16 @@ export default {
           d.name.startsWith(name)
         )
         // 保持 name 为 GeoJSON 中的标准名称，合并业务数据
-        return item ? { ...item, name } : { name, value: 0 }
+        const dataItem = item ? { ...item, name } : { name, value: 0 }
+
+        // 特殊处理：香港和澳门文字太长且密集，隐藏其常态标签以防遮挡
+        if (name === '香港特别行政区' || name === '澳门特别行政区') {
+          dataItem.label = { show: false }
+          // hover (emphasis) 时隐藏，可以加上：
+          // dataItem.emphasis = { label: { show: false } }
+        }
+
+        return dataItem
       })
 
       // 提取前三名作为轮播重点（只轮播有余额的城市）
@@ -546,7 +555,11 @@ export default {
             type: 'map',
             // geoIndex: 0, // 移除关联，独立渲染以支持visualMap
             map: 'china',
-            roam: false,
+            roam: true,
+            scaleLimit: {
+              min: 1,
+              max: 5
+            },
             zoom: 1.2,
             center: [104.195397, 35.86166],
             label: {
