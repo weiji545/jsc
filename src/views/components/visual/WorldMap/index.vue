@@ -405,7 +405,7 @@ export default {
             type: 'effectScatter',
             coordinateSystem: 'geo',
             geoIndex: 0,
-            zlevel: 2,
+            zlevel: 3,
             z: 3,
             triggerEvent: true,
             rippleEffect: {
@@ -435,11 +435,11 @@ export default {
               position: 'top',
               offset: [0, -5],
               formatter: '{b}',
-              fontSize: 10,
-              color: '#fff',
-              backgroundColor: 'rgba(0,0,0,0.3)',
-              padding: [2, 4],
-              borderRadius: 2,
+              fontSize: 12,
+              color: 'rgba(255, 255, 255, 0.9)',
+              backgroundColor: 'rgba(21, 53, 168, 0.7)', // 蓝色透明度背景
+              padding: [4, 8],
+              borderRadius: 4,
 
               // backgroundColor: '#1535A8',
               // color: '#fff',
@@ -448,18 +448,18 @@ export default {
             },
             emphasis: {
               show: true,
-              scale: true,
-              label: {
-                show: true,
-                backgroundColor: '#000',
-                padding: 4,
-                borderRadius: 2,
-                color: '#fff',
-                fontSize: 12,
-              },
+              // scale: true,
+              // label: {
+              //   show: true,
+              //   backgroundColor: '#000',
+              //   padding: 4,
+              //   borderRadius: 2,
+              //   color: '#fff',
+              //   fontSize: 12,
+              // },
             },
             symbol: 'circle',
-            symbolSize: (val) => 6 + (val[2] || 0) / 1000,
+            symbolSize: flows.length > 0 ? 12 : 1,
             itemStyle: {
               color: '#F5F05E',
             },
@@ -503,8 +503,8 @@ export default {
             },
             label: {
               show: true, // 蓝色标签
-              position: 'right',
-              backgroundColor: '#1535A8',
+              position: 'top',
+              backgroundColor: 'rgba(21, 53, 168, 0.9)', // 蓝色透明度背景
               color: '#fff',
               padding: [4, 8],
               borderRadius: 4,
@@ -512,9 +512,9 @@ export default {
             },
             emphasis: { show: true },
             symbol: 'circle',
-            symbolSize: flows.length > 0 ? 8 : 1,
+            symbolSize: flows.length > 0 ? 12 : 1,
             itemStyle: {
-              color: flows.length > 0 ? '#F00' : 'transparent',
+              color: flows.length > 0 ? '#F5F05E' : 'transparent',
             },
             data: [
               {
