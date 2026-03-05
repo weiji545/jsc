@@ -213,17 +213,17 @@ export default {
 
           // 如果当前是1月或2月（3月之前），禁止选择当年的1月和2月
           // 此时选择时间应从上一年开始
-          if (currentMonth < 2) { // 0=1月, 1=2月
-            if (time.getFullYear() === currentYear && time.getMonth() < 2) {
-              return true
-            }
-          }
+          // if (currentMonth < 2) { // 0=1月, 1=2月
+          //   if (time.getFullYear() === currentYear && time.getMonth() < 2) {
+          //     return true
+          //   }
+          // }
 
           if (!this.choiceDate) return false
           const choice = new Date(this.choiceDate)
           // 必须在同一年内，且不允许选择相同的月份（必须跨月）
           return (
-            time.getFullYear() !== choice.getFullYear() ||
+            // time.getFullYear() !== choice.getFullYear() ||
             time.getMonth() === choice.getMonth()
           )
         },
@@ -246,7 +246,6 @@ export default {
         return true
       }
     },
-    // 根据当前选中货币返回用于展示的 dataList
     showTimeRangeType() {
       const lastId = this.innerTime[this.innerTime.length - 1]
       return ['customizedDay', 'customizedMonth'].indexOf(lastId) + 1
